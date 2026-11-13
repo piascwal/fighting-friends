@@ -44,6 +44,7 @@ export const CHARACTERS_HTML = `
         <ol>
           <li>Prépare <b>une image de référence</b> de ton personnage (debout, en entier).</li>
           <li>Touche une pose ci-dessous, puis <b>COPIER LE PROMPT</b>. Colle-le dans ton IA d'images <b>avec l'image de référence en pièce jointe</b>.</li>
+          <li>Si l'IA ne trouve pas la bonne posture (pas assez accroupi, mauvaise jambe…), joins-lui aussi l'<b>image guide</b> : un mannequin gris dans la posture exacte (<b>COPIER L'IMAGE GUIDE</b> ou <b>PARTAGER / ENREGISTRER</b>).</li>
           <li>Récupère l'image générée (fond magenta <code>#FF00FF</code>) et fais <b>IMPORTER L'IMAGE</b> : le fond est retiré automatiquement et le sprite est utilisable tout de suite.</li>
           <li>Seule la pose <b>Garde (repos)</b> est obligatoire pour jouer : les poses manquantes réutilisent la pose la plus proche. Plus tu en ajoutes, plus le personnage est vivant.</li>
           <li><b>EXPORTER .ZIP</b> crée le dossier à déposer dans <code>public/assets/characters/</code> du projet pour que le personnage soit disponible pour tout le monde.</li>

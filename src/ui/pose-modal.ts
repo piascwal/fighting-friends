@@ -13,7 +13,8 @@ import type { Character } from '../data/types';
 import { drawRig, drawRigPortrait } from '../render/rig';
 import { drawSprite } from '../render/sprite-draw';
 import { arcadeText } from '../render/text';
-import { $, copyText, on, toast } from './dom';
+import { renderPoseGuide } from '../render/pose-guide';
+import { $, copyImage, copyText, on, shareOrDownloadImage, toast } from './dom';
 
 export const POSE_MODAL_HTML = `
   <div class="modal hidden" id="chModal"><div class="box">
@@ -29,10 +30,16 @@ export const POSE_MODAL_HTML = `
         </div>
       </div>
       <div class="mright">
-        <div class="lbl">Prompt à coller dans ton IA d'images (avec l'image de référence) :</div>
+        <div class="lbl">1. Prompt à coller dans ton IA d'images, avec l'image de référence du personnage :</div>
         <textarea id="mPrompt" readonly></textarea>
+        <div class="row"><button class="nav sm" id="mCopy">COPIER LE PROMPT</button></div>
+        <div class="lbl" id="mGuideLbl">2. Si l'IA ne trouve pas la posture, joins-lui aussi l'image guide (mannequin gris) :</div>
+        <div class="row" id="mGuideRow">
+          <button class="nav sm" id="mGuideCopy">COPIER L'IMAGE GUIDE</button>
+          <button class="nav sm alt" id="mGuideSave">PARTAGER / ENREGISTRER</button>
+        </div>
+        <div class="lbl">3. Récupère l'image générée :</div>
         <div class="row">
-          <button class="nav sm" id="mCopy">COPIER LE PROMPT</button>
           <label class="nav sm filebtn">IMPORTER L'IMAGE<input type="file" id="mFile" accept="image/*"></label>
           <button class="nav sm alt" id="mDel">SUPPRIMER L'IMAGE</button>
         </div>
@@ -42,7 +49,8 @@ export const POSE_MODAL_HTML = `
 
 type Ctx = CanvasRenderingContext2D;
 
-let open: { char: Character; key: SpriteKey } | null = null;
+/** Pose affichée, et son image guide (préparée à l'ouverture : elle sert à l'aperçu et à la copie). */
+let open: { char: Character; key: SpriteKey; guide: HTMLCanvasElement | null } | null = null;
 let onClose: () => void = () => {};
 
 export const isPoseModalOpen = (): boolean => open !== null;
@@ -101,6 +109,8 @@ function refresh(): void {
   // les réglages n'ont de sens que pour une pose de combat déjà fournie
   $('#mAdj').classList.toggle('hidden', !entry || !!spec.portrait);
   $('#mDel').classList.toggle('hidden', !entry || entry.src === 'repo');
+  $('#mGuideLbl').classList.toggle('hidden', !open.guide);
+  $('#mGuideRow').classList.toggle('hidden', !open.guide);
   if (entry) {
     $<HTMLInputElement>('#adS').value = String(entry.adj.s);
     $<HTMLInputElement>('#adX').value = String(entry.adj.dx);
@@ -109,7 +119,7 @@ function refresh(): void {
 }
 
 export function openPoseModal(char: Character, key: SpriteKey, closed: () => void): void {
-  open = { char, key };
+  open = { char, key, guide: renderPoseGuide(char, key) };
   onClose = closed;
   refresh();
   $('#chModal').classList.remove('hidden');
@@ -137,6 +147,13 @@ export function tickPoseModal(): void {
       ctx.fillRect(x, y, 20, 20);
     }
   }
+  const has = !!spriteEntry(char.id, key);
+  if (!has && open.guide) {
+    // pas encore d'image : on montre l'image guide, exactement celle qui sera copiée
+    const side = Math.min(width, height);
+    ctx.drawImage(open.guide, (width - side) / 2, (height - side) / 2, side, side);
+    return;
+  }
   if (spec.portrait || spec.proj) {
     ctx.save();
     ctx.translate((width - 240) / 2, (height - 240) / 2);
@@ -147,7 +164,6 @@ export function tickPoseModal(): void {
   // ligne du sol, silhouette guide, puis le sprite par-dessus : pour comparer taille et position
   const ground = height - 34;
   const x = width / 2 - 20;
-  const has = !!spriteEntry(char.id, key);
   ctx.strokeStyle = 'rgba(255,255,255,.35)';
   ctx.setLineDash([6, 6]);
   ctx.beginPath();
@@ -155,18 +171,12 @@ export function tickPoseModal(): void {
   ctx.lineTo(width, ground);
   ctx.stroke();
   ctx.setLineDash([]);
+  // image importée : la silhouette guide derrière permet de régler taille et position
   drawRig(ctx, char.look, POSES[guidePose(char, key)], x, ground, 1, {
     scale: 1 / char.look.h,
-    silhouette: has ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.3)',
+    silhouette: 'rgba(255,255,255,.12)',
   });
-  if (has) {
-    drawSprite(ctx, char, key, x, ground, 1);
-  } else {
-    ctx.fillStyle = 'rgba(255,255,255,.6)';
-    ctx.font = '600 13px system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText('Guide de pose (silhouette)', width / 2, 18);
-  }
+  drawSprite(ctx, char, key, x, ground, 1);
 }
 
 async function importFile(event: Event): Promise<void> {
@@ -190,6 +200,15 @@ export function initPoseModal(): void {
     if ((event.target as HTMLElement).id === 'chModal') closePoseModal();
   });
   on('#mCopy', () => void copyText($<HTMLTextAreaElement>('#mPrompt').value, 'Prompt copié !'));
+  on('#mGuideCopy', async () => {
+    if (!open?.guide) return;
+    if (await copyImage(open.guide)) toast('Image guide copiée : colle-la dans ton IA avec le prompt');
+    else toast("Copie d'image impossible ici : utilise PARTAGER / ENREGISTRER");
+  });
+  on('#mGuideSave', () => {
+    if (!open?.guide) return;
+    void shareOrDownloadImage(open.guide, `${open.char.id}-${open.key}-guide.png`);
+  });
   on('#mFile', (event) => void importFile(event), 'change');
   on('#mDel', async () => {
     if (!open) return;

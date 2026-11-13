@@ -1,5 +1,5 @@
 /* Prompts de génération d'images : un texte prêt à coller par pose, à accompagner de l'image de référence. */
-import { SPRITE_BY_KEY, type SpriteKey } from './sprite-poses';
+import { SPRITE_BY_KEY, type SpriteKey, type SpritePoseSpec } from './sprite-poses';
 import type { PoseName } from './poses';
 import type { Character } from './types';
 
@@ -19,6 +19,32 @@ export function guidePose(char: Character, key: SpriteKey): PoseName {
   return SPRITE_BY_KEY[key].rig ?? char.style.spriteRig[key] ?? 'idle';
 }
 
+/** Hauteur d'un personnage debout dans l'image générée (en % de l'image). */
+const STANDING_FRAME = 80;
+/** En dessous de cette hauteur relative, la posture est « basse » et le prompt insiste là-dessus. */
+const LOW_POSE = 0.8;
+
+const GUIDE_IMAGE =
+  'Si une image de mannequin gris est aussi jointe, elle montre la posture exacte à reproduire (position des bras et des jambes, hauteur du corps) : copie sa posture, mais PAS son apparence.';
+
+/**
+ * Cadrage demandé à l'IA. Une posture basse occupe moins de hauteur qu'une posture debout :
+ * sans cette précision, l'IA agrandit le personnage pour remplir l'image et le redresse.
+ */
+function framing(spec: SpritePoseSpec): string {
+  if (spec.w) {
+    return `Le personnage est à l'horizontale, centré, entièrement visible, et occupe environ ${STANDING_FRAME} % de la largeur de l'image.`;
+  }
+  const h = spec.h ?? 1;
+  const percent = Math.round(STANDING_FRAME * Math.min(h, 1.15));
+  const centered = `Le personnage est centré, entièrement visible sans être coupé, et occupe environ ${percent} % de la hauteur de l'image.`;
+  if (h >= LOW_POSE) return centered;
+  return (
+    `POSTURE BASSE : le personnage est beaucoup plus petit que debout, le sommet de sa tête arrive à environ ${Math.round(h * 100)} % de sa hauteur debout. ` +
+    `Ce n'est PAS une simple flexion des genoux : il est vraiment ramassé près du sol. ${centered}`
+  );
+}
+
 export function buildPrompt(char: Character, key: SpriteKey): string {
   const spec = SPRITE_BY_KEY[key];
   const desc = poseDescription(char, key);
@@ -30,7 +56,7 @@ export function buildPrompt(char: Character, key: SpriteKey): string {
   }
   return (
     `À partir de l'image de référence jointe du personnage « ${char.name} » (garde exactement le même visage, la même coiffure, la même corpulence, les mêmes vêtements, les mêmes accessoires et les mêmes couleurs), génère UNE SEULE image de ce personnage EN ENTIER, de la tête aux pieds, vu de côté (profil 3/4) et tourné vers la DROITE, dans la posture suivante : ${desc}. ` +
-    `Un seul personnage, une seule pose, aucun effet spécial (ni flammes, ni éclairs, ni traînées de mouvement, ni onomatopées). Le personnage est centré, entièrement visible sans être coupé, et occupe environ 80 % de la hauteur de l'image. ${STYLE} ${BACKGROUND} ${FORMAT}`
+    `Un seul personnage, une seule pose, aucun effet spécial (ni flammes, ni éclairs, ni traînées de mouvement, ni onomatopées). ${framing(spec)} ${GUIDE_IMAGE} ${STYLE} ${BACKGROUND} ${FORMAT}`
   );
 }
 

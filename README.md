@@ -30,6 +30,8 @@ La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**
 
 1. Dans le jeu : **Options ▸ Personnages & sprites ▸ Nouveau personnage** (nom + style de combat).
 2. Toucher une pose ▸ **Copier le prompt**, le coller dans une IA d'images avec l'image de référence du personnage.
+   Si l'IA ne trouve pas la posture, lui joindre aussi l'**image guide** (mannequin gris dans la posture
+   exacte) : **Copier l'image guide** ou **Partager / Enregistrer**.
 3. **Importer l'image** générée (fond magenta `#FF00FF`) : le fond est retiré automatiquement.
 4. Seule la pose `idle` est obligatoire ; les poses manquantes réutilisent la plus proche.
 5. **Exporter .zip**, déposer le dossier obtenu dans `public/assets/characters/` et ajouter son nom dans
