@@ -1,20 +1,28 @@
 # Fighting Friends
 
-Jeu de combat d'arcade 2D (mobile + ordinateur), sans dépendance ni étape de build : HTML/CSS/JS pur.
+Jeu de combat d'arcade 2D jouable sur téléphone et sur ordinateur.
+TypeScript strict, Vite, Vitest, ESLint + Prettier. Aucune bibliothèque de jeu : un moteur maison sur Canvas.
 
-## Lancer
+## Démarrer
 
-Servir le dossier avec n'importe quel serveur statique (`python3 -m http.server`) et ouvrir `index.html`,
-ou utiliser la version déployée sur GitHub Pages.
+```bash
+npm install
+npm run dev        # jeu sur http://localhost:5173, rechargé à chaque modification
+npm run check      # types + règles d'architecture + tests
+npm run build      # version de production dans dist/
+```
 
-## Commandes
+Avant de modifier le code, lire **[ARCHITECTURE.md](ARCHITECTURE.md)** : couches, taille des fichiers,
+conventions, et « où mettre quoi ».
 
-| | |
-|---|---|
-| Tactile | joystick à gauche, boutons A B C D à droite, un seul bouton à la fois |
-| Clavier | ZQSD / WASD / flèches, A=`U` B=`I` C=`J` D=`K`, pause `Échap` |
-| Spéciaux | `↓↘→` + poing, `↓↙←` + pied, super : `↓↓` + poing quand la jauge est pleine |
-| Combos | quand un coup touche, les 4 boutons s'enchaînent librement ; le même bouton fort deux fois = spécial (B B, D D), une 3ᵉ fois = super |
+## Commandes du jeu
+
+|          |                                                                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Tactile  | joystick à gauche, boutons A B C D à droite, un seul bouton à la fois                                                                |
+| Clavier  | ZQSD / WASD / flèches, A=`U` B=`I` C=`J` D=`K`, pause `Échap`                                                                        |
+| Spéciaux | `↓↘→` + poing, `↓↙←` + pied, super : `↓↓` + poing quand la jauge est pleine                                                          |
+| Combos   | quand un coup touche, les 4 boutons s'enchaînent librement ; le même bouton fort deux fois = spécial (B B, D D), une 3ᵉ fois = super |
 
 La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**.
 
@@ -24,15 +32,13 @@ La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**
 2. Toucher une pose ▸ **Copier le prompt**, le coller dans une IA d'images avec l'image de référence du personnage.
 3. **Importer l'image** générée (fond magenta `#FF00FF`) : le fond est retiré automatiquement.
 4. Seule la pose `idle` est obligatoire ; les poses manquantes réutilisent la plus proche.
-5. **Exporter .zip** puis déposer le dossier obtenu dans `assets/characters/` et ajouter son nom dans
-   `assets/characters/index.json` (ex. `["matheo"]`) pour que le personnage soit livré avec le jeu.
+5. **Exporter .zip**, déposer le dossier obtenu dans `public/assets/characters/` et ajouter son nom dans
+   `public/assets/characters/index.json` (ex. `["matheo"]`) pour que le personnage soit livré avec le jeu.
 
-Format d'un dossier `assets/characters/<id>/` : `character.json` + un PNG par pose
-(`idle.png`, `punch_light.png`, `kick_heavy.png`, ... — noms listés dans `js/poses.js`).
-Les PNG peuvent être détourés ou encore sur fond magenta.
+Un dossier `public/assets/characters/<id>/` contient `character.json` et un PNG par pose (`idle.png`,
+`punch_light.png`… — liste dans `src/data/sprite-poses.ts`). Les PNG peuvent être détourés ou sur fond magenta.
 
-## Code
+## Déploiement
 
-`js/characters.js` styles de combat et coups · `js/fighter.js` moteur (états, combos, manipulations) ·
-`js/fight.js` manches, collisions, HUD · `js/poses.js` postures et prompts · `js/sprites.js` import/détourage ·
-`js/rig.js` personnages provisoires dessinés par code · `js/ui.js` menus.
+Chaque push lance la CI (`.github/workflows/pages.yml`) : vérifications, build, puis publication sur
+GitHub Pages. Prérequis unique : **Settings ▸ Pages ▸ Source : GitHub Actions**.

@@ -1,49 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-<meta charset="utf-8">
-<title>Fighting Friends</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0b0618">
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-<div id="app">
-  <canvas id="cv"></canvas>
+  <head>
+    <meta charset="utf-8" />
+    <title>Fighting Friends</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0b0618" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="cv"></canvas>
 
-  <!-- commandes tactiles -->
-  <div id="touch">
-    <div id="stick"><div id="knob"></div></div>
-    <div id="pad">
-      <div class="btn p" data-b="lp">A<small>poing</small></div>
-      <div class="btn p h" data-b="hp">B<small>POING</small></div>
-      <div class="btn k" data-b="lk">C<small>pied</small></div>
-      <div class="btn k h" data-b="hk">D<small>PIED</small></div>
+      <!-- commandes tactiles -->
+      <div id="touch">
+        <div id="stick"><div id="knob"></div></div>
+        <div id="pad">
+          <div class="btn p" data-b="lp">A<small>poing</small></div>
+          <div class="btn p h" data-b="hp">B<small>POING</small></div>
+          <div class="btn k" data-b="lk">C<small>pied</small></div>
+          <div class="btn k h" data-b="hk">D<small>PIED</small></div>
+        </div>
+      </div>
+      <button id="pauseBtn" aria-label="Pause">II</button>
+      <div id="rotate">↻ Tourne ton téléphone à l'horizontale pour un écran plus grand</div>
+
+      <!-- les menus sont montés ici par src/ui -->
+      <div id="ui"></div>
+      <div id="toast"></div>
     </div>
-  </div>
-  <button id="pauseBtn" aria-label="Pause">II</button>
-  <div id="rotate">↻ Tourne ton téléphone à l'horizontale pour un écran plus grand</div>
-
-  <div id="ui"></div>
-  <div id="toast"></div>
-</div>
-<script src="js/core.js"></script>
-<script src="js/poses.js"></script>
-<script src="js/rig.js"></script>
-<script src="js/characters.js"></script>
-<script src="js/sprites.js"></script>
-<script src="js/input.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/fx.js"></script>
-<script src="js/stages.js"></script>
-<script src="js/fighter.js"></script>
-<script src="js/ai.js"></script>
-<script src="js/fight.js"></script>
-<script src="js/scenes.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/main.js"></script>
-</body>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
