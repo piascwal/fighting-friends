@@ -7,7 +7,7 @@ import { isPortrait, isTouchDevice } from './core/display';
 import { registerServiceWorker } from './core/pwa';
 import { gameState } from './game';
 import { input } from './input';
-import { currentScreen, initUi, tickUi } from './ui';
+import { currentScreen, initUi, openCharactersShortcut, tickUi } from './ui';
 
 const canvas = document.getElementById('cv') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -70,6 +70,8 @@ async function boot(): Promise<void> {
   initUi(gameState);
   resize();
   gameState.startAttract();
+  // raccourci de l'icône de l'application (appui long sur Android) : ouvre directement les sprites
+  if (new URLSearchParams(location.search).get('ecran') === 'personnages') openCharactersShortcut();
 
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', () => setTimeout(resize, 200));

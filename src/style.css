@@ -174,8 +174,23 @@ body.infight #pauseBtn {
   color: var(--y);
   text-shadow: 0 3px 0 #000;
 }
-body.portrait.touch #rotate {
+/* l'écran des sprites reste utilisable à la verticale */
+body.portrait.touch:not([data-screen='chars']) #rotate {
   display: flex;
+}
+#rotate .nav {
+  margin-top: 10px;
+  font-size: 18px;
+  padding: 10px 18px;
+}
+#rotate .nav small {
+  display: block;
+  font:
+    600 11px system-ui,
+    sans-serif;
+  letter-spacing: 0;
+  opacity: 0.75;
+  margin-top: 3px;
 }
 #rotate p {
   margin: 0;

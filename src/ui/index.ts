@@ -8,7 +8,7 @@ import { MENUS_HTML, initMenus } from './menus';
 import { MOVES_HTML, backFromMoves, initMoves, openMoves } from './moves';
 import { OPTIONS_HTML, initOptions, openOptions } from './options';
 import { closePoseModal, isPoseModalOpen, tickPoseModal } from './pose-modal';
-import { currentScreen, mountScreens, showScreen } from './screens';
+import { currentScreen, hideScreens, mountScreens, showScreen } from './screens';
 import { SELECT_HTML, backFromSelect, initSelect, openSelect, tickSelect } from './select';
 
 export type { GameMode, UiActions } from './actions';
@@ -73,12 +73,23 @@ export function initUi(actions: UiActions): void {
     openMovesFromPause: () => openMoves('pause', game().currentPlayer()),
   });
   initSelect();
-  initOptions({ openCharacters, openMoves: () => openMoves('options') });
+  initOptions({ openCharacters: () => openCharacters(), openMoves: () => openMoves('options') });
   initCharacters(openOptions);
   initMoves();
+  $('#rotateChars').addEventListener('click', openCharactersShortcut);
   input.onKey = onKey;
   document.addEventListener('pointerdown', unlockAudio, { once: true });
   showScreen('title');
+}
+
+/**
+ * Accès direct à l'écran des sprites (depuis le message « tourne ton téléphone » ou le raccourci de l'icône).
+ * Le bouton Retour ramène exactement là où l'on était.
+ */
+export function openCharactersShortcut(): void {
+  const from = currentScreen();
+  playSfx('ok');
+  openCharacters(() => (from ? showScreen(from) : hideScreens()));
 }
 
 /** Anime les aperçus des menus ; appelé à chaque image. */

@@ -28,6 +28,8 @@ const ATTRACT_LEVEL = 2;
 class Game implements UiActions {
   scene: Scene | null = null;
   paused = false;
+  /** Pause posée automatiquement pendant l'écran des sprites (et à lever au retour). */
+  private heldForSprites = false;
   private mode: GameMode = 'versus';
   /** Les deux personnages du combat en cours. */
   private fighters: [Character, Character] | null = null;
@@ -38,7 +40,26 @@ class Game implements UiActions {
   private setScene(scene: Scene): void {
     this.scene = scene;
     this.paused = false;
+    this.heldForSprites = false;
     this.screenChanged();
+  }
+
+  /**
+   * L'écran des sprites peut s'ouvrir à tout moment par raccourci (même en plein combat ou pendant une
+   * animation) : ce qui se joue derrière s'arrête le temps d'y travailler. Au retour dans un combat,
+   * on arrive sur le menu pause, pour reprendre quand on est prêt.
+   */
+  private holdDuringSprites(): void {
+    const onSprites = currentScreen() === 'chars';
+    const isAttract = this.scene instanceof FightScene && this.scene.isAttract;
+    if (onSprites && !isAttract && !this.paused) {
+      this.paused = true;
+      this.heldForSprites = true;
+    } else if (!onSprites && this.heldForSprites) {
+      this.heldForSprites = false;
+      if (this.activeFight && !currentScreen()) showScreen('pause');
+      else this.paused = false;
+    }
   }
 
   /** Un vrai combat est-il affiché (pas la démonstration) ? */
@@ -47,6 +68,7 @@ class Game implements UiActions {
   }
 
   screenChanged(): void {
+    this.holdDuringSprites();
     // les commandes tactiles n'apparaissent que pendant un combat, sans menu par-dessus
     const fighting = !!this.activeFight && !currentScreen();
     document.body.classList.toggle('infight', fighting);

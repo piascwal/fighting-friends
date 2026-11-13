@@ -12,6 +12,15 @@
   "background_color": "#0b0618",
   "theme_color": "#0b0618",
   "categories": ["games"],
+  "shortcuts": [
+    {
+      "name": "Personnages & sprites",
+      "short_name": "Sprites",
+      "description": "Images manquantes et prompts à copier",
+      "url": "./?ecran=personnages",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

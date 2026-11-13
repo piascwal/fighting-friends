@@ -2,6 +2,7 @@
 import { playSfx } from '../audio/audio';
 import { exportCharacterZip, saveCustomCharacters } from '../assets/character-files';
 import { hasSprite, removeCharacterSprites, spriteCount } from '../assets/sprite-store';
+import { allowAnyOrientation, lockLandscape } from '../core/display';
 import { pick } from '../core/math';
 import { escapeHtml, slug } from '../core/text';
 import { buildPrompt, spritePosesFor } from '../data/prompts';
@@ -59,6 +60,9 @@ export const CHARACTERS_HTML = `
 const NEW_COLORS = ['#ff3d7f', '#3d9bff', '#7dff6a', '#ff9d2e', '#c56bff', '#2ee6c8'];
 
 let selectedId: string | null = null;
+/** Où ramène le bouton Retour : les options par défaut, ou l'écran d'où l'on vient (raccourcis). */
+let goBack: () => void = () => {};
+let defaultBack: () => void = () => {};
 let missingOnly = false;
 
 const selected = (): Character => characterById(selectedId ?? '') ?? roster[0]!;
@@ -162,18 +166,27 @@ function copyMissingPrompts(): void {
   void copyText(text, `${missing.length} prompts copiés`);
 }
 
-export function openCharacters(): void {
+/**
+ * Ouvre l'écran des sprites. Il est utilisable à la verticale, pour passer facilement
+ * du jeu au générateur d'images et inversement.
+ * @param back action du bouton Retour (par défaut : revenir aux options)
+ */
+export function openCharacters(back?: () => void): void {
+  goBack = back ?? defaultBack;
+  void allowAnyOrientation();
   closePoseModal();
   refresh();
   showScreen('chars');
 }
 
 export function initCharacters(onBack: () => void): void {
+  defaultBack = onBack;
   initPoseModal();
   const valueOf = (event: Event) => (event.target as HTMLInputElement | HTMLSelectElement).value;
   on('#chBack', () => {
     playSfx('back');
-    onBack();
+    void lockLandscape();
+    goBack();
   });
   on('#chSel', (e) => ((selectedId = valueOf(e)), refresh()), 'change');
   on('#chNewBtn', () => {

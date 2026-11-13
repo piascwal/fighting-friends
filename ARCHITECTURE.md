@@ -118,7 +118,9 @@ Le jeu est une application web installable, qui se lance en plein écran à l'ho
 - `core/display.ts` gère plein écran et verrouillage de l'orientation ; `core/pwa.ts` l'enregistrement du
   service worker et la proposition d'installation.
 - Le jeu ne se joue qu'à l'horizontale : à la verticale sur téléphone, un message recouvre tout et le
-  combat se met en pause. Aucune mise en page verticale n'est maintenue.
+  combat se met en pause. Seule exception : l'écran « Personnages & sprites », utilisable dans les deux sens
+  pour passer facilement du jeu au générateur d'images. On y accède depuis ce message, ou par le raccourci de
+  l'icône (`?ecran=personnages`) ; ce qui se jouait derrière reste figé pendant ce temps (`game.ts`).
 
 ## 6. Conventions de code
 
