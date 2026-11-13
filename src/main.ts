@@ -3,6 +3,8 @@ import './style.css';
 import { loadCustomCharacters, loadRepoCharacters } from './assets/character-files';
 import { loadLocalSprites } from './assets/sprite-store';
 import { FPS, VIEW_H, VIEW_W } from './core/constants';
+import { isPortrait, isTouchDevice } from './core/display';
+import { registerServiceWorker } from './core/pwa';
 import { gameState } from './game';
 import { input } from './input';
 import { currentScreen, initUi, tickUi } from './ui';
@@ -17,27 +19,24 @@ const MAX_STEPS_PER_FRAME = 4;
 /** Netteté maximale : au-delà de 2, le gain est invisible et le coût réel sur téléphone. */
 const MAX_PIXEL_RATIO = 2;
 
-/** Adapte le canvas à l'écran : plein écran à l'horizontale, en haut de l'écran à la verticale. */
+/** Adapte le canvas à l'écran : le plus grand possible en gardant les proportions, centré. */
 function resize(): void {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const landscape = vw > vh;
-  const scale = landscape ? Math.min(vw / VIEW_W, vh / VIEW_H) : vw / VIEW_W;
+  const scale = Math.min(vw / VIEW_W, vh / VIEW_H);
   const width = Math.round(VIEW_W * scale);
   const height = Math.round(VIEW_H * scale);
-  const top = landscape
-    ? Math.round((vh - height) / 2)
-    : Math.round(Math.min(vh * 0.07, Math.max(0, (vh - height) / 2)));
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
   canvas.style.left = `${Math.round((vw - width) / 2)}px`;
-  canvas.style.top = `${top}px`;
+  canvas.style.top = `${Math.round((vh - height) / 2)}px`;
   const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
   canvas.width = Math.round(width * ratio);
   canvas.height = Math.round(height * ratio);
-  // à la verticale, les commandes tactiles occupent l'espace sous le jeu
-  document.getElementById('touch')!.style.top = landscape ? '0px' : `${top + height}px`;
-  document.body.classList.toggle('portrait', !landscape);
+  const portrait = isPortrait();
+  document.body.classList.toggle('portrait', portrait);
+  // téléphone tourné à la verticale en plein combat : on met en pause le temps qu'il revienne
+  if (portrait && isTouchDevice() && !gameState.paused) gameState.togglePause();
   input.touch.layout();
 }
 
@@ -86,4 +85,5 @@ async function boot(): Promise<void> {
   requestAnimationFrame(frame);
 }
 
+registerServiceWorker();
 void boot();

@@ -70,11 +70,11 @@ export class TouchPad {
   layout(): void {
     if (!this.layer) return;
     const rect = this.layer.getBoundingClientRect();
-    const landscape = window.innerWidth > window.innerHeight;
-    const r = landscape ? clamp(rect.height * 0.105, 26, 46) : clamp(rect.width * 0.1, 30, 46);
+    // le jeu se joue à l'horizontale : les tailles se calent sur la hauteur de l'écran
+    const r = clamp(rect.height * 0.105, 26, 46);
     const gap = r * 2.28;
-    const marginX = landscape ? Math.max(18, rect.width * 0.035) : rect.width * 0.06;
-    const marginY = landscape ? Math.max(14, rect.height * 0.07) : Math.max(24, rect.height * 0.16);
+    const marginX = Math.max(18, rect.width * 0.035);
+    const marginY = Math.max(14, rect.height * 0.07);
     // grille 2×2 façon borne d'arcade, rangée du haut légèrement décalée
     const x = rect.width - marginX - r;
     const y = rect.height - marginY - r;
@@ -91,14 +91,14 @@ export class TouchPad {
       el.style.top = `${centers[b][1] - r}px`;
       el.style.fontSize = `${r * 0.8}px`;
     }
-    const stick = landscape ? clamp(rect.height * 0.17, 44, 74) : clamp(rect.width * 0.16, 48, 70);
+    const stick = clamp(rect.height * 0.17, 44, 74);
     this.stick.style.width = this.stick.style.height = `${stick * 2}px`;
     this.knob.style.width = this.knob.style.height = `${stick}px`;
     this.geo = {
       button: r,
       stick,
       centers,
-      home: [marginX + stick + (landscape ? 10 : 0), rect.height - marginY - stick * 1.1],
+      home: [marginX + stick + 10, rect.height - marginY - stick * 1.1],
     };
     if (this.stickTouch === null) this.placeStick(...this.geo.home);
   }

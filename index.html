@@ -11,6 +11,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="theme-color" content="#0b0618" />
+    <meta name="apple-mobile-web-app-title" content="Fighting" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
   </head>
   <body>
     <div id="app">
@@ -27,7 +31,11 @@
         </div>
       </div>
       <button id="pauseBtn" aria-label="Pause">II</button>
-      <div id="rotate">↻ Tourne ton téléphone à l'horizontale pour un écran plus grand</div>
+      <!-- le jeu se joue à l'horizontale : à la verticale, ce message recouvre tout -->
+      <div id="rotate">
+        <div class="phone"></div>
+        <p>Tourne ton téléphone<br />à l'horizontale</p>
+      </div>
 
       <!-- les menus sont montés ici par src/ui -->
       <div id="ui"></div>

@@ -32,19 +32,19 @@ infraction fait échouer la CI, donc le déploiement. Les autres relèvent de la
         data/  ──────────────────────────────────►  core/   (outils sans dépendance)
 ```
 
-| Couche    | Rôle                                                                | Peut importer                                        |
-| --------- | ------------------------------------------------------------------- | ---------------------------------------------------- |
-| `core/`   | Outils génériques : maths, couleurs, constantes, stockage, réglages | rien                                                 |
-| `data/`   | Contenu du jeu : types, poses, coups, styles, personnages, prompts  | `core`                                               |
-| `engine/` | Simulation du combat, IA, règles d'enchaînement                     | `core`, `data`                                       |
-| `assets/` | Sprites en mémoire, détourage, import/export de personnages         | `core`, `data`                                       |
-| `audio/`  | Synthèse sonore, effets, musique                                    | `core`                                               |
-| `input/`  | Clavier, tactile, manettes → manettes abstraites du moteur          | `core`, `data`, `engine`                             |
-| `render/` | Tout ce qui dessine dans le canvas                                  | `core`, `data`, `engine`, `assets`                   |
-| `scenes/` | Écrans animés du canvas (combat, versus, victoire, fin)             | toutes les couches sauf `ui`                         |
-| `ui/`     | Menus HTML par-dessus le canvas                                     | `core`, `data`, `assets`, `render`, `audio`, `input` |
-| `game.ts` | Enchaîne les écrans et les modes de jeu                             | tout                                                 |
-| `main.ts` | Démarrage, mise à l'échelle, boucle principale                      | tout                                                 |
+| Couche    | Rôle                                                                                               | Peut importer                                        |
+| --------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `core/`   | Outils génériques : maths, couleurs, constantes, stockage, réglages, plateforme (plein écran, PWA) | rien                                                 |
+| `data/`   | Contenu du jeu : types, poses, coups, styles, personnages, prompts                                 | `core`                                               |
+| `engine/` | Simulation du combat, IA, règles d'enchaînement                                                    | `core`, `data`                                       |
+| `assets/` | Sprites en mémoire, détourage, import/export de personnages                                        | `core`, `data`                                       |
+| `audio/`  | Synthèse sonore, effets, musique                                                                   | `core`                                               |
+| `input/`  | Clavier, tactile, manettes → manettes abstraites du moteur                                         | `core`, `data`, `engine`                             |
+| `render/` | Tout ce qui dessine dans le canvas                                                                 | `core`, `data`, `engine`, `assets`                   |
+| `scenes/` | Écrans animés du canvas (combat, versus, victoire, fin)                                            | toutes les couches sauf `ui`                         |
+| `ui/`     | Menus HTML par-dessus le canvas                                                                    | `core`, `data`, `assets`, `render`, `audio`, `input` |
+| `game.ts` | Enchaîne les écrans et les modes de jeu                                                            | tout                                                 |
+| `main.ts` | Démarrage, mise à l'échelle, boucle principale                                                     | tout                                                 |
 
 Règles :
 
@@ -91,20 +91,36 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
 
 ## 4. Où mettre quoi
 
-| Je veux…                               | Je touche…                                                                                 |
-| -------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Ajouter un personnage                  | une fiche dans `data/characters.ts` (ou un dossier `public/assets/characters/<id>/`)       |
-| Régler un coup (dégâts, vitesse, zone) | `data/normals.ts` ou `data/styles/<style>.ts`                                              |
-| Créer un style de combat               | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` |
-| Changer une règle d'enchaînement       | `engine/move-select.ts` (+ un test dans `tests/combos.test.ts`)                            |
-| Changer une manipulation (↓↘→…)        | `engine/input-buffer.ts`, constante `MOTIONS`                                              |
-| Ajouter un effet visuel                | `render/fx.ts` (création) et `render/fx-draw.ts` (dessin)                                  |
-| Ajouter un son                         | `core/sfx.ts` (son nom) puis `audio/sounds.ts` (sa recette)                                |
-| Ajouter un décor                       | `render/stage-painters.ts`                                                                 |
-| Ajouter un écran de menu               | un fichier dans `ui/`, branché dans `ui/index.ts`                                          |
-| Changer l'enchaînement des écrans      | `game.ts`                                                                                  |
+| Je veux…                                                  | Je touche…                                                                                 |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Ajouter un personnage                                     | une fiche dans `data/characters.ts` (ou un dossier `public/assets/characters/<id>/`)       |
+| Régler un coup (dégâts, vitesse, zone)                    | `data/normals.ts` ou `data/styles/<style>.ts`                                              |
+| Créer un style de combat                                  | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` |
+| Changer une règle d'enchaînement                          | `engine/move-select.ts` (+ un test dans `tests/combos.test.ts`)                            |
+| Changer une manipulation (↓↘→…)                           | `engine/input-buffer.ts`, constante `MOTIONS`                                              |
+| Ajouter un effet visuel                                   | `render/fx.ts` (création) et `render/fx-draw.ts` (dessin)                                  |
+| Ajouter un son                                            | `core/sfx.ts` (son nom) puis `audio/sounds.ts` (sa recette)                                |
+| Ajouter un décor                                          | `render/stage-painters.ts`                                                                 |
+| Changer l'icône, le nom ou l'orientation de l'application | `public/manifest.webmanifest` et `public/icons/`                                           |
+| Changer ce qui marche hors ligne                          | `public/sw.js` (service worker)                                                            |
+| Ajouter un écran de menu                                  | un fichier dans `ui/`, branché dans `ui/index.ts`                                          |
+| Changer l'enchaînement des écrans                         | `game.ts`                                                                                  |
 
-## 5. Conventions de code
+## 5. Application installable (PWA)
+
+Le jeu est une application web installable, qui se lance en plein écran à l'horizontale et marche hors ligne.
+
+- `public/manifest.webmanifest` décrit l'application : nom, icônes, `display: fullscreen`,
+  `orientation: landscape`.
+- `public/sw.js` est le service worker. C'est le seul fichier en JavaScript : le navigateur le charge tel
+  quel, sans passer par Vite. Il n'a **pas de numéro de version à tenir à jour** : les pages sont chargées
+  réseau d'abord, et les fichiers de Vite portent un hash dans leur nom.
+- `core/display.ts` gère plein écran et verrouillage de l'orientation ; `core/pwa.ts` l'enregistrement du
+  service worker et la proposition d'installation.
+- Le jeu ne se joue qu'à l'horizontale : à la verticale sur téléphone, un message recouvre tout et le
+  combat se met en pause. Aucune mise en page verticale n'est maintenue.
+
+## 6. Conventions de code
 
 - **TypeScript strict**, pas de `any`. Les données de jeu ont des types précis (`MoveDef`, `HitDef`…) :
   une faute de frappe dans un coup est une erreur de compilation.
@@ -120,7 +136,7 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
   les données compactes, et elles y sont documentées (`hs`, `bs`, `kb` dans `HitDef`).
 - **Formatage** automatique par Prettier (`npm run format`) : on ne discute jamais de mise en page.
 
-## 6. Tests
+## 7. Tests
 
 - Toute règle de gameplay a un test dans `tests/` : un enchaînement, une manipulation, une garde. Les tests
   rejouent une suite d'entrées frame par frame dans une vraie simulation (`tests/harness.ts`) et vérifient
@@ -130,7 +146,7 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
   personnages ne bloque le jeu.
 - Pas de tests sur l'affichage : il est vérifié à l'œil (`npm run dev`).
 
-## 7. Chaîne de vérification
+## 8. Chaîne de vérification
 
 `npm run check` = types + lint (règles ci-dessus) + tests. La CI le lance à chaque push, avant de construire
 et de déployer sur GitHub Pages : **un code qui ne respecte pas l'architecture n'est jamais déployé.**

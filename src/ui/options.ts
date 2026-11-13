@@ -1,5 +1,6 @@
 /* Écran des options. */
 import { playSfx, refreshMusic } from '../audio/audio';
+import { toggleFullscreen } from '../core/display';
 import { saveSettings, settings, type Settings } from '../core/settings';
 import { $$, on, toast } from './dom';
 import { showScreen } from './screens';
@@ -54,18 +55,6 @@ function cycle<K extends keyof Settings>(key: K): void {
   playSfx('move');
 }
 
-async function toggleFullscreen(): Promise<void> {
-  if (document.fullscreenElement) return document.exitFullscreen();
-  try {
-    await document.documentElement.requestFullscreen();
-    // sur téléphone, on en profite pour basculer à l'horizontale quand c'est permis
-    const orientation = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
-    await orientation.lock?.('landscape').catch(() => {});
-  } catch {
-    toast("Plein écran indisponible ici : ajoute la page à ton écran d'accueil");
-  }
-}
-
 export function openOptions(): void {
   refresh();
   showScreen('options');
@@ -84,7 +73,10 @@ export function initOptions(handlers: OptionsHandlers): void {
     playSfx('back');
     showScreen('menu');
   });
-  on('#optFullscreen', () => void toggleFullscreen());
+  on('#optFullscreen', async () => {
+    if (!(await toggleFullscreen()))
+      toast("Plein écran indisponible ici : installe le jeu sur ton écran d'accueil");
+  });
   on('#optChars', () => {
     playSfx('ok');
     handlers.openCharacters();

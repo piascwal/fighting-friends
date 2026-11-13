@@ -38,6 +38,18 @@ La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**
 Un dossier `public/assets/characters/<id>/` contient `character.json` et un PNG par pose (`idle.png`,
 `punch_light.png`… — liste dans `src/data/sprite-poses.ts`). Les PNG peuvent être détourés ou sur fond magenta.
 
+## Installer le jeu sur un téléphone
+
+Le jeu est une application web installable (PWA) : une fois installé, il se lance depuis son icône, en plein
+écran, à l'horizontale, et fonctionne sans connexion.
+
+- **Android** : ouvrir le jeu dans Chrome, puis le bouton **Installer le jeu** de l'écran titre (ou menu ⋮ ▸
+  _Installer l'application_).
+- **iPhone** : ouvrir le jeu dans Safari, bouton **Partager** ▸ **Sur l'écran d'accueil**.
+
+Sans installation, le jeu passe quand même en plein écran au premier appui (sauf sur iPhone, où Safari ne le
+permet pas).
+
 ## Déploiement
 
 Chaque push lance la CI (`.github/workflows/pages.yml`) : vérifications, build, puis publication sur

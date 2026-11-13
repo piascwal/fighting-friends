@@ -86,6 +86,11 @@ export default tseslint.config(
     },
   },
   {
+    // service worker : JavaScript simple chargé tel quel par le navigateur (voir public/sw.js)
+    files: ['public/sw.js'],
+    languageOptions: { globals: globals.serviceworker },
+  },
+  {
     files: ['tests/**/*.ts'],
     rules: { 'max-lines-per-function': 'off' },
   },

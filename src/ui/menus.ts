@@ -1,5 +1,7 @@
 /* Écrans simples : titre, menu principal, pause, boutons de fin de combat. */
 import { playMusic, playSfx, unlockAudio } from '../audio/audio';
+import { enterImmersive, isInstalledApp, isIos } from '../core/display';
+import { canPromptInstall, promptInstall, watchInstallPrompt } from '../core/pwa';
 import { game, type GameMode } from './actions';
 import { $, $$, on } from './dom';
 import { showScreen } from './screens';
@@ -8,7 +10,10 @@ export const MENUS_HTML = `
   <div class="screen" id="s-title">
     <div class="logo"><span>FIGHTING</span><b>FRIENDS</b></div>
     <div class="blink">TOUCHE L'ÉCRAN POUR JOUER</div>
-    <div class="ver">Astuce : ajoute la page à ton écran d'accueil pour jouer en plein écran</div>
+    <div class="install">
+      <button class="nav sm hidden" id="installBtn">📲 INSTALLER LE JEU<small>Plein écran, à l'horizontale, même hors ligne</small></button>
+      <div class="ver hidden" id="iosHint">Pour jouer en plein écran sur iPhone : bouton <b>Partager</b> puis <b>Sur l'écran d'accueil</b></div>
+    </div>
   </div>
 
   <div class="screen" id="s-menu">
@@ -39,8 +44,24 @@ export interface MenuHandlers {
   openMovesFromPause(): void;
 }
 
+/** Propose d'installer le jeu : bouton sur Android et ordinateur, explication sur iPhone. */
+function initInstall(): void {
+  const button = $('#installBtn');
+  const refresh = () => button.classList.toggle('hidden', !canPromptInstall());
+  watchInstallPrompt(refresh);
+  $('#iosHint').classList.toggle('hidden', !isIos() || isInstalledApp());
+  button.addEventListener('click', (event) => {
+    event.stopPropagation(); // ne pas déclencher aussi l'appui sur l'écran titre
+    void promptInstall();
+  });
+}
+
 export function initMenus(handlers: MenuHandlers): void {
+  initInstall();
+  // chaque appui sur l'écran titre ou un mode de jeu (re)passe en plein écran à l'horizontale :
+  // si le joueur en est sorti par un geste du système, il y revient naturellement
   on('#s-title', () => {
+    void enterImmersive();
     unlockAudio();
     playMusic('menu');
     playSfx('ok');
@@ -48,6 +69,7 @@ export function initMenus(handlers: MenuHandlers): void {
   });
   for (const button of $$('[data-mode]')) {
     button.addEventListener('click', () => {
+      void enterImmersive();
       playSfx('ok');
       handlers.openSelect(button.dataset.mode as GameMode);
     });
