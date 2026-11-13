@@ -6,43 +6,45 @@
   // Coups normaux communs à tous les styles
   function normals() {
     return {
-      lp: { name: 'Poing léger', rank: 1, total: 17, sprite: 'punch_light', anim: [[0, 'lp', 0.7], [9, 'idle', 0.3]],
-        hits: [H(4, 3, [15, -168, 80, 36], 28, { hs: 15, bs: 10, kb: 3 })] },
-      lk: { name: 'Pied léger', rank: 2, total: 21, sprite: 'kick_light', anim: [[0, 'windK', 0.6], [4, 'lk', 0.75], [12, 'idle', 0.3]], vel: [[2, 6, 3]],
-        hits: [H(6, 3, [15, -112, 100, 44], 36, { hs: 17, bs: 11, kb: 4, fx: 'kick' })] },
-      hp: { name: 'Poing fort', rank: 3, total: 30, sprite: 'punch_heavy', anim: [[0, 'windP', 0.5], [6, 'hp', 0.75], [17, 'idle', 0.25]], vel: [[4, 9, 4]],
-        hits: [H(9, 4, [15, -162, 100, 46], 75, { hs: 21, bs: 15, kb: 6, fx: 'heavy' })] },
-      hk: { name: 'Pied fort', rank: 4, total: 36, sprite: 'kick_heavy', anim: [[0, 'windK', 0.5], [8, 'hk', 0.75], [20, 'idle', 0.25]], vel: [[5, 12, 4]],
-        hits: [H(12, 4, [10, -190, 105, 80], 90, { hs: 23, bs: 17, kb: 9, fx: 'heavy', sw: 'side' })] },
-      clp: { name: 'Poing accroupi', rank: 1, total: 15, low: true, sprite: 'crouch_punch', anim: [[0, 'cLp', 0.7], [8, 'crouch', 0.3]],
-        hits: [H(4, 3, [15, -108, 76, 34], 24, { hs: 14, bs: 9, kb: 4 })] },
-      clk: { name: 'Pied bas', rank: 2, total: 19, low: true, sprite: 'crouch_kick', anim: [[0, 'cLk', 0.7], [10, 'crouch', 0.3]],
-        hits: [H(5, 3, [15, -42, 96, 40], 30, { hs: 16, bs: 10, kb: 4, lvl: 'low', fx: 'kick', sw: 'low' })] },
-      chp: { name: 'Uppercut (lanceur)', rank: 5, total: 38, jc: true, sprite: 'uppercut', anim: [[0, 'windU', 0.6], [6, 'upper', 0.8], [22, 'idle', 0.2]],
-        hits: [H(8, 6, [5, -215, 70, 150], 70, { launch: [1.5, -15.5], bs: 16, kb: 6, fx: 'heavy', sw: 'up' })] },
-      chk: { name: 'Balayette', rank: 5, total: 40, low: true, sprite: 'crouch_kick', anim: [[0, 'cLk', 0.5], [7, 'sweep', 0.8], [24, 'crouch', 0.2]],
-        hits: [H(10, 4, [15, -44, 116, 44], 70, { launch: [3, -6.5], bs: 15, kb: 7, lvl: 'low', fx: 'kick', sw: 'low' })] },
-      fhp: { name: 'Marteau (casse-garde basse)', rank: 5, total: 42, sprite: 'punch_heavy', anim: [[0, 'windO', 0.4], [15, 'overhead', 0.8], [28, 'idle', 0.2]],
-        vel: [[4, 16, 2.5]], hits: [H(18, 4, [10, -200, 88, 130], 80, { hs: 22, bs: 14, kb: 7, lvl: 'high', fx: 'heavy', sw: 'down' })] },
-      jlp: { name: 'Poing sauté', rank: 1, total: 22, air: true, sprite: 'jump_punch', anim: [[0, 'jP', 0.7]],
-        hits: [H(4, 12, [5, -120, 76, 70], 40, { hs: 17, bs: 12, kb: 4, lvl: 'high' })] },
-      jhp: { name: 'Poing sauté fort', rank: 3, total: 28, air: true, sprite: 'jump_punch', anim: [[0, 'jP', 0.7]],
-        hits: [H(6, 12, [5, -125, 84, 84], 70, { hs: 21, bs: 14, kb: 6, lvl: 'high', fx: 'heavy', sw: 'down' })] },
-      jlk: { name: 'Pied sauté', rank: 2, total: 24, air: true, sprite: 'jump_kick', anim: [[0, 'jK', 0.7]],
-        hits: [H(5, 14, [5, -80, 90, 64], 45, { hs: 18, bs: 12, kb: 5, lvl: 'high', fx: 'kick' })] },
-      jhk: { name: 'Pied sauté fort', rank: 4, total: 30, air: true, sprite: 'jump_kick', anim: [[0, 'jK', 0.7]],
-        hits: [H(7, 14, [5, -85, 100, 74], 80, { hs: 22, bs: 15, kb: 8, lvl: 'high', fx: 'heavy' })] },
+      lp: { name: 'Poing léger', rank: 1, total: 12, sprite: 'punch_light', anim: [[0, 'lp', 1], [7, 'idle', 0.45]], vel: [[0, 3, 2]],
+        hits: [H(3, 3, [15, -168, 82, 36], 26, { hs: 15, bs: 9, kb: 2.5 })] },
+      lk: { name: 'Pied léger', rank: 2, total: 15, sprite: 'kick_light', anim: [[0, 'windK', 0.9], [3, 'lk', 1], [9, 'idle', 0.45]], vel: [[1, 5, 4]],
+        hits: [H(4, 3, [15, -112, 102, 44], 34, { hs: 17, bs: 10, kb: 3, fx: 'kick' })] },
+      hp: { name: 'Poing fort', rank: 3, total: 21, sprite: 'punch_heavy', anim: [[0, 'windP', 0.9], [4, 'hp', 1], [13, 'idle', 0.4]], vel: [[2, 7, 6]],
+        hits: [H(6, 4, [15, -162, 104, 46], 68, { hs: 21, bs: 13, kb: 4.5, fx: 'heavy' })] },
+      hk: { name: 'Pied fort', rank: 4, total: 25, sprite: 'kick_heavy', anim: [[0, 'windK', 0.9], [5, 'hk', 1], [15, 'idle', 0.4]], vel: [[3, 8, 6]],
+        hits: [H(8, 4, [10, -190, 108, 80], 82, { hs: 23, bs: 15, kb: 6, fx: 'heavy', sw: 'side' })] },
+      clp: { name: 'Poing accroupi', rank: 1, total: 11, low: true, sprite: 'crouch_punch', anim: [[0, 'cLp', 1], [6, 'crouch', 0.45]], vel: [[0, 3, 2]],
+        hits: [H(3, 3, [15, -108, 78, 34], 22, { hs: 14, bs: 9, kb: 2.5 })] },
+      clk: { name: 'Pied bas', rank: 2, total: 14, low: true, sprite: 'crouch_kick', anim: [[0, 'cLk', 1], [8, 'crouch', 0.45]], vel: [[0, 4, 3]],
+        hits: [H(4, 3, [15, -42, 98, 40], 28, { hs: 16, bs: 10, kb: 3, lvl: 'low', fx: 'kick', sw: 'low' })] },
+      chp: { name: 'Uppercut (lanceur)', rank: 5, total: 27, jc: true, sprite: 'uppercut', anim: [[0, 'windU', 0.9], [4, 'upper', 1], [17, 'idle', 0.35]], vel: [[1, 5, 4]],
+        hits: [H(5, 6, [5, -215, 76, 160], 64, { launch: [1.5, -16.5], bs: 15, kb: 5, fx: 'heavy', sw: 'up' })] },
+      chk: { name: 'Balayette', rank: 5, total: 29, low: true, sprite: 'crouch_kick', anim: [[0, 'cLk', 0.9], [5, 'sweep', 1], [18, 'crouch', 0.35]], vel: [[2, 7, 4]],
+        hits: [H(7, 4, [15, -44, 118, 44], 64, { launch: [3, -7], bs: 14, kb: 6, lvl: 'low', fx: 'kick', sw: 'low' })] },
+      fhp: { name: 'Marteau (casse-garde basse)', rank: 5, total: 31, sprite: 'punch_heavy', anim: [[0, 'windO', 0.7], [11, 'overhead', 1], [22, 'idle', 0.35]],
+        vel: [[3, 12, 4]], hits: [H(14, 4, [10, -200, 92, 130], 76, { hs: 22, bs: 13, kb: 5, lvl: 'high', fx: 'heavy', sw: 'down' })] },
+      jlp: { name: 'Poing sauté', rank: 1, total: 15, air: true, sprite: 'jump_punch', anim: [[0, 'jP', 1]],
+        hits: [H(3, 10, [5, -120, 78, 72], 36, { hs: 17, bs: 11, kb: 3, lvl: 'high' })] },
+      jhp: { name: 'Poing sauté fort', rank: 3, total: 20, air: true, sprite: 'jump_punch', anim: [[0, 'jP', 1]],
+        hits: [H(5, 10, [5, -125, 86, 86], 62, { hs: 21, bs: 13, kb: 4, lvl: 'high', fx: 'heavy', sw: 'down' })] },
+      jlk: { name: 'Pied sauté', rank: 2, total: 16, air: true, sprite: 'jump_kick', anim: [[0, 'jK', 1]],
+        hits: [H(4, 11, [5, -80, 92, 66], 40, { hs: 18, bs: 11, kb: 3, lvl: 'high', fx: 'kick' })] },
+      jhk: { name: 'Pied sauté fort', rank: 4, total: 22, air: true, sprite: 'jump_kick', anim: [[0, 'jK', 1]],
+        hits: [H(5, 12, [5, -85, 102, 76], 72, { hs: 22, bs: 14, kb: 6, lvl: 'high', fx: 'heavy' })] },
     };
   }
   const SP = (o) => Object.assign({ rank: 10, sfx: 'special' }, o);
   const SU = (o) => Object.assign({ rank: 20, cost: 100, flash: true, trail: true, sfx: 'super' }, o);
 
+  const COMBOS = [['Rafale', 'A  A  A  C  B  D'], ['Finir par le spécial 1', 'A  C  B  B'], ['Finir par le spécial 2', 'A  C  B  D  D'], ['Jusqu\'au SUPER (jauge pleine)', 'A  C  B  B  B'],
+    ['Lanceur', '↓+B  ▸  ↑ (saut)  ▸  A  C  B  D'], ['Balayage', '↓+A  ↓+C  ↓+D']];
   const T = (FF.TEMPLATES = {});
 
   /* ---------- ÉQUILIBRÉ : projectile + uppercut ---------- */
   T.balanced = {
     label: 'Équilibré', hint: 'Boule de feu, uppercut enflammé',
-    stats: { hp: 1000, speed: 3.5, jump: 17, power: 1 },
+    stats: { hp: 1000, speed: 4.7, jump: 20, power: 1 },
     names: { s1: 'Boule de feu', s2: 'Comète ascendante', super: 'BRASIER FINAL' },
     element: 'fire',
     spriteDesc: {
@@ -53,24 +55,24 @@
     spriteRig: { special1: 'cast', special2: 'upper' },
     build() {
       const m = normals();
-      const fb = (heavy) => SP({ name: 'Boule de feu', total: 46, sprite: 'special1', anim: [[0, 'windCast', 0.5], [10, 'cast', 0.8], [32, 'idle', 0.2]],
-        proj: { t: 13, kind: 'fire', vx: heavy ? 10.5 : 7, y: -128, w: 46, h: 40, dmg: 70, hs: 20, bs: 14, kb: 7, fx: 'fire' } });
-      const up = (heavy) => SP({ name: 'Comète ascendante', sprite: 'special2', total: 60, landRec: 16, inv: [0, 7], trail: true,
-        anim: [[0, 'windU', 0.7], [3, 'upper', 0.9]], imp: [4, heavy ? 4 : 2.5, heavy ? -18 : -14.5],
-        hits: [H(4, 14, [0, -225, 76, 170], heavy ? 130 : 105, { launch: [4, -13], bs: 18, kb: 8, fx: 'fire', sw: 'up', stop: 12 })] });
+      const fb = (heavy) => SP({ name: 'Boule de feu', total: 34, sprite: 'special1', anim: [[0, 'windCast', 0.9], [6, 'cast', 1], [24, 'idle', 0.35]],
+        proj: { t: 9, kind: 'fire', vx: heavy ? 14 : 9.5, y: -128, w: 46, h: 40, dmg: 70, hs: 20, bs: 14, kb: 7, fx: 'fire' } });
+      const up = (heavy) => SP({ name: 'Comète ascendante', sprite: 'special2', total: 60, landRec: 10, inv: [0, 7], trail: true,
+        anim: [[0, 'windU', 0.9], [2, 'upper', 1]], imp: [3, heavy ? 4 : 2.5, heavy ? -20 : -16.5],
+        hits: [H(3, 14, [0, -225, 76, 170], heavy ? 130 : 105, { launch: [4, -13], bs: 18, kb: 8, fx: 'fire', sw: 'up', stop: 12 })] });
       m.s1l = fb(false); m.s1h = fb(true); m.s2l = up(false); m.s2h = up(true);
-      m.super = SU({ name: 'BRASIER FINAL', total: 74, sprite: 'special1', anim: [[0, 'charge', 0.5], [22, 'cast', 0.9], [58, 'idle', 0.2]],
-        proj: { t: 26, kind: 'superfire', vx: 13, y: -130, w: 120, h: 110, dmg: 62, hits: 5, hs: 24, bs: 16, kb: 9, fx: 'fire', launchLast: [8, -12] } });
+      m.super = SU({ name: 'BRASIER FINAL', total: 52, sprite: 'special1', anim: [[0, 'charge', 0.8], [8, 'cast', 1], [40, 'idle', 0.3]],
+        proj: { t: 11, kind: 'superfire', vx: 16, y: -130, w: 120, h: 110, dmg: 62, hits: 5, hs: 24, bs: 16, kb: 9, fx: 'fire', launchLast: [8, -12] } });
       return m;
     },
-    combos: [['Enchaînement de base', 'A  C  B  D'], ['Cible facile', 'A  A  B  ▸  ↓↘→ + A'], ['Lanceur', '↓+B  ▸  ↑ (saut)  ▸  A  C  D'], ['Fatal', 'C  B  ▸  ↓↘→ + B  ▸  B+D']],
+    combos: COMBOS,
     ai: { zoner: 0.5, antiAir: 's2h', ender: 's1h' },
   };
 
   /* ---------- RAPIDE : ruée + coups de pied tournoyants ---------- */
   T.fast = {
     label: 'Rapide', hint: 'Ruée éclair, cyclone de coups de pied',
-    stats: { hp: 900, speed: 4.3, jump: 18, power: 0.9 },
+    stats: { hp: 900, speed: 5.7, jump: 21, power: 0.9 },
     names: { s1: 'Éclair', s2: 'Cyclone', super: 'MILLE ÉCLAIRS' },
     element: 'elec',
     spriteDesc: {
@@ -80,32 +82,32 @@
     spriteRig: { special1: 'dashP', special2: 'spinK' },
     build() {
       const m = normals();
-      const da = (heavy) => SP({ name: 'Éclair', total: 42, trail: true, sprite: 'special1', anim: [[0, 'windP', 0.6], [6, 'dashP', 0.9], [28, 'idle', 0.2]],
-        vel: [[7, 18, heavy ? 19 : 14]],
-        hits: [H(8, 11, [5, -160, 90, 80], heavy ? 105 : 85, heavy ? { launch: [7, -8], bs: 16, kb: 10, fx: 'elec', stop: 11 } : { hs: 24, bs: 15, kb: 10, fx: 'elec' })] });
-      const sp = (heavy) => SP({ name: 'Cyclone', total: heavy ? 58 : 48, trail: true, sprite: 'special2',
-        anim: [[0, 'windK', 0.6], [6, 'spinK', 0.9], [13, 'spinK2', 1], [18, 'spinK', 1], [23, 'spinK2', 1], [28, 'spinK', 1], [33, 'spinK2', 1], [heavy ? 40 : 30, 'idle', 0.25]],
-        vel: [[6, heavy ? 38 : 28, 6]],
-        hits: (heavy ? [8, 18, 28] : [8, 18]).map((t, i, a) => H(t, 4, [-20, -175, 120, 80], 42,
+      const da = (heavy) => SP({ name: 'Éclair', total: 32, trail: true, sprite: 'special1', anim: [[0, 'windP', 0.9], [4, 'dashP', 1], [22, 'idle', 0.35]],
+        vel: [[4, 14, heavy ? 24 : 18]],
+        hits: [H(5, 10, [5, -160, 90, 80], heavy ? 105 : 85, heavy ? { launch: [7, -8], bs: 16, kb: 10, fx: 'elec', stop: 11 } : { hs: 24, bs: 15, kb: 10, fx: 'elec' })] });
+      const sp = (heavy) => SP({ name: 'Cyclone', total: heavy ? 40 : 32, trail: true, sprite: 'special2',
+        anim: [[0, 'windK', 0.9], [3, 'spinK', 1], [9, 'spinK2', 1], [12, 'spinK', 1], [16, 'spinK2', 1], [19, 'spinK', 1], [23, 'spinK2', 1], [heavy ? 27 : 20, 'idle', 0.35]],
+        vel: [[3, heavy ? 26 : 19, 8]],
+        hits: (heavy ? [5, 12, 19] : [5, 12]).map((t, i, a) => H(t, 4, [-20, -175, 120, 80], 42,
           i === a.length - 1 ? { launch: [5, -9.5], bs: 14, kb: 6, fx: 'kick', sw: 'side' } : { hs: 22, bs: 12, kb: 1, fx: 'kick', sw: 'side' })) });
       m.s1l = da(false); m.s1h = da(true); m.s2l = sp(false); m.s2h = sp(true);
       const hits = [];
-      for (let i = 0; i < 9; i++) hits.push(H(9 + i * 5, 3, [-10, -190, 130, 180], 30, { hs: 24, bs: 10, kb: 0, fx: 'elec', stop: 4 }));
-      hits.push(H(58, 5, [-10, -210, 130, 200], 90, { launch: [9, -15], bs: 18, kb: 12, fx: 'elec', stop: 16, sw: 'up' }));
-      const an = [[0, 'charge', 0.5], [5, 'dashP', 0.9]];
-      for (let i = 0; i < 9; i++) an.push([9 + i * 5, ['lp', 'hp', 'lk', 'hk'][i % 4], 0.9]);
-      an.push([54, 'windU', 0.8], [57, 'upper', 0.9], [74, 'idle', 0.2]);
-      m.super = SU({ name: 'MILLE ÉCLAIRS', total: 88, anim: an, vel: [[5, 12, 20]], hits });
+      for (let i = 0; i < 9; i++) hits.push(H(6 + i * 3, 3, [-10, -190, 130, 180], 30, { hs: 24, bs: 10, kb: 0, fx: 'elec', stop: 3 }));
+      hits.push(H(35, 5, [-10, -210, 130, 200], 90, { launch: [9, -17], bs: 18, kb: 12, fx: 'elec', stop: 14, sw: 'up' }));
+      const an = [[0, 'charge', 0.8], [3, 'dashP', 1]];
+      for (let i = 0; i < 9; i++) an.push([6 + i * 3, ['lp', 'hp', 'lk', 'hk'][i % 4], 1]);
+      an.push([33, 'windU', 1], [35, 'upper', 1], [50, 'idle', 0.3]);
+      m.super = SU({ name: 'MILLE ÉCLAIRS', total: 62, anim: an, vel: [[3, 9, 24]], hits });
       return m;
     },
-    combos: [['Enchaînement de base', 'A  C  B  D'], ['Rafale', 'A  A  C  B  ▸  ↓↙← + C'], ['Lanceur', '↓+B  ▸  ↑ (saut)  ▸  A  C  D'], ['Fatal', 'C  B  ▸  ↓↘→ + A  ▸  B+D']],
+    combos: COMBOS,
     ai: { zoner: 0, antiAir: 'chp', ender: 's2h' },
   };
 
   /* ---------- LOURD : onde de choc + charge ---------- */
   T.heavy = {
     label: 'Lourd', hint: 'Onde de choc au sol, charge blindée',
-    stats: { hp: 1150, speed: 2.9, jump: 16, power: 1.15 },
+    stats: { hp: 1150, speed: 3.9, jump: 19, power: 1.15 },
     names: { s1: 'Onde de choc', s2: 'Bélier', super: 'SÉISME' },
     element: 'earth',
     spriteDesc: {
@@ -116,25 +118,25 @@
     spriteRig: { special1: 'slam', special2: 'shoulder' },
     build() {
       const m = normals();
-      const wv = (heavy) => SP({ name: 'Onde de choc', total: 54, sprite: 'special1', anim: [[0, 'windSlam', 0.4], [14, 'slam', 0.9], [38, 'idle', 0.2]],
-        shakeAt: 17, proj: { t: 18, kind: 'wave', vx: heavy ? 8.5 : 6, y: -34, x: 60, w: 70, h: 68, dmg: 85, hs: 22, bs: 15, kb: 8, fx: 'earth', ground: true } });
-      const ch = (heavy) => SP({ name: 'Bélier', total: 52, trail: true, armor: [3, 24], sprite: 'special2', anim: [[0, 'windP', 0.5], [6, 'shoulder', 0.9], [32, 'idle', 0.2]],
-        vel: [[8, heavy ? 26 : 22, heavy ? 12 : 10]],
-        hits: [H(9, 16, [0, -175, 78, 140], heavy ? 145 : 120, { launch: [9, -9], bs: 20, kb: 12, fx: 'earth', stop: 13 })] });
+      const wv = (heavy) => SP({ name: 'Onde de choc', total: 40, sprite: 'special1', anim: [[0, 'windSlam', 0.8], [9, 'slam', 1], [28, 'idle', 0.35]],
+        shakeAt: 11, proj: { t: 12, kind: 'wave', vx: heavy ? 12 : 8.5, y: -34, x: 60, w: 70, h: 68, dmg: 85, hs: 22, bs: 15, kb: 8, fx: 'earth', ground: true } });
+      const ch = (heavy) => SP({ name: 'Bélier', total: 40, trail: true, armor: [2, 20], sprite: 'special2', anim: [[0, 'windP', 0.9], [4, 'shoulder', 1], [26, 'idle', 0.35]],
+        vel: [[5, heavy ? 20 : 17, heavy ? 16 : 13]],
+        hits: [H(6, 14, [0, -175, 78, 140], heavy ? 145 : 120, { launch: [9, -9], bs: 20, kb: 12, fx: 'earth', stop: 13 })] });
       m.s1l = wv(false); m.s1h = wv(true); m.s2l = ch(false); m.s2h = ch(true);
-      m.super = SU({ name: 'SÉISME', total: 84, sprite: 'special1', anim: [[0, 'charge', 0.5], [14, 'windSlam', 0.6], [24, 'slam', 0.95], [64, 'idle', 0.2]],
-        shakeAt: 27, hits: [H(27, 5, [-40, -210, 210, 210], 150, { launch: [3, -18], bs: 20, kb: 12, fx: 'earth', stop: 16, sw: 'down' })],
-        proj: { t: 28, kind: 'quake', vx: 12, y: -60, x: 110, w: 110, h: 120, dmg: 70, hits: 3, hs: 24, bs: 16, kb: 9, fx: 'earth', ground: true, launchLast: [5, -13] } });
+      m.super = SU({ name: 'SÉISME', total: 62, sprite: 'special1', anim: [[0, 'charge', 0.8], [5, 'windSlam', 0.9], [12, 'slam', 1], [46, 'idle', 0.3]],
+        shakeAt: 14, hits: [H(14, 5, [-40, -210, 210, 210], 150, { launch: [3, -18], bs: 20, kb: 12, fx: 'earth', stop: 16, sw: 'down' })],
+        proj: { t: 15, kind: 'quake', vx: 15, y: -60, x: 110, w: 110, h: 120, dmg: 70, hits: 3, hs: 24, bs: 16, kb: 9, fx: 'earth', ground: true, launchLast: [5, -13] } });
       return m;
     },
-    combos: [['Enchaînement de base', 'A  C  B  D'], ['Mur', 'C  B  ▸  ↓↙← + D'], ['Lanceur', '↓+B  ▸  ↑ (saut)  ▸  B  D'], ['Fatal', 'A  B  ▸  ↓↘→ + B  ▸  B+D']],
+    combos: COMBOS,
     ai: { zoner: 0.3, antiAir: 'chp', ender: 's2h' },
   };
 
   /* ---------- TECHNIQUE : lames + téléportation ---------- */
   T.tech = {
     label: 'Technique', hint: 'Lame à distance, téléportation plongeante',
-    stats: { hp: 950, speed: 3.9, jump: 18, power: 0.95 },
+    stats: { hp: 950, speed: 5.2, jump: 21, power: 0.95 },
     names: { s1: "Lame d'ombre", s2: 'Chute fantôme', super: 'NUIT SANS FIN' },
     element: 'slash',
     spriteDesc: {
@@ -145,20 +147,20 @@
     spriteRig: { special1: 'throwS', special2: 'diveK' },
     build() {
       const m = normals();
-      const bl = (heavy) => SP({ name: "Lame d'ombre", total: 36, sprite: 'special1', anim: [[0, 'windP', 0.6], [7, 'throwS', 0.9], [24, 'idle', 0.25]],
-        proj: { t: 9, kind: 'blade', vx: heavy ? 15 : 11, y: -130, w: 44, h: 34, dmg: 52, hs: 17, bs: 12, kb: 5, fx: 'slash' } });
-      const tp = (heavy) => SP({ name: 'Chute fantôme', total: 90, landRec: 12, inv: [0, 12], sprite: 'special2', trail: true,
-        anim: [[0, 'crouch', 0.6], [10, 'diveK', 1]], tele: { t: 10, mode: heavy ? 'behind' : 'front' }, vanish: [3, 10],
-        hits: [H(12, 40, [0, -70, 80, 90], 95, { hs: 24, bs: 14, kb: 7, fx: 'slash', lvl: 'high' })] });
+      const bl = (heavy) => SP({ name: "Lame d'ombre", total: 28, sprite: 'special1', anim: [[0, 'windP', 0.9], [5, 'throwS', 1], [18, 'idle', 0.35]],
+        proj: { t: 6, kind: 'blade', vx: heavy ? 19 : 14, y: -130, w: 44, h: 34, dmg: 52, hs: 17, bs: 12, kb: 5, fx: 'slash' } });
+      const tp = (heavy) => SP({ name: 'Chute fantôme', total: 90, landRec: 8, inv: [0, 9], sprite: 'special2', trail: true,
+        anim: [[0, 'crouch', 0.9], [7, 'diveK', 1]], tele: { t: 7, mode: heavy ? 'behind' : 'front' }, vanish: [2, 7],
+        hits: [H(9, 40, [0, -70, 80, 90], 95, { hs: 24, bs: 14, kb: 7, fx: 'slash', lvl: 'high' })] });
       m.s1l = bl(false); m.s1h = bl(true); m.s2l = tp(false); m.s2h = tp(true);
       const hits = [], an = [[0, 'charge', 0.5]];
-      for (let i = 0; i < 7; i++) { hits.push(H(14 + i * 6, 3, [-20, -200, 140, 190], 36, { hs: 26, bs: 10, kb: 0, fx: 'slash', stop: 5, sw: i % 2 ? 'up' : 'down' })); an.push([12 + i * 6, i % 2 ? 'slash2' : 'slash', 0.95]); }
-      hits.push(H(60, 5, [-20, -210, 150, 200], 95, { launch: [8, -14], bs: 18, kb: 12, fx: 'slash', stop: 16, sw: 'side' }));
-      an.push([57, 'hk', 0.9], [76, 'idle', 0.2]);
-      m.super = SU({ name: 'NUIT SANS FIN', total: 90, anim: an, tele: { t: 10, mode: 'near' }, vanish: [4, 10], inv: [0, 12], hits });
+      for (let i = 0; i < 7; i++) { hits.push(H(8 + i * 4, 3, [-20, -200, 140, 190], 36, { hs: 26, bs: 10, kb: 0, fx: 'slash', stop: 3, sw: i % 2 ? 'up' : 'down' })); an.push([7 + i * 4, i % 2 ? 'slash2' : 'slash', 1]); }
+      hits.push(H(38, 5, [-20, -210, 150, 200], 95, { launch: [8, -16], bs: 18, kb: 12, fx: 'slash', stop: 14, sw: 'side' }));
+      an.push([36, 'hk', 1], [52, 'idle', 0.3]);
+      m.super = SU({ name: 'NUIT SANS FIN', total: 64, anim: an, tele: { t: 5, mode: 'near' }, vanish: [2, 5], inv: [0, 8], hits });
       return m;
     },
-    combos: [['Enchaînement de base', 'A  C  B  D'], ['Tranchant', 'A  C  B  ▸  ↓↘→ + B'], ['Lanceur', '↓+B  ▸  ↑ (saut)  ▸  A  C  D'], ['Fatal', 'C  B  ▸  ↓↙← + C  ▸  B+D']],
+    combos: COMBOS,
     ai: { zoner: 0.45, antiAir: 'chp', ender: 's1h' },
   };
   for (const k in T) { T[k].id = k; T[k].moves = T[k].build(); for (const n in T[k].moves) T[k].moves[n].id = n; }

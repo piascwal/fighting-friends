@@ -57,7 +57,7 @@
           case 'smoke': ctx.globalAlpha = a * 0.7; ctx.fillStyle = o.col; ctx.beginPath(); ctx.arc(o.x, o.y, o.size * (0.6 + k), 0, 7); ctx.fill(); break;
           case 'rock': ctx.globalAlpha = Math.min(1, a * 3); ctx.translate(o.x, o.y); ctx.rotate(o.rot + o.t * 0.3); ctx.fillStyle = o.col; ctx.fillRect(-o.size / 2, -o.size / 2, o.size, o.size * 0.7); break;
           case 'bolt': {
-            ctx.globalAlpha = a; ctx.translate(o.x, o.y); ctx.rotate(o.rot); ctx.strokeStyle = o.col; ctx.lineWidth = 3; ctx.shadowColor = '#4cf'; ctx.shadowBlur = 10; ctx.beginPath(); ctx.moveTo(-o.size / 2, 0);
+            ctx.globalAlpha = a; ctx.translate(o.x, o.y); ctx.rotate(o.rot); ctx.strokeStyle = o.col; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-o.size / 2, 0);
             for (let i = 1; i <= 6; i++) ctx.lineTo(-o.size / 2 + (o.size * i) / 6, Math.sin(o.seed + i * 7.3 + o.t) * 12); ctx.stroke(); break;
           }
           case 'cut': {

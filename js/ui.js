@@ -199,7 +199,7 @@
     const row = (a, b) => `<tr><td>${a}</td><td>${b}</td></tr>`;
     $('#mvBody').innerHTML = `
       <h3>Commandes</h3><table>
-      ${row('Tactile', `Joystick à gauche (apparaît sous ton pouce) · boutons ${A} ${B} ${C} ${D} à droite. Pose ton pouce <b>entre deux boutons</b> pour appuyer sur les deux.`)}
+      ${row('Tactile', `Joystick à gauche (apparaît sous ton pouce) · boutons ${A} ${B} ${C} ${D} à droite. Un seul bouton à la fois suffit pour tout faire.`)}
       ${row('Clavier (1 joueur)', `Déplacement ${k('Z Q S D')} / ${k('W A S D')} ou flèches · ${A} ${k('U')} ${B} ${k('I')} ${C} ${k('J')} ${D} ${k('K')} · pause ${k('Échap')}`)}
       ${row('Clavier (2 joueurs)', `J1 : ${k('ZQSD')} + ${k('F')} ${k('G')} ${k('V')} ${k('B')} — J2 : flèches + ${k('O')} ${k('P')} ${k('L')} ${k('M / ;')}`)}
       ${row('Manette', 'Croix ou stick · X/Y = poings · A/B = pieds · Start = pause')}</table>
@@ -211,10 +211,10 @@
       ${row(`↓ + ${B}`, 'Uppercut : <b>lance l\'adversaire en l\'air</b>. Maintiens ↑ pour le suivre et continuer le combo.')}
       ${row(`↓ + ${D}`, 'Balayette : fait tomber')}${row(`→ + ${B}`, 'Marteau : touche les adversaires accroupis en garde')}</table>
       <h3>Coups spéciaux de ${esc(c.name)}</h3><table>
-      ${row(`<b>↓ ↘ →</b> + ${A} ou ${B} &nbsp;<span class="or">ou</span>&nbsp; ${A}+${B} ensemble`, `<b>${esc(n.s1)}</b>`)}
-      ${row(`<b>↓ ↙ ←</b> + ${C} ou ${D} &nbsp;<span class="or">ou</span>&nbsp; ${C}+${D} ensemble`, `<b>${esc(n.s2)}</b>`)}
-      ${row(`<b>↓ ↘ → ↓ ↘ →</b> + ${A}/${B} &nbsp;<span class="or">ou</span>&nbsp; ${B}+${D} ensemble`, `<b class="sup">${esc(n.super)}</b> — jauge SUPER pleine`)}</table>
-      <h3>Combos</h3><p class="note">Règle d'or : quand un coup <b>touche</b>, tu peux l'annuler par un coup plus fort : léger ▸ fort ▸ spécial ▸ SUPER. Appuie sur le bouton suivant dès l'impact.</p><table>
+      ${row(`<b>↓ ↘ →</b> + ${A} ou ${B} &nbsp;<span class="or">ou en combo</span>&nbsp; ${B} puis ${B}`, `<b>${esc(n.s1)}</b>`)}
+      ${row(`<b>↓ ↙ ←</b> + ${C} ou ${D} &nbsp;<span class="or">ou en combo</span>&nbsp; ${D} puis ${D}`, `<b>${esc(n.s2)}</b>`)}
+      ${row(`<b>↓ ↓</b> + ${A}/${B} &nbsp;<span class="or">ou en combo</span>&nbsp; encore ${B} ou ${D} après un coup spécial`, `<b class="sup">${esc(n.super)}</b> — jauge SUPER pleine`)}</table>
+      <h3>Combos</h3><p class="note">Règle d'or : quand un coup <b>touche</b>, appuie tout de suite sur un autre bouton : les 4 boutons s'enchaînent dans l'ordre que tu veux (une fois chacun, les légers jusqu'à 3 fois). Rappuyer sur le <b>même bouton fort</b> déclenche le coup spécial, et une 3ᵉ fois le SUPER si la jauge est pleine.</p><table>
       ${c.tpl.combos.map((x) => row(esc(x[0]), esc(x[1]).replace(/\bA\b/g, A).replace(/\bB\b/g, B).replace(/\bC\b/g, C).replace(/\bD\b/g, D))).join('')}</table>`;
   }
 

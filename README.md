@@ -11,10 +11,10 @@ ou utiliser la version déployée sur GitHub Pages.
 
 | | |
 |---|---|
-| Tactile | joystick à gauche, boutons A B C D à droite (un pouce posé entre deux boutons appuie sur les deux) |
+| Tactile | joystick à gauche, boutons A B C D à droite, un seul bouton à la fois |
 | Clavier | ZQSD / WASD / flèches, A=`U` B=`I` C=`J` D=`K`, pause `Échap` |
-| Spéciaux | `↓↘→` + poing (ou A+B), `↓↙←` + pied (ou C+D), super : B+D quand la jauge est pleine |
-| Combos | un coup qui touche s'annule par un coup plus fort : léger ▸ fort ▸ spécial ▸ super |
+| Spéciaux | `↓↘→` + poing, `↓↙←` + pied, super : `↓↓` + poing quand la jauge est pleine |
+| Combos | quand un coup touche, les 4 boutons s'enchaînent librement ; le même bouton fort deux fois = spécial (B B, D D), une 3ᵉ fois = super |
 
 La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**.
 

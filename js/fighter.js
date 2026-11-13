@@ -1,7 +1,7 @@
 /* Combattant : machine à états, tampon d'entrées, manipulations (quarts de cercle), annulations/combos */
 (function () {
   const FF = window.FF, Rig = FF.Rig, P = FF.POSES;
-  const BUF = 9;          // frames pendant lesquelles un appui reste en mémoire
+  const BUF = 12;         // frames pendant lesquelles un appui reste en mémoire
   const HIT_STATES = { hitstun: 1, airhit: 1 };
 
   class Fighter {
@@ -15,7 +15,7 @@
     reset(x, facing) {
       Object.assign(this, { x, y: 0, vx: 0, vy: 0, facing, hp: this.maxHp, hpLag: this.maxHp, state: 'neutral', t: 0, ft: 0, move: null,
         crouching: false, combo: 0, comboDmg: 0, juggle: 0, stun: 0, now: 0, dirHist: [{ d: 5, f: 0 }], btnBuf: [], dashReq: 0, trail: [],
-        flash: 0, shake: 0, airAtk: 0, chain: 0, visible: true, connected: false, walkPh: 0, guard: false, dur: 0, hitDone: {}, armorLeft: 0 });
+        flash: 0, shake: 0, airAtk: 0, chain: 0, visible: true, connected: false, walkPh: 0, guard: false, dur: 0, hitDone: {}, armorLeft: 0, clk: 0, used: {}, cmd: null });
       this.setPose('idle', 1); Rig.approach(this.pose, P.idle, 1);
     }
     get grounded() { return this.y >= 0; }
@@ -33,9 +33,9 @@
         const n = h.length;
         if ((d === 6 || d === 4) && n >= 3 && h[n - 2].d === 5 && h[n - 3].d === d && this.now - h[n - 2].f <= 9 && h[n - 2].f - h[n - 3].f <= 14) this.dashReq = d === 6 ? 1 : -1, this.dashF = this.now;
       }
-      for (const b of c.pressed) this.btnBuf.push({ b, f: this.now });
+      for (const b of c.pressed) this.btnBuf.push({ b, f: this.now, c: this.clk });
       if (this.btnBuf.length > 12) this.btnBuf.splice(0, this.btnBuf.length - 12);
-      if (c.cmds.length) { this.cmd = { m: c.cmds[c.cmds.length - 1], f: this.now }; c.cmds.length = 0; }
+      if (c.cmds.length) { this.cmd = { m: c.cmds[c.cmds.length - 1], c: this.clk }; c.cmds.length = 0; }
       if (this.dashReq && this.now - this.dashF > 6) this.dashReq = 0;
     }
     // la suite de directions a-t-elle été faite juste avant l'appui ? (ex. [2,6] = quart de cercle avant)
@@ -51,21 +51,25 @@
       }
       return need < 0;
     }
-    decide(set, e) {
-      const air = !this.grounded, Pn = set.lp || set.hp, K = set.lk || set.hk;
-      if (!air) {
-        if (this.meter >= 100 && ((set.hp && set.hk) || (Pn && this.motion([2, 6, 2, 6], e.f)))) return 'super';
-        const tryS = (id) => (this.canStart(id) ? id : null);
-        let s = null;
-        if (set.lp && set.hp) s = tryS('s1h'); else if (set.lk && set.hk) s = tryS('s2h');
-        else if (Pn && this.motion([2, 6], e.f)) s = tryS(set.hp ? 's1h' : 's1l');
-        else if (K && this.motion([2, 4], e.f)) s = tryS(set.hk ? 's2h' : 's2l');
-        if (s) return s;
-        if (this.ctrl.y > 0) return 'c' + e.b;
-        if (e.b === 'hp' && this.ctrl.x * this.facing > 0) return 'fhp';
-        return e.b;
+    /* Quel coup pour cet appui ? Un seul bouton à la fois :
+       - manipulation + bouton (quart de cercle, ↓↓) ;
+       - ou "même bouton fort deux fois" en combo : B puis B = spécial 1, D puis D = spécial 2,
+         puis encore B ou D = SUPER si la jauge est pleine. */
+    decide(e) {
+      const b = e.b, air = !this.grounded, punch = b === 'lp' || b === 'hp', heavy = b === 'hp' || b === 'hk';
+      if (air) return 'j' + b;
+      const cur = this.state === 'attack' ? this.move : null, ok = (id) => (this.canStart(id) ? id : null);
+      if (this.meter >= 100 && punch && (this.motion([2, 6, 2, 6], e.f) || this.motion([2, 3, 2, 3], e.f) || this.motion([2, 5, 2], e.f))) return 'super';
+      if (cur && this.connected) {
+        if (heavy && cur.rank === 10 && this.meter >= 100) return 'super';
+        if (b === 'hp' && (cur.id === 'hp' || cur.id === 'fhp')) { const s = ok('s1h'); if (s) return s; }
+        if (b === 'hk' && (cur.id === 'hk' || cur.id === 'chk')) { const s = ok('s2h'); if (s) return s; }
       }
-      return 'j' + e.b;
+      if (punch && (this.motion([2, 6], e.f) || this.motion([2, 3], e.f))) { const s = ok(b === 'hp' ? 's1h' : 's1l'); if (s) return s; }
+      if (!punch && (this.motion([2, 4], e.f) || this.motion([2, 1], e.f))) { const s = ok(b === 'hk' ? 's2h' : 's2l'); if (s) return s; }
+      if (this.ctrl.y > 0) return 'c' + b;
+      if (b === 'hp' && this.ctrl.x * this.facing > 0 && !cur) return 'fhp';
+      return b;
     }
     canStart(id) {
       const m = this.moves[id]; if (!m) return false;
@@ -73,37 +77,37 @@
       if (m.proj && this.w && this.w.hasProj(this)) return false;
       const air = !this.grounded; if (!!m.air !== air) return false;
       const S = this.state;
-      if (S === 'neutral' || (S === 'dash' && this.dashDir > 0 && this.t >= 3)) return true;
-      if (S === 'air') return this.airAtk < 3;
+      if (S === 'neutral' || (S === 'dash' && this.dashDir > 0 && this.t >= 2)) return true;
+      if (S === 'air') return this.airAtk < 4;
       if (S === 'attack') {
         const cur = this.move;
-        if (cur.rank < 10 && m.rank >= 10 && this.t <= 4) return true;          // appui "presque simultané" de 2 boutons
-        if (!this.connected || cur.rank >= 20) return false;                       // on n'annule que si le coup a touché
-        if (m.rank > cur.rank) return true;
-        return m.rank === 1 && cur.rank === 1 && this.chain < 2;
+        if (!this.connected || cur.rank >= 20) return false;      // on n'enchaîne que si le coup a touché (ou a été bloqué)
+        if (m.rank > cur.rank && m.rank >= 10) return true;        // normal ▸ spécial ▸ super
+        if (cur.rank >= 10) return false;
+        if (m.id === cur.id) return m.rank <= 2 && this.chain < 2; // coups légers répétables (A A A)
+        return !this.used[m.id];                                    // chaque coup normal une fois par enchaînement, dans n'importe quel ordre
       }
       return false;
     }
     tryAttack() {
-      if (this.cmd && this.now - this.cmd.f <= 12) {
+      if (this.cmd && this.clk - this.cmd.c <= 12) {
         const id = this.cmd.m;
         if (id === 'dashF' || id === 'dashB') { if (this.state === 'neutral') { this.dashDir = id === 'dashF' ? 1 : -1; this.cmd = null; this.setState('dash'); return true; } }
         else if (this.canStart(id)) { this.cmd = null; this.startMove(id); return true; }
       }
       const bb = this.btnBuf; let e = null;
-      for (let i = bb.length - 1; i >= 0; i--) if (!bb[i].used && this.now - bb[i].f <= BUF) { e = bb[i]; break; }
+      for (let i = bb.length - 1; i >= 0; i--) if (!bb[i].used && this.clk - bb[i].c <= BUF) { e = bb[i]; break; }
       if (!e) return false;
-      const set = {}, grp = [];
-      for (const o of bb) if (!o.used && Math.abs(o.f - e.f) <= 3) { set[o.b] = true; grp.push(o); }
-      for (const b in this.ctrl.held) if (this.ctrl.held[b] && this.state === 'attack' && this.t <= 4) set[b] = true;
-      const id = this.decide(set, e);
-      if (id && this.canStart(id)) { grp.forEach((o) => (o.used = true)); this.startMove(id); return true; }
+      const id = this.decide(e);
+      if (id && this.canStart(id)) { for (const o of bb) if (o.c <= e.c) o.used = true; this.startMove(id); return true; }
       return false;
     }
     startMove(id) {
       const m = this.moves[id], prev = this.move;
       if (this.grounded && this.state !== 'attack') this.faceOpp();
-      this.chain = prev && prev.rank === 1 && m.rank === 1 ? this.chain + 1 : 0;
+      const chaining = this.state === 'attack';
+      this.chain = chaining && prev && prev.id === m.id ? this.chain + 1 : 0;
+      if (!chaining) this.used = {}; this.used[m.id] = true;
       this.state = 'attack'; this.move = m; this.t = 0; this.hitDone = {}; this.connected = false; this.visible = true;
       this.armorLeft = m.armor ? 1 : 0; this.crouching = !!m.low;
       if (m.cost) this.meter -= m.cost;
@@ -122,13 +126,13 @@
 
     /* ---------- une frame de logique ---------- */
     update(opp) {
-      this.opp = opp; this.ft = this.t; if (this.flash > 0) this.flash--;
+      this.opp = opp; this.ft = this.t; this.clk++; if (this.flash > 0) this.flash--;
       this.guard = false;
       this['s_' + this.state]();
       this.t++;
       this.x += this.vx;
       if (this.y < 0 || this.vy < 0) {
-        this.vy += this.state === 'airhit' ? 0.85 + 0.1 * this.juggle : 0.9; this.y += this.vy;
+        this.vy += this.state === 'airhit' ? 0.95 + 0.09 * this.juggle : 1.15; this.y += this.vy;
         if (this.y >= 0) { this.y = 0; this.vy = 0; this.land(); }
       }
       this.x = FF.clamp(this.x, 40, FF.STAGE_W - 40);
@@ -152,10 +156,10 @@
       this.guard = rx < 0 && o && (o.state === 'attack' && Math.abs(o.x - this.x) < 300 || this.w.projNear(this));
       if (c.y > 0) { this.crouching = true; this.vx = 0; }
       else { this.crouching = false; this.vx = this.guard ? 0 : rx > 0 ? this.st.speed * this.facing : rx < 0 ? -this.st.speed * 0.8 * this.facing : 0; }
-      if (this.vx) this.walkPh += 0.21 * rx;
+      if (this.vx) this.walkPh += 0.27 * rx;
     }
     s_jumpsquat() {
-      if (this.t >= 3) { this.vy = -this.st.jump; this.vx = this.jumpDir * this.st.speed * 1.2; this.y = -1; this.airAtk = 0; this.setState('air'); this.setPose('jump', 0.4); FF.Audio.play('jump'); this.w.fx.dust(this.x, FF.GROUND, 0, 4); }
+      if (this.t >= 2) { this.vy = -this.st.jump; this.vx = this.jumpDir * this.st.speed * 1.1; this.y = -1; this.airAtk = 0; this.setState('air'); this.setPose('jump', 0.4); FF.Audio.play('jump'); this.w.fx.dust(this.x, FF.GROUND, 0, 4); }
     }
     s_air() { this.tryAttack(); }
     s_recover() { if (this.t >= this.dur) this.setState('neutral'); }
@@ -177,14 +181,14 @@
     s_hitstun() { this.vx *= 0.8; if (this.t >= this.stun) { this.vx = 0; this.setState('neutral'); } }
     s_blockstun() { this.vx *= 0.86; if (this.t >= this.stun) { this.vx = 0; this.setState('neutral'); } }
     s_airhit() {}
-    s_down() { this.vx *= 0.8; if (this.hp > 0 && this.t >= 34 && !this.w.roundOver) { this.setState('getup'); this.setPose('getup', 0.35); } }
-    s_getup() { this.vx = 0; if (this.t >= 16) this.setState('neutral'); }
+    s_down() { this.vx *= 0.8; if (this.hp > 0 && this.t >= 24 && !this.w.roundOver) { this.setState('getup'); this.setPose('getup', 0.35); } }
+    s_getup() { this.vx = 0; if (this.t >= 11) this.setState('neutral'); }
     s_dash() {
       const fwd = this.dashDir > 0, sp = this.st.speed;
       if (this.t === 0) { this.setPose(fwd ? 'dashF' : 'dashB', 0.6); this.w.fx.dust(this.x, FF.GROUND, this.facing * this.dashDir, 6); FF.Audio.play('whoosh'); }
-      this.vx = this.facing * this.dashDir * (this.t < 10 ? sp * (fwd ? 2.8 : 2.6) : sp);
-      if (fwd && this.t >= 3 && this.tryAttack()) return;
-      if (this.t >= (fwd ? 14 : 16)) { this.vx = 0; this.setState('neutral'); }
+      this.vx = this.facing * this.dashDir * (this.t < 9 ? sp * (fwd ? 2.5 : 2.3) : sp);
+      if (fwd && this.t >= 2 && this.tryAttack()) return;
+      if (this.t >= (fwd ? 12 : 14)) { this.vx = 0; this.setState('neutral'); }
     }
     s_lock() { this.vx *= 0.8; }
 

@@ -69,12 +69,11 @@
     const a = Math.atan2(dy, dx), oct = Math.round(a / (Math.PI / 4));
     touch.x = [1, 1, 0, -1, -1, -1, 0, 1, 1][(oct + 8) % 8]; touch.y = [0, 1, 1, 1, 0, -1, -1, -1, 0][(oct + 8) % 8];
   }
-  // un doigt posé entre deux boutons appuie sur les deux (pour les combinaisons A+B, C+D, B+D)
+  // un doigt = un seul bouton (le plus proche), avec une zone généreuse autour
   function buttonsAt(px, py) {
-    const out = []; let best = null, bd = 1e9;
-    for (const b of BTN) { const d = Math.hypot(px - geo.pos[b][0], py - geo.pos[b][1]); if (d < geo.R * 1.2) out.push(b); if (d < bd) { bd = d; best = b; } }
-    if (!out.length && bd < geo.R * 2.1) out.push(best);
-    return out;
+    let best = null, bd = 1e9;
+    for (const b of BTN) { const d = Math.hypot(px - geo.pos[b][0], py - geo.pos[b][1]); if (d < bd) { bd = d; best = b; } }
+    return bd < geo.R * 2.2 ? [best] : [];
   }
   function refreshButtons() {
     const now = {};

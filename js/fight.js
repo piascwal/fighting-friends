@@ -32,7 +32,7 @@
       FF.Audio.play(d.fx === 'slash' ? 'slash' : d.fx === 'earth' ? 'earth' : 'fire');
     }
     superFlash(f, m) {
-      this.superFreeze = 46; this.superBy = f; this.superName = m.name; this.flashA = 0.7; this.shake(8);
+      this.superFreeze = 30; this.superBy = f; this.superName = m.name; this.flashA = 0.7; this.shake(8);
       FF.Rig.approach(f.pose, f.target, 1);
     }
 
@@ -122,13 +122,13 @@
     onHit(a, d, h, res, x, y, dir) {
       const big = h.dmg >= 60;
       if (res === 'hit') {
-        this.fx.hit(x, y, h.fx, h.dmg, dir); this.hitstop = h.stop || (big ? 9 : 6); d.shake = 1;
+        this.fx.hit(x, y, h.fx, h.dmg, dir); this.hitstop = h.stop || (big ? 7 : 4); d.shake = 1;
         if (big) this.shake(h.dmg >= 100 ? 11 : 6); if (h.launch) this.flashA = Math.max(this.flashA, 0.25);
         FF.Audio.play({ fire: 'fire', elec: 'elec', earth: 'earth', slash: 'slash' }[h.fx] || (big ? 'hitH' : 'hitL')); if (big && h.fx !== 'heavy') FF.Audio.play('hitH');
         a.meter = Math.min(100, a.meter + d.lastDmg * 0.13); d.meter = Math.min(100, d.meter + d.lastDmg * 0.06);
         if (a.combo >= 2) this.cshow[a.idx] = { n: a.combo, dmg: a.comboDmg, t: 70, pop: 8 };
       } else if (res === 'block') {
-        this.fx.block(x, y); this.hitstop = 5; FF.Audio.play('block'); a.meter = Math.min(100, a.meter + 2); d.meter = Math.min(100, d.meter + 2);
+        this.fx.block(x, y); this.hitstop = 3; FF.Audio.play('block'); a.meter = Math.min(100, a.meter + 2); d.meter = Math.min(100, d.meter + 2);
       } else { this.fx.block(x, y); this.fx.hit(x, y, 'earth', 30, dir); this.hitstop = 8; FF.Audio.play('hitH'); }
     }
     updateProjs() {
@@ -160,7 +160,7 @@
       if (e) { const k = (d.h * 1.9 * s) / e.h * e.adj.s; ctx.drawImage(e.img, -e.w * k * 0.6, -e.h * k / 2 + (d.ground ? -d.h * 0.3 : 0), e.w * k, e.h * k); ctx.restore(); return; }
       const w = d.w * s, h = d.h * s, pul = 1 + Math.sin(t * 0.7) * 0.08;
       if (d.fx === 'fire') {
-        ctx.shadowColor = '#ff5a1f'; ctx.shadowBlur = 24;
+        
         ctx.fillStyle = '#ff5a1f'; ctx.beginPath(); ctx.moveTo(w * 0.5, 0); ctx.quadraticCurveTo(w * 0.3, -h * 0.62 * pul, -w * 0.3, -h * 0.4); ctx.quadraticCurveTo(-w * 1.5, 0, -w * 0.3, h * 0.4); ctx.quadraticCurveTo(w * 0.3, h * 0.62 * pul, w * 0.5, 0); ctx.fill();
         ctx.fillStyle = '#ffd23a'; ctx.beginPath(); ctx.ellipse(w * 0.05, 0, w * 0.4, h * 0.4 * pul, 0, 0, 7); ctx.fill();
         ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(w * 0.12, 0, w * 0.22, h * 0.22, 0, 0, 7); ctx.fill();
@@ -170,7 +170,7 @@
         ctx.lineTo(w * 0.9, h * 0.5); ctx.closePath(); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#ffd98a'; ctx.globalAlpha = 0.6; ctx.fillRect(-w * 0.9, h * 0.42, w * 1.8, 6);
       } else {
-        ctx.rotate(t * 0.5); ctx.shadowColor = '#a25bff'; ctx.shadowBlur = 18;
+        ctx.rotate(t * 0.5);
         for (let i = 0; i < 2; i++) { ctx.rotate(Math.PI); ctx.fillStyle = i ? '#e9d5ff' : '#8a3bff'; ctx.beginPath(); ctx.moveTo(-w * 0.55, 0); ctx.quadraticCurveTo(0, -h * 0.9, w * 0.55, 0); ctx.quadraticCurveTo(0, -h * 0.3, -w * 0.55, 0); ctx.fill(); }
       }
       ctx.restore();
@@ -182,7 +182,7 @@
       FF.drawStage(ctx, this.stage, cam, this.tick);
       ctx.translate(-cam, 0);
       if (this.superFreeze > 0) {
-        const s = this.superBy, k = this.superFreeze / 46;
+        const s = this.superBy, k = this.superFreeze / 30;
         ctx.fillStyle = 'rgba(4,2,18,.72)'; ctx.fillRect(cam - 20, -20, W + 40, H + 40);
         ctx.save(); ctx.translate(s.x, G - 110); ctx.strokeStyle = FF.rgba(s.c.color, 0.7); ctx.lineWidth = 3;
         for (let i = 0; i < 40; i++) { const an = i * 0.157 + this.tick * 0.02, r0 = 110 + ((i * 37 + this.tick * 14) % 200); ctx.beginPath(); ctx.moveTo(Math.cos(an) * r0, Math.sin(an) * r0); ctx.lineTo(Math.cos(an) * (r0 + 120), Math.sin(an) * (r0 + 120)); ctx.stroke(); }
@@ -196,7 +196,7 @@
       if (FF.settings.hitboxes && !o.attract) this.drawBoxes(ctx);
       ctx.restore();
       if (!o.attract) this.drawHUD(ctx);
-      if (this.superFreeze > 0) { const k = FF.easeOut((46 - this.superFreeze) / 10); T(ctx, this.superName, W / 2, 150, 68, { scale: 0.6 + 0.4 * k, colors: ['#fff', '#ffe27a', this.superBy.c.color], glow: this.superBy.c.color }); }
+      if (this.superFreeze > 0) { const k = FF.easeOut((30 - this.superFreeze) / 8); T(ctx, this.superName, W / 2, 150, 68, { scale: 0.6 + 0.4 * k, colors: ['#fff', '#ffe27a', this.superBy.c.color], glow: this.superBy.c.color }); }
       for (const bn of this.banners) {
         const k = FF.easeBack(bn.t / 9), out = FF.clamp((bn.dur - bn.t) / 8, 0, 1);
         T(ctx, bn.txt, W / 2, bn.y, bn.size, { scale: (0.3 + 0.7 * k) * (1 + (1 - out) * 0.5), alpha: out, colors: bn.colors });
@@ -236,7 +236,7 @@
         ctx.restore();
         ctx.save(); ctx.font = `900 26px ${FF.FONT}`; const nw = ctx.measureText(f.c.name).width; ctx.restore();
         T(ctx, f.c.name, i ? W - 104 : 104, y + 44, 26, { align: i ? 'right' : 'left', colors: ['#fff', '#fff', '#ddd'], scale: Math.min(1, 118 / nw) });
-        T(ctx, full ? 'SUPER ! B+D' : 'SUPER', i ? W - 36 - mx - mw / 2 : 36 + mx + mw / 2, y + my + 6.5, full ? 13 : 12, { colors: full ? ['#140a1e', '#140a1e', '#140a1e'] : ['#fff', '#eee', '#ccc'], stroke: full ? 'rgba(255,255,255,.9)' : '#140a1e' });
+        T(ctx, full ? 'SUPER PRÊT !' : 'SUPER', i ? W - 36 - mx - mw / 2 : 36 + mx + mw / 2, y + my + 6.5, full ? 13 : 12, { colors: full ? ['#140a1e', '#140a1e', '#140a1e'] : ['#fff', '#eee', '#ccc'], stroke: full ? 'rgba(255,255,255,.9)' : '#140a1e' });
         // compteur de combo
         const c = this.cshow[i];
         if (c) {
