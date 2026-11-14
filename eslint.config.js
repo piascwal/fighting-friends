@@ -86,9 +86,16 @@ export default tseslint.config(
     },
   },
   {
-    // service worker : JavaScript simple chargé tel quel par le navigateur (voir public/sw.js)
-    files: ['public/sw.js'],
-    languageOptions: { globals: globals.serviceworker },
+    // service worker : modèle en JavaScript simple, complété à la construction (voir vite.config.ts)
+    files: ['scripts/sw-template.js'],
+    languageOptions: {
+      globals: { ...globals.serviceworker, __VERSION__: 'readonly', __FILES__: 'readonly' },
+    },
+  },
+  {
+    // filet de sécurité chargé avant le jeu, hors du paquet (voir index.html)
+    files: ['public/rescue.js'],
+    languageOptions: { globals: globals.browser },
   },
   {
     files: ['tests/**/*.ts'],

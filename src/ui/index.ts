@@ -15,6 +15,7 @@ export type { GameMode, UiActions } from './actions';
 export { showResult } from './menus';
 export { currentScreen, hideScreens, showScreen } from './screens';
 export { openSelect } from './select';
+export { checkForUpdate } from './update-banner';
 
 const MOVE_KEYS: Record<string, number> = {
   ArrowDown: 1,

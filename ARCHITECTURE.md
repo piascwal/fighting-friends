@@ -104,7 +104,7 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
 | Ajouter un son                                                   | `core/sfx.ts` (son nom) puis `audio/sounds.ts` (sa recette)                                                                         |
 | Ajouter un décor dessiné par le jeu                              | `render/stage-painters.ts` (un décor par personnage, lui, est une image importée)                                                   |
 | Changer l'icône, le nom ou l'orientation de l'application        | `public/manifest.webmanifest` et `public/icons/`                                                                                    |
-| Changer ce qui marche hors ligne                                 | `public/sw.js` (service worker)                                                                                                     |
+| Changer ce qui marche hors ligne                                 | `scripts/sw-template.js` (modèle du service worker)                                                                                 |
 | Changer la compression des images                                | `assets/image-codec.ts`                                                                                                             |
 | Changer la reprise d'un personnage local par sa version du dépôt | `assets/repo-characters.ts`                                                                                                         |
 | Ajouter un écran de menu                                         | un fichier dans `ui/`, branché dans `ui/index.ts`                                                                                   |
@@ -116,9 +116,18 @@ Le jeu est une application web installable, qui se lance en plein écran à l'ho
 
 - `public/manifest.webmanifest` décrit l'application : nom, icônes, `display: fullscreen`,
   `orientation: landscape`.
-- `public/sw.js` est le service worker. C'est le seul fichier en JavaScript : le navigateur le charge tel
-  quel, sans passer par Vite. Il n'a **pas de numéro de version à tenir à jour** : les pages sont chargées
-  réseau d'abord, et les fichiers de Vite portent un hash dans leur nom.
+- **Mises à jour sans problème de cache** (même mécanisme que dkk-rock) :
+  - chaque déploiement porte un numéro de version (`majeur.mineur` de package.json + numéro d'exécution de la
+    CI), publié dans `version.json` et affiché sur l'écran titre ;
+  - le service worker est **généré à la construction** (`scripts/sw-template.js`, rempli par `vite.config.ts`)
+    avec cette version et la liste complète des fichiers : chaque version a son propre cache, rempli d'un coup,
+    donc une page ne mélange jamais deux versions. La page et `version.json` passent par le réseau d'abord,
+    le reste vient du cache (jouable hors ligne) ;
+  - à l'ouverture et à chaque retour dans l'application (une fois par minute au plus), le jeu compare sa
+    version à `version.json` (`core/version.ts`). Sur l'écran titre ou le menu, il se recharge tout seul ;
+    ailleurs (combat en cours…), un bandeau propose de recharger (`ui/update-banner.ts`) ;
+  - filet de sécurité `public/rescue.js` : si le jeu n'a pas démarré au bout de 6 s (page d'une version
+    effacée), il vide le cache et recharge, une seule fois.
 - `core/display.ts` gère plein écran et verrouillage de l'orientation ; `core/pwa.ts` l'enregistrement du
   service worker et la proposition d'installation.
 - Le jeu ne se joue qu'à l'horizontale : à la verticale sur téléphone, un message recouvre tout et le

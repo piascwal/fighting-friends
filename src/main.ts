@@ -9,7 +9,7 @@ import { isPortrait, isTouchDevice } from './core/display';
 import { registerServiceWorker } from './core/pwa';
 import { gameState } from './game';
 import { input } from './input';
-import { currentScreen, initUi, openCharactersShortcut, tickUi } from './ui';
+import { checkForUpdate, currentScreen, initUi, openCharactersShortcut, tickUi } from './ui';
 
 const canvas = document.getElementById('cv') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -89,9 +89,14 @@ async function boot(): Promise<void> {
   window.addEventListener('pageshow', () => setBackground(document.hidden));
   document.addEventListener('visibilitychange', () => {
     setBackground(document.hidden);
+    if (!document.hidden) checkForUpdate();
     if (document.hidden && !gameState.paused) gameState.togglePause();
   });
   requestAnimationFrame(frame);
+  // le jeu a démarré : le filet de sécurité (public/rescue.js) n'a rien à faire
+  document.documentElement.dataset.started = '1';
+  // une version plus récente a-t-elle été publiée ? (à l'ouverture, puis à chaque retour dans l'application)
+  checkForUpdate();
 }
 
 registerServiceWorker();

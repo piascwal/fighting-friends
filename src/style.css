@@ -1061,3 +1061,49 @@ i.b {
   -webkit-user-select: text;
   user-select: text;
 }
+
+/* numéro de version, discret, sur l'écran titre */
+.version {
+  position: absolute;
+  top: max(8px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  font-size: 10px;
+  opacity: 0.45;
+}
+
+/* bandeau « nouvelle version disponible » */
+#update {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 20px);
+  padding: 8px 12px;
+  border: 2px solid var(--y);
+  border-radius: 10px;
+  background: rgba(10, 6, 24, 0.95);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+#update[hidden] {
+  display: none;
+}
+#update button {
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 12px;
+  background: var(--y);
+  color: #1a0c00;
+  font-weight: 900;
+  cursor: pointer;
+}
+#update button.later {
+  background: transparent;
+  color: #fff;
+  text-decoration: underline;
+}

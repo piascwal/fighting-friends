@@ -2,6 +2,7 @@
 import { playMusic, playSfx, unlockAudio } from '../audio/audio';
 import { enterImmersive, isInstalledApp, isIos } from '../core/display';
 import { canPromptInstall, promptInstall, watchInstallPrompt } from '../core/pwa';
+import { versionLabel } from '../core/version';
 import { game, type GameMode } from './actions';
 import { $, $$, on } from './dom';
 import { showScreen } from './screens';
@@ -14,6 +15,7 @@ export const MENUS_HTML = `
       <button class="nav sm hidden" id="installBtn">📲 INSTALLER LE JEU<small>Plein écran, à l'horizontale, même hors ligne</small></button>
       <div class="ver hidden" id="iosHint">Pour jouer en plein écran sur iPhone : bouton <b>Partager</b> puis <b>Sur l'écran d'accueil</b></div>
     </div>
+    <div class="version" id="versionLabel"></div>
   </div>
 
   <div class="screen" id="s-menu">
@@ -58,6 +60,7 @@ function initInstall(): void {
 
 export function initMenus(handlers: MenuHandlers): void {
   initInstall();
+  $('#versionLabel').textContent = versionLabel();
   // chaque appui sur l'écran titre ou un mode de jeu (re)passe en plein écran à l'horizontale :
   // si le joueur en est sorti par un geste du système, il y revient naturellement
   on('#s-title', () => {

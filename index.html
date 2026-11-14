@@ -43,7 +43,11 @@
       <!-- les menus sont montés ici par src/ui -->
       <div id="ui"></div>
       <div id="toast"></div>
+      <!-- nouvelle version publiée : proposition de recharger -->
+      <div id="update" hidden></div>
     </div>
+    <!-- filet de sécurité si le jeu ne démarre pas (cache d'une ancienne version) -->
+    <script src="rescue.js"></script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
