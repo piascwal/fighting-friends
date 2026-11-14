@@ -65,6 +65,8 @@ export const ice: StyleDef = {
   id: 'ice',
   label: 'Givre',
   hint: 'Éclat qui fige, pic de glace à distance',
+  archetype: 'Zoneur',
+  tags: ['Projectile', 'À distance', 'Fige'],
   stats: { hp: 950, speed: 4.3, jump: 23, power: 1 },
   names: { s1: 'Éclat de glace', s2: 'Pic de glace', super: 'BLIZZARD' },
   moves: moveSet({

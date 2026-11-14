@@ -75,6 +75,8 @@ export const drunken: StyleDef = {
   id: 'drunken',
   label: 'Poing ivre',
   hint: 'Esquive titubante, gourde en cloche',
+  archetype: 'Imprévisible',
+  tags: ['Invincible', 'Projectile', 'Multi-coups'],
   stats: { hp: 1000, speed: 4.2, jump: 23, power: 1.05 },
   names: { s1: 'Esquive titubante', s2: 'Gourde', super: 'TOURBILLON IVRE' },
   moves: moveSet({

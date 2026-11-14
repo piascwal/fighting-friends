@@ -7,6 +7,7 @@ import type { Emit } from './events';
 import type { Fighter } from './fighter';
 
 export interface Projectile {
+  /** Lanceur : change si le projectile est renvoyé. */
   owner: Fighter;
   def: ProjectileDef;
   x: number;
@@ -23,6 +24,13 @@ export interface Projectile {
 }
 
 const REHIT_DELAY = 7;
+const REFLECT_SPEEDUP = 1.25;
+
+/** Le combattant est-il dans la fenêtre de renvoi d'un de ses coups ? */
+function isReflecting(f: Fighter): boolean {
+  const reflect = f.state === 'attack' ? f.move?.reflect : undefined;
+  return !!reflect && f.ft >= reflect[0] && f.ft < reflect[1];
+}
 const MAX_AGE = 240;
 
 export type OnHit = (
@@ -74,7 +82,7 @@ export function updateProjectiles(list: Projectile[], emit: Emit, onHit: OnHit):
     }
     p.age++;
     p.cooldown--;
-    hitTarget(p, onHit);
+    hitTarget(p, onHit, emit);
     clash(p, list, emit);
   }
   return list.filter(
@@ -82,10 +90,21 @@ export function updateProjectiles(list: Projectile[], emit: Emit, onHit: OnHit):
   );
 }
 
-function hitTarget(p: Projectile, onHit: OnHit): void {
+function hitTarget(p: Projectile, onHit: OnHit, emit: Emit): void {
   const target = p.owner.opp;
   const box = hurtbox(target);
   if (!box || p.cooldown > 0 || !overlaps(projectileBox(p), box)) return;
+  if (isReflecting(target)) {
+    // renvoyé : le projectile repart plus vite vers son lanceur, qui en devient la cible
+    p.owner = target;
+    p.dir = -p.dir;
+    p.vx = -p.vx * REFLECT_SPEEDUP;
+    p.age = 0;
+    p.cooldown = REHIT_DELAY;
+    emit({ type: 'guard', x: p.x, y: p.y });
+    emit({ type: 'sfx', name: 'block' });
+    return;
+  }
   const d = p.def;
   const hit: HitDef = {
     t: 0,

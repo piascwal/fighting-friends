@@ -4,11 +4,26 @@ import { SPECIAL_POSES } from '../src/data/special-poses';
 import { SPRITE_BY_KEY } from '../src/data/sprite-poses';
 import { STYLE_LIST } from '../src/data/styles';
 import type { MoveId } from '../src/data/types';
-import { autoFight, createTraining, fighterChar, press, run, wait } from './harness';
+import type { Controller } from '../src/engine/controller';
+import type { FightSim } from '../src/engine/fight';
+import { autoFight, createTraining, fighterChar, press, run, wait, type Step } from './harness';
+
+/** Une frame : les manettes lisent leurs appuis, puis le combat avance. */
+function stepBoth(pad: Controller, sim: FightSim, other?: Controller): void {
+  pad.step();
+  other?.step();
+  sim.update();
+}
 
 const SPECIALS: readonly MoveId[] = ['s1l', 's1h', 's2l', 's2h', 'super'];
 /** Coups qui ne frappent pas par eux-mêmes : garde de contre (attend un coup), pas éclair (déplacement). */
-const NO_DAMAGE: Record<string, readonly MoveId[]> = { counter: ['s1l', 's1h'], storm: ['s2l', 's2h'] };
+const NO_DAMAGE: Record<string, readonly MoveId[]> = {
+  counter: ['s1l', 's1h'], // garde de contre
+  storm: ['s2l', 's2h'], // pas éclair
+  tiger: ['s2l', 's2h'], // posture : ce sont ses suites qui frappent
+  berserker: ['s2l', 's2h'], // rage
+  monk: ['s2l', 's2h'], // méditation
+};
 
 /** Lance un coup par ordre direct (comme la console), le mannequin placé à `distance`. */
 function damageOf(style: (typeof STYLE_LIST)[number]['id'], id: MoveId, distance: number): number {
@@ -30,7 +45,7 @@ describe.each(STYLE_LIST.map((s) => [s.id, s] as const))('style %s', (id, style)
   it.each(SPECIALS.filter((m) => !NO_DAMAGE[id]?.includes(m)))(
     '%s touche le mannequin à une distance au moins',
     (move) => {
-      const best = Math.max(...[80, 200, 330].map((d) => damageOf(style.id, move, d)));
+      const best = Math.max(...[80, 140, 200, 260, 330].map((d) => damageOf(style.id, move, d)));
       expect(best).toBeGreaterThan(0);
     },
   );
@@ -161,5 +176,193 @@ describe('saut et coups aériens', () => {
       ]);
       expect(r.maxCombo, style.id).toBeGreaterThanOrEqual(4);
     }
+  });
+});
+
+describe('mécaniques inspirées des jeux de combat', () => {
+  /** Joue une suite d'étapes avec le joueur d'un style donné ; renvoie les coups sortis et les dégâts infligés. */
+  const play = (style: (typeof STYLE_LIST)[number]['id'], steps: Step[], distance = 90) => {
+    const { sim, pad } = createTraining({ style, distance });
+    const [player, dummy] = sim.fighters;
+    const names: string[] = [];
+    let dealt = 0;
+    for (const step of steps) {
+      for (let f = 0; f < (step.frames ?? 1); f++) {
+        pad.x = step.x ?? 0;
+        pad.y = step.y ?? 0;
+        if (f === 0 && step.press) pad.press(step.press);
+        pad.step();
+        const before = dummy.hp;
+        sim.update();
+        if (dummy.hp < before) dealt += before - dummy.hp;
+        const name = player.move?.name;
+        if (name && names[names.length - 1] !== name) names.push(name);
+      }
+    }
+    return { names, dealt, player };
+  };
+
+  it('charge : arrière tenu puis avant + poing lance le disque', () => {
+    const r = play(
+      'soldier',
+      [
+        { x: -1, frames: 35 },
+        { x: 1, press: 'lp', frames: 40 },
+      ],
+      300,
+    );
+    expect(r.names).toContain('Disque tranchant');
+  });
+
+  it("charge : sans avoir tenu l'arrière, avant + poing reste un coup normal", () => {
+    const r = play(
+      'soldier',
+      [
+        { x: -1, frames: 8 },
+        { x: 1, press: 'lp', frames: 30 },
+      ],
+      300,
+    );
+    expect(r.names).not.toContain('Disque tranchant');
+  });
+
+  it('charge : bas tenu puis haut + pied lance le saut périlleux', () => {
+    const r = play(
+      'soldier',
+      [
+        { y: 1, frames: 35 },
+        { y: -1, frames: 1 },
+        { y: -1, press: 'hk', frames: 40 },
+      ],
+      90,
+    );
+    expect(r.names).toContain('Saut périlleux');
+    expect(r.dealt).toBeGreaterThan(0);
+  });
+
+  it('enchaîneur : deux nouveaux appuis sur un poing donnent la deuxième puis la troisième frappe', () => {
+    const { sim, pad } = createTraining({ style: 'chain', distance: 90 });
+    const player = sim.fighters[0];
+    const names = new Set<string>();
+    pad.commands.push('s1h');
+    for (let f = 0; f < 90; f++) {
+      if (f === 10 || f === 24) pad.press('hp');
+      pad.step();
+      sim.update();
+      if (player.move) names.add(player.move.name);
+    }
+    expect([...names]).toEqual(['Triple frappe', 'Triple frappe (2)', 'Triple frappe (3)']);
+  });
+
+  it('enchaîneur : sans toucher, pas de suite', () => {
+    const { sim, pad } = createTraining({ style: 'chain', distance: 400 });
+    const player = sim.fighters[0];
+    const names = new Set<string>();
+    pad.commands.push('s1h');
+    for (let f = 0; f < 60; f++) {
+      if (f === 10) pad.press('hp');
+      pad.step();
+      sim.update();
+      if (player.move) names.add(player.move.name);
+    }
+    expect(names.has('Triple frappe (2)')).toBe(false);
+  });
+
+  it('tigre : chaque bouton fait sortir la posture sur un coup différent', () => {
+    const exits = (button: 'lp' | 'hp' | 'lk' | 'hk') => {
+      const { sim, pad } = createTraining({ style: 'tiger', distance: 90 });
+      const player = sim.fighters[0];
+      pad.commands.push('s2h');
+      const names = new Set<string>();
+      for (let f = 0; f < 70; f++) {
+        if (f === 12) pad.press(button);
+        pad.step();
+        sim.update();
+        if (player.move) names.add(player.move.name);
+      }
+      return names;
+    };
+    expect(exits('lp')).toContain('Griffe');
+    expect(exits('hp')).toContain('Bond du tigre');
+    expect(exits('lk')).toContain('Fauchage');
+    expect(exits('hk')).toContain('Ruade');
+  });
+
+  it('berserker : la rage augmente les dégâts pendant quelques secondes', () => {
+    const hitOnce = (enraged: boolean) => {
+      const { sim, pad } = createTraining({ style: 'berserker', distance: 300 });
+      const [player, dummy] = sim.fighters;
+      if (enraged) {
+        pad.commands.push('s2l');
+        for (let f = 0; f < 40; f++) stepBoth(pad, sim);
+        expect(player.buffed).toBe(true);
+      }
+      player.x = dummy.x - 90;
+      pad.press('hp');
+      let dealt = 0;
+      for (let f = 0; f < 30; f++) {
+        pad.step();
+        const before = dummy.hp;
+        sim.update();
+        if (dummy.hp < before) dealt += before - dummy.hp;
+      }
+      return dealt;
+    };
+    expect(hitOnce(true)).toBeGreaterThan(hitOnce(false));
+  });
+
+  it("artificier : la mine reste au sol et explose quand l'adversaire y marche", () => {
+    const { sim, pad } = createTraining({ style: 'trapper', distance: 330, humanOpponent: true });
+    const [, dummy] = sim.fighters;
+    pad.commands.push('s1h');
+    for (let f = 0; f < 60; f++) stepBoth(pad, sim, dummy.ctrl);
+    expect(sim.projectiles.length).toBe(1);
+    expect(dummy.hp).toBe(dummy.maxHp);
+    // l'adversaire avance vers le joueur et passe sur la mine
+    dummy.ctrl.x = -1;
+    let exploded = false;
+    for (let f = 0; f < 60; f++) {
+      pad.step();
+      dummy.ctrl.step();
+      const before = dummy.hp;
+      sim.update();
+      if (dummy.hp < before) exploded = true;
+    }
+    expect(exploded).toBe(true);
+  });
+
+  it('miroir : la garde renvoie un projectile à son lanceur', () => {
+    const { sim, pad } = createTraining({
+      style: 'mirror',
+      opponent: 'ardan',
+      distance: 300,
+      humanOpponent: true,
+    });
+    const [player, caster] = sim.fighters;
+    caster.ctrl.commands.push('s1l'); // boule de feu
+    let reflected = false;
+    let casterHit = false;
+    for (let f = 0; f < 80; f++) {
+      if (f === 14) pad.commands.push('s1h');
+      pad.step();
+      caster.ctrl.step();
+      const before = caster.hp;
+      sim.update();
+      if (sim.projectiles.some((p) => p.owner === player)) reflected = true;
+      // (en entraînement, la vie de l'adversaire remonte aussitôt : on regarde la perte sur la frame)
+      if (caster.hp < before) casterHit = true;
+    }
+    expect(reflected).toBe(true);
+    expect(player.hp).toBe(player.maxHp);
+    expect(casterHit).toBe(true);
+  });
+
+  it('moine : la méditation rend de la vie', () => {
+    const { sim, pad } = createTraining({ style: 'monk', distance: 300 });
+    const player = sim.fighters[0];
+    player.hp = 500;
+    pad.commands.push('s2h');
+    for (let f = 0; f < 80; f++) stepBoth(pad, sim);
+    expect(player.hp).toBeGreaterThan(500);
   });
 });

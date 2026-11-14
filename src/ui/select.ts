@@ -88,7 +88,8 @@ function refresh(): void {
     info.innerHTML = '<div class="iname">AU HASARD</div><div class="ititle">Laisse le destin choisir</div>';
     return;
   }
-  const { stats, label, hint } = char.style;
+  const { stats, label, hint, archetype, tags, names } = char.style;
+  const chips = tags.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
   info.innerHTML = `
     <div class="iname" style="color:${char.color}">${escapeHtml(char.name)}</div>
     <div class="ititle">${escapeHtml(char.title)} — style ${label.toLowerCase()}</div>
@@ -97,7 +98,9 @@ function refresh(): void {
       ${statBar('Vitesse', (stats.speed - 3.2) / 2.7)}
       ${statBar('Puissance', (stats.power - 0.8) / 0.38)}
     </div>
-    <div class="ihint">${escapeHtml(hint)}</div>`;
+    <div class="ihint">${escapeHtml(hint)}</div>
+    <div class="itags"><b>${escapeHtml(archetype)}</b> ${chips}</div>
+    <div class="ihint">${escapeHtml(`${names.s1} · ${names.s2} · ${names.super}`)}</div>`;
 }
 
 function confirm(): void {

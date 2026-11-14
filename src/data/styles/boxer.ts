@@ -74,6 +74,8 @@ export const boxer: StyleDef = {
   id: 'boxer',
   label: 'Boxeur',
   hint: 'Rafale de directs, crochet plongeant',
+  archetype: 'Agresseur',
+  tags: ['Multi-coups', 'Casse-garde', 'Ruée'],
   stats: { hp: 1050, speed: 4.6, jump: 22, power: 1.05 },
   names: { s1: 'Rafale', s2: 'Crochet plongeant', super: 'UPPERCUT TITAN' },
   moves: moveSet({

@@ -92,6 +92,8 @@ export const tech: StyleDef = {
   id: 'tech',
   label: 'Technique',
   hint: 'Lame à distance, téléportation plongeante',
+  archetype: 'Insaisissable',
+  tags: ['Projectile', 'Téléportation', 'Invincible'],
   stats: { hp: 950, speed: 5.2, jump: 25, power: 0.95 },
   names: { s1: "Lame d'ombre", s2: 'Chute fantôme', super: 'NUIT SANS FIN' },
   moves: moveSet({

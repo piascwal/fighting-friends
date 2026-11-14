@@ -153,6 +153,61 @@ export const SPECIAL_POSES = {
     { h: 0.95 },
   ),
 
+  sp_somersault: pose(
+    'Saut périlleux',
+    'somersault',
+    "saut périlleux arrière en coup de pied (aucun sol visible) : corps renversé en arrière dans les airs, une jambe tendue qui fouette vers le haut et l'avant, bras écartés",
+    { h: 1.1, ax: 0.5, fb: ['jump_kick', 'kick_heavy', 'idle'] },
+  ),
+  sp_flip_kick: pose(
+    'Coup de talon retourné',
+    'flipKick',
+    "salto avant en l'air (aucun sol visible) : corps penché vers l'avant presque à l'horizontale, une jambe tendue qui retombe talon en avant comme un marteau",
+    { fb: ['jump_kick', 'kick_heavy', 'idle'] },
+  ),
+  sp_tiger_stance: pose(
+    'Posture du tigre',
+    'tigerStance',
+    'posture du tigre : très bas sur ses jambes fléchies, buste penché en avant, les deux mains ouvertes en griffes tendues devant lui, regard de prédateur',
+    { h: 0.68, ax: 0.45, fb: ['crouch', 'idle'] },
+  ),
+  sp_rage: pose(
+    'Rage',
+    'rage',
+    "explosion de rage : debout, jambes écartées, bras fléchis et poings serrés de chaque côté du corps, muscles bandés, tête en arrière, il hurle (ne dessine PAS d'aura)",
+    { h: 1.05, ax: 0.5, fb: ['super', 'win', 'idle'] },
+  ),
+  sp_plant: pose(
+    'Pose de mine',
+    'plant',
+    'accroupi sur un genou, penché en avant, en train de poser délicatement un petit engin explosif au sol devant lui avec une main',
+    { h: 0.62, ax: 0.45, fb: ['crouch', 'idle'] },
+  ),
+  sp_mirror_guard: pose(
+    'Garde miroir',
+    'mirrorGuard',
+    "garde miroir : debout, les deux avant-bras croisés en X devant le visage, paumes ouvertes vers l'avant, comme pour renvoyer une attaque",
+    { ax: 0.45, fb: ['block', 'idle'] },
+  ),
+  sp_burst: pose(
+    "Libération d'énergie",
+    'burst',
+    "libération d'énergie : debout, jambes écartées, les deux bras écartés vers le haut en V, poitrine en avant, tête levée (ne dessine PAS l'énergie)",
+    { h: 1.05, ax: 0.5, fb: ['super', 'win', 'idle'] },
+  ),
+  sp_lotus_knee: pose(
+    'Genou du lotus',
+    'lotusKnee',
+    "coup de genou sauté (aucun sol visible) : en train de s'élever, un genou levé très haut devant lui, un bras levé, l'autre tiré en arrière",
+    { h: 1.05, ax: 0.45, fb: ['jump_kick', 'kick_light', 'idle'] },
+  ),
+  sp_meditate: pose(
+    'Méditation',
+    'meditate',
+    'en méditation : assis en tailleur au sol, dos bien droit, mains posées sur les genoux paumes vers le haut, yeux fermés, expression sereine',
+    { h: 0.55, ax: 0.5, fb: ['crouch', 'idle'] },
+  ),
+
   // ---------- projectiles ----------
   pj_fireball: projectile(
     'Boule de feu',
@@ -185,6 +240,23 @@ export const SPECIAL_POSES = {
   pj_palm_wave: projectile(
     'Onde de paume',
     "une onde d'énergie en forme d'empreinte de main ouverte, translucide, avec des cercles de souffle autour",
+  ),
+  pj_disc: projectile(
+    'Disque tranchant',
+    "un disque d'énergie tranchant vu de côté, très fin et tournoyant, avec une courte traînée vers la gauche",
+  ),
+  pj_mine: projectile(
+    'Mine',
+    'une petite mine posée au sol, ronde et métallique, avec un voyant rouge allumé au sommet',
+  ),
+  pj_grenade: projectile('Grenade', 'une petite bombe ronde et noire avec une mèche allumée qui crépite'),
+  pj_light: projectile(
+    'Éclat de lumière',
+    'un éclat de lumière blanche et dorée en forme de losange, avec une courte traînée vers la gauche',
+  ),
+  pj_beam: projectile(
+    'Rayon',
+    "un rayon d'énergie horizontal, long et épais, très lumineux au centre, qui traverse toute la largeur de l'image",
   ),
 } satisfies Record<string, SpecialSpec>;
 

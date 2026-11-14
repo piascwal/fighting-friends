@@ -45,9 +45,12 @@ automatiquement : 5 fois plus légères qu'en PNG, sans différence visible.
 Chaque personnage peut aussi avoir son **décor** : carte « Décor » dans l'écran des sprites, avec un prompt à
 compléter par la description de la scène et une image guide qui fixe le sol et la taille des combattants.
 
-**12 styles de combat** (Équilibré, Rapide, Lourd, Technique, Lutteur, Maître du contre, Givre, Voltigeur,
-Boxeur, Taekwondo, Tempête, Poing ivre). Changer le style d'un personnage ne fait perdre aucune image : celles
-du nouveau style apparaissent comme manquantes, celles de l'ancien restent conservées.
+**20 styles de combat**, chacun avec sa famille et ses capacités (affichées à la sélection) :
+Équilibré, Rapide, Lourd, Technique, Lutteur (prises imparables), Maître du contre, Givre, Voltigeur, Boxeur,
+Taekwondo, Tempête, Poing ivre, Soldat (coups à charge), Enchaîneur (frappe en trois temps), Tigre (posture
+à quatre sorties), Berserker (rage temporaire), Artificier (mines), Miroir (renvoie les projectiles), Énergiste
+(rayon) et Moine (méditation qui soigne). Changer le style d'un personnage ne fait perdre aucune image ; la liste
+des styles indique ceux qui sont déjà pris, et un nouveau personnage reçoit d'office un style libre.
 
 ## Installer le jeu sur un téléphone
 

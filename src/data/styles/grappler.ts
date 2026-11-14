@@ -79,6 +79,8 @@ export const grappler: StyleDef = {
   id: 'grappler',
   label: 'Lutteur',
   hint: 'Prises imparables, plongeon écrasant',
+  archetype: 'Lutteur',
+  tags: ['Prise', 'Casse-garde', 'Anti-aérien'],
   stats: { hp: 1200, speed: 3.7, jump: 22, power: 1.15 },
   names: { s1: "Prise d'ours", s2: 'Plongeon', super: 'SUPLEX TITAN' },
   moves: moveSet({

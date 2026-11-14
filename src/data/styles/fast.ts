@@ -93,6 +93,8 @@ export const fast: StyleDef = {
   id: 'fast',
   label: 'Rapide',
   hint: 'Ruée éclair, cyclone de coups de pied',
+  archetype: 'Agresseur',
+  tags: ['Ruée', 'Multi-coups', 'Anti-aérien'],
   stats: { hp: 900, speed: 5.7, jump: 25, power: 0.9 },
   names: { s1: 'Éclair', s2: 'Cyclone', super: 'MILLE ÉCLAIRS' },
   moves: moveSet({

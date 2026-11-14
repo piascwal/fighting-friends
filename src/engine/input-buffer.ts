@@ -8,6 +8,10 @@ import type { AiCommand, Controller } from './controller';
 export const PRESS_BUFFER = 12;
 const COMMAND_BUFFER = 12;
 const HISTORY_SIZE = 24;
+/** Charge : direction tenue au moins ce nombre de frames (une demi-seconde)… */
+export const CHARGE_FRAMES = 30;
+/** … puis relâchée il y a au plus ce nombre de frames au moment de l'appui. */
+const CHARGE_GRACE = 10;
 
 /* Directions en notation « pavé numérique », relatives au regard du combattant :
    7 8 9
@@ -56,6 +60,9 @@ export class InputBuffer {
   private dashFrame = 0;
   private dirs: DirectionEntry[] = [{ dir: 5, frame: 0 }];
   private presses: BufferedPress[] = [];
+  /** Durée pendant laquelle l'arrière / le bas sont tenus, et dernier relâchement d'une charge complète. */
+  private held = { back: 0, down: 0 };
+  private released = { back: -999, down: -999 };
   private command: { id: AiCommand; clock: number } | null = null;
 
   reset(): void {
@@ -65,12 +72,16 @@ export class InputBuffer {
     this.dirs = [{ dir: 5, frame: 0 }];
     this.presses = [];
     this.command = null;
+    this.held = { back: 0, down: 0 };
+    this.released = { back: -999, down: -999 };
   }
 
   /** À appeler à chaque frame réelle, même pendant l'arrêt sur image. */
   read(ctrl: Controller, facing: number): void {
     this.frame++;
     const dir = 5 + ctrl.x * facing - 3 * ctrl.y;
+    this.trackCharge('back', dir === 4 || dir === 1 || dir === 7);
+    this.trackCharge('down', dir === 1 || dir === 2 || dir === 3);
     const last = this.dirs[this.dirs.length - 1]!;
     if (dir !== last.dir) {
       this.dirs.push({ dir, frame: this.frame });
@@ -86,6 +97,20 @@ export class InputBuffer {
       ctrl.commands.length = 0;
     }
     if (this.dashRequest && this.frame - this.dashFrame > 6) this.dashRequest = 0;
+  }
+
+  private trackCharge(kind: 'back' | 'down', holding: boolean): void {
+    if (holding) {
+      this.held[kind]++;
+      return;
+    }
+    if (this.held[kind] >= CHARGE_FRAMES) this.released[kind] = this.frame;
+    this.held[kind] = 0;
+  }
+
+  /** Une charge (arrière ou bas tenu une demi-seconde) vient-elle d'être relâchée au moment de l'appui ? */
+  hasCharge(kind: 'back' | 'down', pressFrame: number): boolean {
+    return pressFrame - this.released[kind] <= CHARGE_GRACE;
   }
 
   /** À appeler à chaque frame simulée. */

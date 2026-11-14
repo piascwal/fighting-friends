@@ -143,6 +143,66 @@ function drawPalmWave(ctx: Ctx, w: number, h: number, age: number): void {
   }
 }
 
+/** Disque tranchant vu de côté : ellipse très fine qui scintille en tournant. */
+function drawDisc(ctx: Ctx, w: number, h: number, age: number): void {
+  const squash = 0.35 + 0.15 * Math.sin(age * 0.9);
+  ctx.fillStyle = '#c9d6ff';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, w / 2, (h / 2) * squash * 2, 0, 0, 7);
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(-w * 0.35, -1.5, w * 0.7, 3);
+}
+
+/** Mine posée au sol, voyant qui clignote. */
+function drawMine(ctx: Ctx, w: number, h: number, age: number): void {
+  ctx.fillStyle = '#3a3f4a';
+  ctx.beginPath();
+  ctx.ellipse(0, h * 0.2, w / 2, h * 0.35, 0, Math.PI, 0);
+  ctx.fill();
+  ctx.fillRect(-w / 2, h * 0.2, w, h * 0.25);
+  ctx.fillStyle = age % 30 < 15 ? '#ff3d3d' : '#5a1010';
+  ctx.fillRect(-w * 0.1, -h * 0.25, w * 0.2, h * 0.2);
+}
+
+/** Grenade : boule sombre et mèche qui crépite. */
+function drawGrenade(ctx: Ctx, w: number, h: number, age: number): void {
+  ctx.rotate(age * 0.3);
+  ctx.fillStyle = '#23262e';
+  ctx.beginPath();
+  ctx.arc(0, h * 0.08, w * 0.42, 0, 7);
+  ctx.fill();
+  ctx.fillStyle = '#6a6f7a';
+  ctx.fillRect(-w * 0.1, -h * 0.45, w * 0.2, h * 0.14);
+  ctx.fillStyle = age % 4 < 2 ? '#ffd23a' : '#ff5a1f';
+  ctx.fillRect(-w * 0.06, -h * 0.62, w * 0.12, h * 0.14);
+}
+
+/** Éclat de lumière : losange blanc et doré. */
+function drawLight(ctx: Ctx, w: number, h: number): void {
+  ctx.fillStyle = '#ffd23a';
+  ctx.beginPath();
+  ctx.moveTo(w * 0.55, 0);
+  ctx.lineTo(0, -h * 0.5);
+  ctx.lineTo(-w * 0.55, 0);
+  ctx.lineTo(0, h * 0.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(-w * 0.25, -h * 0.12, w * 0.6, h * 0.24);
+}
+
+/** Rayon : bande lumineuse sur toute sa longueur, qui pulse. */
+function drawBeam(ctx: Ctx, w: number, h: number, age: number): void {
+  const pulse = 0.8 + 0.2 * Math.sin(age * 1.3);
+  ctx.fillStyle = '#2aa8ff';
+  ctx.fillRect(-w / 2, (-h / 2) * pulse, w, h * pulse);
+  ctx.fillStyle = '#bff4ff';
+  ctx.fillRect(-w / 2, (-h / 4) * pulse, w, (h / 2) * pulse);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(-w / 2, -h * 0.08, w, h * 0.16);
+}
+
 export function drawProjectileShape(ctx: Ctx, look: ProjectileLook, w: number, h: number, age: number): void {
   switch (look) {
     case 'fire':
@@ -161,5 +221,15 @@ export function drawProjectileShape(ctx: Ctx, look: ProjectileLook, w: number, h
       return drawBottle(ctx, w, h, age);
     case 'palm':
       return drawPalmWave(ctx, w, h, age);
+    case 'disc':
+      return drawDisc(ctx, w, h, age);
+    case 'mine':
+      return drawMine(ctx, w, h, age);
+    case 'grenade':
+      return drawGrenade(ctx, w, h, age);
+    case 'light':
+      return drawLight(ctx, w, h);
+    case 'beam':
+      return drawBeam(ctx, w, h, age);
   }
 }

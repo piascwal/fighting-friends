@@ -15,6 +15,8 @@ export type FightEvent =
   | { type: 'shake'; amount: number }
   | { type: 'flash'; amount: number }
   | { type: 'confetti'; x: number; y: number }
+  /** Volutes de couleur autour d'un combattant (bonus, soin). */
+  | { type: 'aura'; x: number; y: number; color: string; count: number }
   | { type: 'banner'; text: string; duration: number; size: number; y?: number; tone?: BannerTone };
 
 export type Emit = (event: FightEvent) => void;

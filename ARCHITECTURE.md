@@ -91,24 +91,25 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
 
 ## 4. Où mettre quoi
 
-| Je veux…                                                         | Je touche…                                                                                                                          |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Ajouter un personnage                                            | une fiche dans `data/characters.ts` (ou un dossier `public/assets/characters/<id>/`)                                                |
-| Régler un coup (dégâts, vitesse, zone)                           | `data/normals.ts` ou `data/styles/<style>.ts`                                                                                       |
-| Créer un style de combat                                         | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` + son pantin dans `data/styles/looks.ts` |
-| Ajouter une image de coup spécial ou de projectile               | `data/special-poses.ts` (nom, description pour le prompt, posture guide) ; le coup la cite dans `sprite` ou `proj.sprite`           |
-| Changer la direction artistique des prompts                      | `ART_DIRECTION` dans `data/prompts.ts`                                                                                              |
-| Changer une règle d'enchaînement                                 | `engine/move-select.ts` (+ un test dans `tests/combos.test.ts`)                                                                     |
-| Changer une manipulation (↓↘→…)                                  | `engine/input-buffer.ts`, constante `MOTIONS`                                                                                       |
-| Ajouter un effet visuel                                          | `render/fx.ts` (création) et `render/fx-draw.ts` (dessin)                                                                           |
-| Ajouter un son                                                   | `core/sfx.ts` (son nom) puis `audio/sounds.ts` (sa recette)                                                                         |
-| Ajouter un décor dessiné par le jeu                              | `render/stage-painters.ts` (un décor par personnage, lui, est une image importée)                                                   |
-| Changer l'icône, le nom ou l'orientation de l'application        | `public/manifest.webmanifest` et `public/icons/`                                                                                    |
-| Changer ce qui marche hors ligne                                 | `scripts/sw-template.js` (modèle du service worker)                                                                                 |
-| Changer la compression des images                                | `assets/image-codec.ts`                                                                                                             |
-| Changer la reprise d'un personnage local par sa version du dépôt | `assets/repo-characters.ts`                                                                                                         |
-| Ajouter un écran de menu                                         | un fichier dans `ui/`, branché dans `ui/index.ts`                                                                                   |
-| Changer l'enchaînement des écrans                                | `game.ts`                                                                                                                           |
+| Je veux…                                                                         | Je touche…                                                                                                                          |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Ajouter un personnage                                                            | une fiche dans `data/characters.ts` (ou un dossier `public/assets/characters/<id>/`)                                                |
+| Régler un coup (dégâts, vitesse, zone)                                           | `data/normals.ts` ou `data/styles/<style>.ts`                                                                                       |
+| Créer un style de combat                                                         | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` + son pantin dans `data/styles/looks.ts` |
+| Donner une suite à un coup (enchaînement, posture), un bonus, un soin, un renvoi | champs `followUps`, `buff`, `heal`, `reflect` du coup (`data/types.ts`), lus par `engine/`                                          |
+| Ajouter une image de coup spécial ou de projectile                               | `data/special-poses.ts` (nom, description pour le prompt, posture guide) ; le coup la cite dans `sprite` ou `proj.sprite`           |
+| Changer la direction artistique des prompts                                      | `ART_DIRECTION` dans `data/prompts.ts`                                                                                              |
+| Changer une règle d'enchaînement                                                 | `engine/move-select.ts` (+ un test dans `tests/combos.test.ts`)                                                                     |
+| Changer une manipulation (↓↘→…)                                                  | `engine/input-buffer.ts`, constante `MOTIONS`                                                                                       |
+| Ajouter un effet visuel                                                          | `render/fx.ts` (création) et `render/fx-draw.ts` (dessin)                                                                           |
+| Ajouter un son                                                                   | `core/sfx.ts` (son nom) puis `audio/sounds.ts` (sa recette)                                                                         |
+| Ajouter un décor dessiné par le jeu                                              | `render/stage-painters.ts` (un décor par personnage, lui, est une image importée)                                                   |
+| Changer l'icône, le nom ou l'orientation de l'application                        | `public/manifest.webmanifest` et `public/icons/`                                                                                    |
+| Changer ce qui marche hors ligne                                                 | `scripts/sw-template.js` (modèle du service worker)                                                                                 |
+| Changer la compression des images                                                | `assets/image-codec.ts`                                                                                                             |
+| Changer la reprise d'un personnage local par sa version du dépôt                 | `assets/repo-characters.ts`                                                                                                         |
+| Ajouter un écran de menu                                                         | un fichier dans `ui/`, branché dans `ui/index.ts`                                                                                   |
+| Changer l'enchaînement des écrans                                                | `game.ts`                                                                                                                           |
 
 ## 5. Application installable (PWA)
 

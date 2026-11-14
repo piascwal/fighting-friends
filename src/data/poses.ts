@@ -80,6 +80,16 @@ const RAW = {
   skyCall: { t: -8, hd: -16, aF: [176, 180], aB: [-40, 30], lF: [28, 2], lB: [-26, -36] },
   sway: { t: -30, hd: -20, aF: [60, 170], aB: [-20, 40], lF: [40, 30], lB: [-10, -40] },
   lobThrow: { t: 16, hd: -4, aF: [124, 150], aB: [-30, 30], lF: [40, 0], lB: [-30, -46] },
+  // charge, enchaînements, postures, bonus, pièges, renvoi, rayon, soin
+  somersault: { rot: -40, t: -20, hd: -20, aF: [-30, 20], aB: [-60, -20], lF: [150, 160], lB: [60, -40] },
+  flipKick: { rot: 30, t: 30, hd: 10, aF: [-40, 20], aB: [-70, -30], lF: [140, 150], lB: [40, -60] },
+  tigerStance: { t: 34, hd: -6, aF: [100, 130], aB: [80, 120], lF: [96, -30], lB: [62, -100] },
+  rage: { t: -10, hd: -20, aF: [40, 170], aB: [-40, -170], lF: [36, 4], lB: [-36, -6] },
+  plant: { t: 50, hd: 20, aF: [60, 10], aB: [20, 0], lF: [90, -10], lB: [40, -90] },
+  mirrorGuard: { t: -4, hd: -4, aF: [95, 175], aB: [85, 180], lF: [28, 4], lB: [-22, -34] },
+  burst: { t: -10, hd: -16, aF: [140, 160], aB: [-140, -160], lF: [40, 2], lB: [-40, -4] },
+  lotusKnee: { t: -6, hd: -10, aF: [150, 60], aB: [-40, 40], lF: [120, -10], lB: [10, -20] },
+  meditate: { t: 0, hd: 6, aF: [40, 100], aB: [30, 100], lF: [95, 175], lB: [80, -170] },
 } satisfies Record<string, RawPose>;
 
 export type PoseName = keyof typeof RAW;
@@ -202,6 +212,15 @@ export const POSE_SPRITE: Record<PoseName, SpriteKey> = {
   skyCall: 'sp_sky_call',
   sway: 'sp_sway',
   lobThrow: 'sp_lob_throw',
+  somersault: 'sp_somersault',
+  flipKick: 'sp_flip_kick',
+  tigerStance: 'sp_tiger_stance',
+  rage: 'sp_rage',
+  plant: 'sp_plant',
+  mirrorGuard: 'sp_mirror_guard',
+  burst: 'sp_burst',
+  lotusKnee: 'sp_lotus_knee',
+  meditate: 'sp_meditate',
 };
 
 /** Postures de préparation : pendant un coup, elles gardent leur propre sprite au lieu de celui du coup. */

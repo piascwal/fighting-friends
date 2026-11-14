@@ -3,7 +3,7 @@ import { playSfx } from '../audio/audio';
 import { escapeHtml } from '../core/text';
 import { COMBO_EXAMPLES } from '../data/combos';
 import { characterById, roster } from '../data/roster';
-import type { Character } from '../data/types';
+import type { Button, Character, MoveDef } from '../data/types';
 import { $, on } from './dom';
 import { showScreen, type ScreenName } from './screens';
 
@@ -27,6 +27,46 @@ const withBadges = (inputs: string) =>
   escapeHtml(inputs).replace(/\bA\b/g, A).replace(/\bB\b/g, B).replace(/\bC\b/g, C).replace(/\bD\b/g, D);
 
 let shownChar: Character | null = null;
+
+const BADGES: Record<Button, string> = { lp: A, hp: B, lk: C, hk: D };
+
+/** Manipulation des deux coups spéciaux : quart de cercle, ou charge pour les styles à charge. */
+function specialInputs(char: Character): { s1: string; s2: string } {
+  if (char.style.input === 'charge') {
+    return {
+      s1: `<b>← tenu</b> ½ s, puis <b>→</b> + ${A} ou ${B}`,
+      s2: `<b>↓ tenu</b> ½ s, puis <b>↑</b> + ${C} ou ${D}`,
+    };
+  }
+  return { s1: `<b>↓ ↘ →</b> + ${A} ou ${B}`, s2: `<b>↓ ↙ ←</b> + ${C} ou ${D}` };
+}
+
+/** Suites des coups spéciaux (enchaînements en plusieurs temps, sorties de posture), récursivement. */
+function followUpRows(char: Character): string {
+  const rows: string[] = [];
+  const visit = (move: MoveDef, depth: number) => {
+    const followUps = move.followUps;
+    if (!followUps || depth > 3) return;
+    const when = followUps.onHit ? 'quand il touche' : 'pendant la posture';
+    const seen = new Set<string>();
+    for (const next of Object.values(followUps.moves)) {
+      const key = next.name;
+      const buttons = (Object.entries(followUps.moves) as [Button, MoveDef][])
+        .filter(([, m]) => m.name === next.name)
+        .map(([b]) => BADGES[b])
+        .join(' ou ');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      rows.push(
+        row(`après <b>${escapeHtml(move.name)}</b>, ${when} : ${buttons}`, `<b>${escapeHtml(next.name)}</b>`),
+      );
+      visit(next, depth + 1);
+    }
+  };
+  visit(char.style.moves.s1h, 0);
+  visit(char.style.moves.s2h, 0);
+  return rows.join('');
+}
 let returnTo: ScreenName = 'options';
 
 function render(): void {
@@ -58,8 +98,9 @@ function render(): void {
     </table>
     <h3>Coups spéciaux de ${escapeHtml(char.name)}</h3>
     <table>
-      ${row(`<b>↓ ↘ →</b> + ${A} ou ${B}${or('ou en combo')}${B} puis ${B}`, `<b>${escapeHtml(names.s1)}</b>`)}
-      ${row(`<b>↓ ↙ ←</b> + ${C} ou ${D}${or('ou en combo')}${D} puis ${D}`, `<b>${escapeHtml(names.s2)}</b>`)}
+      ${row(`${specialInputs(char).s1}${or('ou en combo')}${B} puis ${B}`, `<b>${escapeHtml(names.s1)}</b>`)}
+      ${row(`${specialInputs(char).s2}${or('ou en combo')}${D} puis ${D}`, `<b>${escapeHtml(names.s2)}</b>`)}
+      ${followUpRows(char)}
       ${row(`<b>↓ ↓</b> + ${A}/${B}${or('ou en combo')}encore ${B} ou ${D} après un coup spécial`, `<b class="sup">${escapeHtml(names.super)}</b> — jauge SUPER pleine`)}
     </table>
     <h3>Combos</h3>

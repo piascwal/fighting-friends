@@ -66,6 +66,9 @@ export class FightView {
         return this.fx.swoosh(event.fighter, event.box, event.kind, event.fighter.char.color);
       case 'confetti':
         return this.fx.confetti(event.x, event.y);
+      case 'aura':
+        for (let i = 0; i < event.count; i++) this.fx.aura(event.x, event.y, event.color);
+        return;
       case 'shake':
         this.shake = Math.max(this.shake, event.amount);
         return;
@@ -105,6 +108,8 @@ export class FightView {
     if (frozen || sim.hitstop > 0) return;
     for (const f of sim.fighters) {
       if (f.meter >= 100 && sim.tick % 5 === 0) fx.aura(f.x, GROUND_Y + f.y, f.char.color);
+      // bonus temporaire actif : volutes rouges
+      if (f.buffed && sim.tick % 3 === 0) fx.aura(f.x, GROUND_Y + f.y, '#ff3b1f');
     }
     if (sim.tick % 2 === 0) for (const p of sim.projectiles) emitProjectileTrail(fx, p);
   }

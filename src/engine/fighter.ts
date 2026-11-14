@@ -9,9 +9,9 @@ import type { Character, FighterStats, MoveDef, MoveId, MoveSet } from '../data/
 import type { Ai } from './ai';
 import type { Controller } from './controller';
 import { InputBuffer } from './input-buffer';
-import { runAttack, startMove } from './fighter-attack';
+import { runAttack, startMove, startMoveDef } from './fighter-attack';
 import { updateFighterPose } from './fighter-pose';
-import { canStart, selectMove } from './move-select';
+import { canStart, followUpFor, selectMove } from './move-select';
 import type { FighterWorld } from './world';
 
 export type FighterState =
@@ -139,8 +139,19 @@ export class Fighter {
   get grounded(): boolean {
     return this.y >= 0;
   }
+  /** Bonus temporaire (style Berserker) : actif jusqu'à cette frame simulée. */
+  buffUntil = 0;
+  buffPower = 1;
+  buffSpeed = 1;
+
+  get buffed(): boolean {
+    return this.input.clock < this.buffUntil;
+  }
   get power(): number {
-    return this.stats.power;
+    return this.stats.power * (this.buffed ? this.buffPower : 1);
+  }
+  get speed(): number {
+    return this.stats.speed * (this.buffed ? this.buffSpeed : 1);
   }
   /** Âge en frames réelles : sert aux animations d'attente. */
   get age(): number {
@@ -164,6 +175,7 @@ export class Fighter {
     this.combo = this.comboDmg = this.juggle = this.stun = this.flash = 0;
     this.airAttacks = this.chain = this.armorLeft = this.walkPhase = 0;
     this.pursuit = false;
+    this.buffUntil = 0;
     this.visible = true;
     this.used.clear();
     this.hitDone.clear();
@@ -225,6 +237,12 @@ export class Fighter {
     }
     const press = this.input.pendingPress();
     if (!press) return false;
+    const followUp = followUpFor(this, press);
+    if (followUp) {
+      this.input.consume(press);
+      startMoveDef(this, followUp);
+      return true;
+    }
     const id = selectMove(this, press);
     if (!canStart(this, id)) return false;
     this.input.consume(press);
@@ -317,15 +335,17 @@ export class Fighter {
     this.guard = forward < 0 && threatened;
     this.crouching = ctrl.y > 0;
     if (this.crouching || this.guard || forward === 0) this.vx = 0;
-    else this.vx = this.stats.speed * this.facing * (forward > 0 ? 1 : -0.8);
+    else this.vx = this.speed * this.facing * (forward > 0 ? 1 : -0.8);
     if (this.vx) this.walkPhase += 0.27 * forward;
   }
 
   private stateJumpsquat(): void {
+    // un coup de charge vers le haut (pousser vers le haut + pied) part avant même de décoller
+    if (this.tryAttack()) return;
     if (this.t < JUMPSQUAT_FRAMES) return;
     // le saut de poursuite est calé sur le lanceur (même hauteur pour tous) pour rester à portée de l'adversaire
     this.vy = this.pursuit ? -PURSUIT_JUMP : -this.stats.jump;
-    this.vx = this.jumpDir * (this.pursuit ? PURSUIT_DRIFT : this.stats.speed * 1.35);
+    this.vx = this.jumpDir * (this.pursuit ? PURSUIT_DRIFT : this.speed * 1.35);
     this.y = -1;
     this.airAttacks = 0;
     this.setState('air');
@@ -336,7 +356,7 @@ export class Fighter {
 
   private stateDash(): void {
     const forward = this.dashDir > 0;
-    const speed = this.stats.speed;
+    const speed = this.speed;
     if (this.t === 0) {
       this.setPose(forward ? 'dashF' : 'dashB', 0.6);
       this.world.emit({ type: 'dust', x: this.x, y: GROUND_Y, dir: this.facing * this.dashDir, count: 6 });

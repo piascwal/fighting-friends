@@ -89,6 +89,19 @@ export function runAttack(f: Fighter): void {
     emit({ type: 'dust', x: f.x, y: GROUND_Y, dir: 0, count: 6 });
   }
   if (move.proj && t === move.proj.t) f.world.spawnProjectile(f, move.proj);
+  if (move.buff && t === move.buff.t) {
+    f.buffUntil = f.input.clock + move.buff.duration;
+    f.buffPower = move.buff.power;
+    f.buffSpeed = move.buff.speed;
+    emit({ type: 'aura', x: f.x, y: GROUND_Y + f.y, color: '#ff3b1f', count: 12 });
+    emit({ type: 'flash', amount: 0.3 });
+    emit({ type: 'sfx', name: 'super' });
+  }
+  if (move.heal && t === move.heal.t) {
+    f.hp = Math.min(f.maxHp, f.hp + move.heal.amount);
+    emit({ type: 'aura', x: f.x, y: GROUND_Y + f.y, color: '#7dff6a', count: 14 });
+    emit({ type: 'sfx', name: 'win' });
+  }
   if (move.tele && t === move.tele.t) teleport(f, move.tele.mode);
   if (move.shakeAt === t) {
     emit({ type: 'shake', amount: 12 });

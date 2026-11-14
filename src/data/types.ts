@@ -43,7 +43,20 @@ export interface HitDef {
 }
 
 /** Apparence d'un projectile quand le personnage n'a pas fourni d'image pour lui. */
-export type ProjectileLook = 'fire' | 'blade' | 'wave' | 'ice' | 'spike' | 'bolt' | 'bottle' | 'palm';
+export type ProjectileLook =
+  | 'fire'
+  | 'blade'
+  | 'wave'
+  | 'ice'
+  | 'spike'
+  | 'bolt'
+  | 'bottle'
+  | 'palm'
+  | 'disc'
+  | 'mine'
+  | 'grenade'
+  | 'light'
+  | 'beam';
 
 export interface ProjectileDef {
   /** Frame d'apparition. */
@@ -122,6 +135,25 @@ export interface MoveDef {
   sfx?: 'special' | 'super';
   /** Garde de contre : un coup reçu pendant cette fenêtre est absorbé et déclenche la riposte. */
   counter?: { from: number; to: number; riposte: MoveDef };
+  /** Coups qui peuvent suivre celui-ci (bouton pressé pendant la fenêtre). */
+  followUps?: FollowUps;
+  /** Peut partir au sol comme tout au début d'un saut (coups de charge vers le haut). */
+  anywhere?: boolean;
+  /** Bonus temporaire, déclenché à la frame t : dégâts et vitesse multipliés pendant `duration` frames. */
+  buff?: { t: number; duration: number; power: number; speed: number };
+  /** Fenêtre pendant laquelle un projectile adverse est renvoyé à son lanceur. */
+  reflect?: readonly [from: number, to: number];
+  /** Soin à la frame t. */
+  heal?: { t: number; amount: number };
+}
+
+/** Suite d'un coup : pendant la fenêtre, un bouton enchaîne sur un autre coup (enchaînements en 3 temps, postures). */
+export interface FollowUps {
+  from: number;
+  to: number;
+  /** Seulement si le coup a touché (ou a été bloqué). */
+  onHit?: boolean;
+  moves: Partial<Record<Button, MoveDef>>;
 }
 
 export type MoveSet = Record<MoveId, MoveDef>;
@@ -148,7 +180,38 @@ export type StyleId =
   | 'boxer'
   | 'kicker'
   | 'storm'
-  | 'drunken';
+  | 'drunken'
+  | 'soldier'
+  | 'chain'
+  | 'tiger'
+  | 'berserker'
+  | 'trapper'
+  | 'mirror'
+  | 'beam'
+  | 'monk';
+
+/** Capacités d'un style, affichées pour aider à choisir. */
+export type StyleTag =
+  | 'Projectile'
+  | 'Anti-aérien'
+  | 'Prise'
+  | 'Contre'
+  | 'Renvoi'
+  | 'Téléportation'
+  | 'Armure'
+  | 'Invincible'
+  | 'Casse-garde'
+  | 'Coup bas'
+  | 'Charge'
+  | 'Enchaînement'
+  | 'Posture'
+  | 'Bonus'
+  | 'Piège'
+  | 'Soin'
+  | 'Ruée'
+  | 'Multi-coups'
+  | 'Fige'
+  | 'À distance';
 
 /** Un style de combat : statistiques + jeu de coups. Plusieurs personnages peuvent partager un style. */
 export interface StyleDef {
@@ -157,6 +220,11 @@ export interface StyleDef {
   hint: string;
   stats: FighterStats;
   names: { s1: string; s2: string; super: string };
+  /** Famille de jeu, en un mot (Polyvalent, Agresseur, Zoneur…). */
+  archetype: string;
+  tags: readonly StyleTag[];
+  /** Manipulation des coups spéciaux : quart de cercle (par défaut) ou charge (arrière puis avant…). */
+  input?: 'motion' | 'charge';
   moves: MoveSet;
   /** Préférences de la console quand elle joue ce style. */
   ai: { zoner: number; antiAir: MoveId; ender: MoveId };

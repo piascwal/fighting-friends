@@ -1,6 +1,6 @@
 /* La console : elle observe le combat et pilote sa manette comme un joueur (directions + ordres de coups). */
 import { clamp, pick } from '../core/math';
-import type { HitDef, MoveId } from '../data/types';
+import type { Button, HitDef, MoveId } from '../data/types';
 import type { AiCommand } from './controller';
 import type { Fighter } from './fighter';
 import type { FightSim } from './fight';
@@ -51,6 +51,7 @@ export class Ai {
   private plan: Plan = { x: 0, y: 0, kind: 'walk' };
   private lastMove: unknown = null;
   private rolled = false;
+  private followed = false;
   /** Frames entre deux décisions. */
   private readonly react: number;
   private readonly blockRate: number;
@@ -130,13 +131,25 @@ export class Ai {
     ctrl.y = this.plan.y;
   }
 
+  /** Enchaînements en plusieurs temps et postures : appuie sur un des boutons de suite, une fois par coup. */
+  private tryFollowUp(me: Fighter): void {
+    const followUps = me.move?.followUps;
+    if (!followUps || this.followed || me.ft < followUps.from) return;
+    if (followUps.onHit && !me.connected) return;
+    this.followed = true;
+    const buttons = Object.keys(followUps.moves) as Button[];
+    if (buttons.length && Math.random() < this.comboRate) me.ctrl.press(pick(buttons));
+  }
+
   /** Quand un coup touche, tente (selon son niveau) le coup suivant du combo. */
   private continueCombo(me: Fighter, opp: Fighter, toward: number, order: (c: AiCommand) => void): void {
     const move = me.move!;
     if (this.lastMove !== move) {
       this.lastMove = move;
       this.rolled = false;
+      this.followed = false;
     }
+    this.tryFollowUp(me);
     if (!me.connected || this.rolled) return;
     this.rolled = true;
     if (!opp.inHit || Math.random() >= this.comboRate) return;

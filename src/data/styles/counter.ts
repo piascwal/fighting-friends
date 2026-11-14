@@ -88,6 +88,8 @@ export const counter: StyleDef = {
   id: 'counter',
   label: 'Maître du contre',
   hint: 'Garde qui renvoie les coups, paume de souffle',
+  archetype: 'Contre',
+  tags: ['Contre', 'Projectile', 'Multi-coups'],
   stats: { hp: 1000, speed: 4.5, jump: 23, power: 1 },
   names: { s1: 'Garde de fer', s2: 'Paume de souffle', super: 'CENT PAUMES' },
   moves: moveSet({

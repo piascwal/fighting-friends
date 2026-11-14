@@ -79,6 +79,8 @@ export const kicker: StyleDef = {
   id: 'kicker',
   label: 'Taekwondo',
   hint: 'Pieds fouettés, coup de pied de hache',
+  archetype: 'Agresseur',
+  tags: ['Multi-coups', 'Casse-garde', 'Ruée'],
   stats: { hp: 950, speed: 4.8, jump: 25, power: 0.95 },
   names: { s1: 'Pieds fouettés', s2: 'Coup de pied de hache', super: 'HÉLICE' },
   moves: moveSet({

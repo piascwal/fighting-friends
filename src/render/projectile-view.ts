@@ -41,7 +41,8 @@ export function drawProjectile(ctx: Ctx, p: Projectile): void {
 /** Particules laissées dans le sillage d'un projectile. */
 export function emitProjectileTrail(fx: Fx, p: Projectile): void {
   const { def } = p;
-  if (def.look === 'spike' || def.look === 'bolt') return; // projectiles fixes : pas de traînée
+  // projectiles fixes : pas de traînée
+  if (def.look === 'spike' || def.look === 'bolt' || def.look === 'mine' || def.look === 'beam') return;
   if (def.fx === 'fire') {
     fx.add({
       type: 'smoke',

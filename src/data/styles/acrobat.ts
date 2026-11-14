@@ -82,6 +82,8 @@ export const acrobat: StyleDef = {
   id: 'acrobat',
   label: 'Voltigeur',
   hint: 'Vrille anti-aérienne, glissade sous les projectiles',
+  archetype: 'Aérien',
+  tags: ['Anti-aérien', 'Coup bas', 'Invincible'],
   stats: { hp: 900, speed: 5.4, jump: 26, power: 0.9 },
   names: { s1: 'Vrille', s2: 'Glissade', super: 'TORNADE' },
   moves: moveSet({

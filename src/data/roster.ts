@@ -36,6 +36,11 @@ export const roster: Character[] = BASE_CHARACTERS.map(makeCharacter);
 
 export const characterById = (id: string): Character | undefined => roster.find((c) => c.id === id);
 
+/** Personnages qui utilisent ce style (sauf `except`) : pour éviter d'avoir deux fois le même. */
+export function styleUsers(style: StyleId, except?: Character): Character[] {
+  return roster.filter((c) => c.styleId === style && c !== except);
+}
+
 /** Ajoute un personnage, ou remplace celui qui porte déjà cet identifiant. */
 export function addCharacter(def: CharacterDef): Character {
   const char = makeCharacter(def);

@@ -52,6 +52,8 @@ export const storm: StyleDef = {
   id: 'storm',
   label: 'Tempête',
   hint: 'Foudre à distance, pas éclair',
+  archetype: 'Zoneur',
+  tags: ['À distance', 'Téléportation', 'Invincible'],
   stats: { hp: 920, speed: 4.4, jump: 24, power: 1 },
   names: { s1: 'Foudre', s2: "Pas de l'éclair", super: 'ORAGE' },
   moves: moveSet({

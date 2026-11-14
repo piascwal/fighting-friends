@@ -60,6 +60,8 @@ export const heavy: StyleDef = {
   id: 'heavy',
   label: 'Lourd',
   hint: 'Onde de choc au sol, charge blindée',
+  archetype: 'Puissant',
+  tags: ['Projectile', 'Armure', 'Coup bas'],
   stats: { hp: 1150, speed: 3.9, jump: 22, power: 1.15 },
   names: { s1: 'Onde de choc', s2: 'Bélier', super: 'SÉISME' },
   moves: moveSet({

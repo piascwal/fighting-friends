@@ -58,6 +58,8 @@ export const balanced: StyleDef = {
   id: 'balanced',
   label: 'Équilibré',
   hint: 'Boule de feu, uppercut enflammé',
+  archetype: 'Polyvalent',
+  tags: ['Projectile', 'Anti-aérien', 'Invincible'],
   stats: { hp: 1000, speed: 4.7, jump: 24, power: 1 },
   names: { s1: 'Boule de feu', s2: 'Comète ascendante', super: 'BRASIER FINAL' },
   moves: moveSet({

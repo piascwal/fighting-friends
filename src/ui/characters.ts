@@ -7,7 +7,14 @@ import { pick } from '../core/math';
 import { escapeHtml, slug } from '../core/text';
 import { buildPrompt, spritePosesFor } from '../data/prompts';
 import { SPRITE_BY_KEY, SPRITE_POSES, type SpritePoseSpec } from '../data/sprite-poses';
-import { addCharacter, characterById, removeCharacter, restyleCharacter, roster } from '../data/roster';
+import {
+  addCharacter,
+  characterById,
+  removeCharacter,
+  restyleCharacter,
+  roster,
+  styleUsers,
+} from '../data/roster';
 import { STYLE_LIST } from '../data/styles';
 import type { Character, StyleId } from '../data/types';
 import { STAGE_COUNT } from '../render/stages';
@@ -36,6 +43,7 @@ export const CHARACTERS_HTML = `
         <label>Couleur <input type="color" id="edCol"></label>
         <button class="nav sm alt" id="edDel">SUPPRIMER LE PERSONNAGE</button>
       </div>
+      <div id="styleNote"></div>
       <div id="chInfo"></div>
       <div class="row">
         <button class="nav sm" id="chCopyAll">COPIER TOUS LES PROMPTS MANQUANTS</button>
@@ -87,10 +95,24 @@ let missingOnly = false;
 
 const selected = (): Character => characterById(selectedId ?? '') ?? roster[0]!;
 
-function fillStyleSelect(select: HTMLSelectElement, value?: StyleId): void {
-  select.innerHTML = STYLE_LIST.map((s) => `<option value="${s.id}">${s.label} — ${s.hint}</option>`).join(
-    '',
-  );
+/**
+ * Liste des styles : les styles libres d'abord, puis ceux déjà pris (avec le nom de qui les a),
+ * pour que chaque personnage ait de préférence un style à lui.
+ * @param owner personnage dont on choisit le style (son propre style compte comme libre pour lui)
+ */
+function fillStyleSelect(select: HTMLSelectElement, value?: StyleId, owner?: Character): void {
+  const option = (s: (typeof STYLE_LIST)[number]) => {
+    const users = styleUsers(s.id, owner).map((c) => c.name);
+    const taken = users.length ? ` · pris par ${users.join(', ')}` : '';
+    return `<option value="${s.id}">${escapeHtml(`${s.label} (${s.archetype}) — ${s.hint}${taken}`)}</option>`;
+  };
+  const free = STYLE_LIST.filter((s) => !styleUsers(s.id, owner).length);
+  const taken = STYLE_LIST.filter((s) => styleUsers(s.id, owner).length);
+  select.innerHTML =
+    `<optgroup label="Styles libres">${free.map(option).join('')}</optgroup>` +
+    (taken.length ? `<optgroup label="Déjà pris">${taken.map(option).join('')}</optgroup>` : '');
+  // nouveau personnage : on propose d'emblée le premier style libre
+  select.value = value ?? free[0]?.id ?? STYLE_LIST[0]!.id;
   if (value) select.value = value;
 }
 
@@ -105,7 +127,8 @@ function refresh(): void {
   select.value = char.id;
 
   // style et couleur se changent pour tous ; seul un personnage créé sur cet appareil se supprime
-  fillStyleSelect($<HTMLSelectElement>('#edStyle'), char.styleId);
+  fillStyleSelect($<HTMLSelectElement>('#edStyle'), char.styleId, char);
+  $('#styleNote').innerHTML = styleNote(char);
   $<HTMLInputElement>('#edCol').value = char.color;
   $('#edDel').classList.toggle('hidden', !(char.custom && !char.repo));
 
@@ -167,6 +190,18 @@ function poseCard(char: Character, spec: SpritePoseSpec, extraBadge?: string): H
   );
   card.addEventListener('click', () => openPoseModal(char, spec.key, refresh));
   return card;
+}
+
+/** Ce que permet le style choisi, et un avertissement s'il est déjà celui d'un autre personnage. */
+function styleNote(char: Character): string {
+  const { style } = char;
+  const tags = style.tags.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+  const others = styleUsers(char.styleId, char).map((c) => c.name);
+  const warning = others.length
+    ? `<div class="warn">⚠ Ce style est aussi celui de ${escapeHtml(others.join(', '))}. Un style libre rendra les combats plus variés.</div>`
+    : '';
+  const names = `${style.names.s1} · ${style.names.s2} · super ${style.names.super}`;
+  return `<div class="styleInfo"><b>${escapeHtml(style.archetype)}</b> ${tags}<div class="moves">${escapeHtml(names)}</div>${warning}</div>`;
 }
 
 function createCharacter(): void {
