@@ -41,6 +41,12 @@ export const SOUNDS: Record<SfxName, (s: Synth) => void> = {
     noise(s, { dur: 0.14, vol: 0.5, freq: 5200, q: 2.5, filter: 'highpass' });
     tone(s, { type: 'sawtooth', from: 1800, to: 500, dur: 0.1, vol: 0.1 });
   },
+  ice(s) {
+    // cristal qui se brise
+    tone(s, { type: 'triangle', from: 2400, to: 1200, dur: 0.18, vol: 0.14 });
+    tone(s, { type: 'triangle', from: 3100, to: 1600, dur: 0.14, vol: 0.1, delay: 0.03 });
+    noise(s, { dur: 0.16, vol: 0.35, freq: 6000, q: 2, filter: 'highpass' });
+  },
   special(s) {
     tone(s, { type: 'sawtooth', from: 200, to: 700, dur: 0.2, vol: 0.2 });
     noise(s, { dur: 0.2, vol: 0.25, freq: 2000 });

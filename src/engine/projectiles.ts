@@ -12,6 +12,7 @@ export interface Projectile {
   x: number;
   y: number;
   vx: number;
+  vy: number;
   /** Sens de déplacement : 1 = droite. */
   dir: number;
   /** Touches restantes. */
@@ -42,6 +43,7 @@ export function createProjectile(owner: Fighter, def: ProjectileDef): Projectile
     x: owner.x + owner.facing * (def.x ?? 70) * s,
     y: GROUND_Y + def.y * s,
     vx: def.vx * owner.facing,
+    vy: def.vy ?? 0,
     dir: owner.facing,
     hits: def.hits ?? 1,
     cooldown: 0,
@@ -60,12 +62,24 @@ export function projectileBox(p: Projectile): Rect {
 export function updateProjectiles(list: Projectile[], emit: Emit, onHit: OnHit): Projectile[] {
   for (const p of list) {
     p.x += p.vx;
+    if (p.def.gravity) {
+      // lancé en cloche : retombe, et se brise en touchant le sol
+      p.vy += p.def.gravity;
+      p.y += p.vy;
+      if (p.y >= GROUND_Y - 8) {
+        p.hits = 0;
+        emit({ type: 'impact', x: p.x, y: GROUND_Y - 8, fx: p.def.fx, power: 40, dir: p.dir });
+        emit({ type: 'sfx', name: 'block' });
+      }
+    }
     p.age++;
     p.cooldown--;
     hitTarget(p, onHit);
     clash(p, list, emit);
   }
-  return list.filter((p) => p.hits > 0 && p.x > -150 && p.x < STAGE_W + 150 && p.age <= MAX_AGE);
+  return list.filter(
+    (p) => p.hits > 0 && p.x > -150 && p.x < STAGE_W + 150 && p.age <= (p.def.life ?? MAX_AGE),
+  );
 }
 
 function hitTarget(p: Projectile, onHit: OnHit): void {
@@ -88,10 +102,12 @@ function hitTarget(p: Projectile, onHit: OnHit): void {
   };
   const result = applyHit(target, p.owner, hit, p.dir, true);
   if (!result) return;
-  p.hits--;
+  // absorbé par une garde de contre : le projectile disparaît et ne compte pas comme réussi
+  const countered = result === 'counter';
+  p.hits = countered ? 0 : p.hits - 1;
   p.cooldown = REHIT_DELAY;
   // le lanceur peut enchaîner (ex. boule de feu ▸ super) si son projectile touche pendant son animation
-  if (p.owner.state === 'attack' && p.owner.move?.proj) p.owner.connected = true;
+  if (!countered && p.owner.state === 'attack' && p.owner.move?.proj) p.owner.connected = true;
   onHit(
     p.owner,
     target,

@@ -37,8 +37,17 @@ La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**
 5. **Exporter .zip**, déposer le dossier obtenu dans `public/assets/characters/` et ajouter son nom dans
    `public/assets/characters/index.json` (ex. `["matheo"]`) pour que le personnage soit livré avec le jeu.
 
-Un dossier `public/assets/characters/<id>/` contient `character.json` et un PNG par pose (`idle.png`,
-`punch_light.png`… — liste dans `src/data/sprite-poses.ts`). Les PNG peuvent être détourés ou sur fond magenta.
+Un dossier `public/assets/characters/<id>/` contient `character.json` (style, couleur, réglages et liste des
+fichiers) et une image par pose, en WebP (`idle.webp`, `punch_light.webp`… — liste dans
+`src/data/sprite-poses.ts` et `src/data/special-poses.ts`). Les images importées sont compressées
+automatiquement : 5 fois plus légères qu'en PNG, sans différence visible.
+
+Chaque personnage peut aussi avoir son **décor** : carte « Décor » dans l'écran des sprites, avec un prompt à
+compléter par la description de la scène et une image guide qui fixe le sol et la taille des combattants.
+
+**12 styles de combat** (Équilibré, Rapide, Lourd, Technique, Lutteur, Maître du contre, Givre, Voltigeur,
+Boxeur, Taekwondo, Tempête, Poing ivre). Changer le style d'un personnage ne fait perdre aucune image : celles
+du nouveau style apparaissent comme manquantes, celles de l'ancien restent conservées.
 
 ## Installer le jeu sur un téléphone
 

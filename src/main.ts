@@ -1,6 +1,8 @@
 /* Démarrage : chargement des données, mise à l'échelle de l'écran, boucle principale. */
 import './style.css';
-import { loadCustomCharacters, loadRepoCharacters } from './assets/character-files';
+import { setBackground } from './audio/audio';
+import { applyOverrides, loadCustomCharacters, renameLegacySprite } from './assets/character-files';
+import { loadRepoCharacters } from './assets/repo-characters';
 import { loadLocalSprites } from './assets/sprite-store';
 import { FPS, VIEW_H, VIEW_W } from './core/constants';
 import { isPortrait, isTouchDevice } from './core/display';
@@ -62,8 +64,9 @@ function frame(now: number): void {
 async function boot(): Promise<void> {
   loadCustomCharacters();
   // les sprites sont un plus : si leur chargement échoue, le jeu démarre avec les pantins
-  await loadLocalSprites().catch(() => {});
+  await loadLocalSprites(renameLegacySprite).catch(() => {});
   await loadRepoCharacters().catch(() => {});
+  applyOverrides();
 
   input.init();
   input.onPause = () => gameState.togglePause();
@@ -81,7 +84,11 @@ async function boot(): Promise<void> {
   window.addEventListener('keydown', (event) => {
     if ((event.code === 'Enter' || event.code === 'Space') && !currentScreen()) gameState.skip();
   });
+  // quand on passe à une autre appli : musique coupée et combat en pause
+  window.addEventListener('pagehide', () => setBackground(true));
+  window.addEventListener('pageshow', () => setBackground(document.hidden));
   document.addEventListener('visibilitychange', () => {
+    setBackground(document.hidden);
     if (document.hidden && !gameState.paused) gameState.togglePause();
   });
   requestAnimationFrame(frame);

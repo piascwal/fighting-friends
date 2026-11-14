@@ -7,13 +7,26 @@ const shadowBlade = (heavy: boolean) =>
   special({
     name: "Lame d'ombre",
     total: 28,
-    sprite: 'special1',
+    sprite: 'sp_blade_throw',
     anim: [
       [0, 'windP', 0.9],
       [5, 'throwS', 1],
       [18, 'idle', 0.35],
     ],
-    proj: { t: 6, vx: heavy ? 19 : 14, y: -130, w: 44, h: 34, dmg: 52, hs: 17, bs: 12, kb: 5, fx: 'slash' },
+    proj: {
+      t: 6,
+      vx: heavy ? 19 : 14,
+      look: 'blade',
+      sprite: 'pj_blade',
+      y: -130,
+      w: 44,
+      h: 34,
+      dmg: 52,
+      hs: 17,
+      bs: 12,
+      kb: 5,
+      fx: 'slash',
+    },
   });
 
 /** Disparaît puis retombe en coup de pied : devant l'adversaire (léger) ou dans son dos (fort). */
@@ -23,7 +36,7 @@ const phantomDrop = (heavy: boolean) =>
     total: 90,
     landRec: 8,
     inv: [0, 9],
-    sprite: 'special2',
+    sprite: 'sp_dive_kick',
     trail: true,
     anim: [
       [0, 'crouch', 0.9],
@@ -79,16 +92,8 @@ export const tech: StyleDef = {
   id: 'tech',
   label: 'Technique',
   hint: 'Lame à distance, téléportation plongeante',
-  stats: { hp: 950, speed: 5.2, jump: 21, power: 0.95 },
+  stats: { hp: 950, speed: 5.2, jump: 25, power: 0.95 },
   names: { s1: "Lame d'ombre", s2: 'Chute fantôme', super: 'NUIT SANS FIN' },
-  spriteDesc: {
-    special1:
-      "lancer d'un projectile : buste engagé, bras avant tendu vers l'avant main ouverte comme s'il venait de lancer une lame, l'autre bras tiré en arrière (ne dessine PAS le projectile)",
-    special2:
-      "coup de pied plongeant : en l'air (aucun sol visible), corps en diagonale, une jambe tendue pointée vers le bas et l'avant, l'autre repliée, bras en arrière",
-    projectile: "une lame d'énergie tranchante en forme de croissant, avec une courte traînée vers la gauche",
-  },
-  spriteRig: { special1: 'throwS', special2: 'diveK' },
   moves: moveSet({
     ...NORMALS,
     s1l: shadowBlade(false),

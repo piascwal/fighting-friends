@@ -1,0 +1,145 @@
+{
+  "id": "lolo",
+  "name": "LOLO",
+  "style": "tech",
+  "color": "#3d9bff",
+  "title": "Nouveau challenger",
+  "quote": "À qui le tour ?",
+  "files": {
+    "block": "block.webp",
+    "crouch": "crouch.webp",
+    "crouch_block": "crouch_block.webp",
+    "crouch_kick": "crouch_kick.webp",
+    "crouch_punch": "crouch_punch.webp",
+    "down": "down.webp",
+    "fall": "fall.webp",
+    "hit": "hit.webp",
+    "idle": "idle.webp",
+    "intro": "intro.webp",
+    "jump": "jump.webp",
+    "jump_kick": "jump_kick.webp",
+    "jump_punch": "jump_punch.webp",
+    "kick_heavy": "kick_heavy.webp",
+    "kick_light": "kick_light.webp",
+    "portrait": "portrait.webp",
+    "punch_heavy": "punch_heavy.webp",
+    "punch_light": "punch_light.webp",
+    "uppercut": "uppercut.webp",
+    "walk1": "walk1.webp",
+    "walk2": "walk2.webp",
+    "win": "win.webp"
+  },
+  "adjust": {
+    "block": {
+      "s": 1,
+      "dx": -3,
+      "dy": 0
+    },
+    "crouch": {
+      "s": 1.19,
+      "dx": 38,
+      "dy": 0
+    },
+    "crouch_block": {
+      "s": 1.03,
+      "dx": 27,
+      "dy": 0
+    },
+    "crouch_kick": {
+      "s": 1.31,
+      "dx": -30,
+      "dy": 0
+    },
+    "crouch_punch": {
+      "s": 1.02,
+      "dx": 29,
+      "dy": 0
+    },
+    "down": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "fall": {
+      "s": 1.09,
+      "dx": -4,
+      "dy": 0
+    },
+    "hit": {
+      "s": 1.01,
+      "dx": -12,
+      "dy": 0
+    },
+    "idle": {
+      "s": 1,
+      "dx": 4,
+      "dy": 0
+    },
+    "intro": {
+      "s": 1.02,
+      "dx": 0,
+      "dy": 0
+    },
+    "jump": {
+      "s": 1.01,
+      "dx": 11,
+      "dy": 0
+    },
+    "jump_kick": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "jump_punch": {
+      "s": 1.01,
+      "dx": 10,
+      "dy": 0
+    },
+    "kick_heavy": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "kick_light": {
+      "s": 1.01,
+      "dx": -19,
+      "dy": 0
+    },
+    "portrait": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "punch_heavy": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "punch_light": {
+      "s": 1.01,
+      "dx": 19,
+      "dy": 0
+    },
+    "uppercut": {
+      "s": 1.03,
+      "dx": -14,
+      "dy": 0
+    },
+    "walk1": {
+      "s": 1,
+      "dx": 10,
+      "dy": 0
+    },
+    "walk2": {
+      "s": 0.99,
+      "dx": 6,
+      "dy": 0
+    },
+    "win": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    }
+  },
+  "updated": 1794652551918
+}

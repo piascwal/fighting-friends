@@ -7,7 +7,7 @@ const shockwave = (heavy: boolean) =>
   special({
     name: 'Onde de choc',
     total: 40,
-    sprite: 'special1',
+    sprite: 'sp_ground_slam',
     anim: [
       [0, 'windSlam', 0.8],
       [9, 'slam', 1],
@@ -17,6 +17,8 @@ const shockwave = (heavy: boolean) =>
     proj: {
       t: 12,
       vx: heavy ? 12 : 8.5,
+      look: 'wave',
+      sprite: 'pj_shockwave',
       x: 60,
       y: -34,
       w: 70,
@@ -36,7 +38,7 @@ const ram = (heavy: boolean) =>
     total: 40,
     trail: true,
     armor: [2, 20],
-    sprite: 'special2',
+    sprite: 'sp_shoulder_charge',
     anim: [
       [0, 'windP', 0.9],
       [4, 'shoulder', 1],
@@ -58,17 +60,8 @@ export const heavy: StyleDef = {
   id: 'heavy',
   label: 'Lourd',
   hint: 'Onde de choc au sol, charge blindée',
-  stats: { hp: 1150, speed: 3.9, jump: 19, power: 1.15 },
+  stats: { hp: 1150, speed: 3.9, jump: 22, power: 1.15 },
   names: { s1: 'Onde de choc', s2: 'Bélier', super: 'SÉISME' },
-  spriteDesc: {
-    special1:
-      "frappe du sol : buste complètement plié vers l'avant, les deux poings écrasés ensemble contre le sol devant ses pieds, genoux fléchis",
-    special2:
-      "charge à l'épaule : corps penché vers l'avant, épaule avant en bélier, bras repliés contre le torse, tête rentrée, en pleine course",
-    projectile:
-      'une onde de choc qui court au ras du sol : éclats de roche et poussière soulevés en forme de vague',
-  },
-  spriteRig: { special1: 'slam', special2: 'shoulder' },
   moves: moveSet({
     ...NORMALS,
     s1l: shockwave(false),
@@ -78,7 +71,7 @@ export const heavy: StyleDef = {
     super: superMove({
       name: 'SÉISME',
       total: 62,
-      sprite: 'special1',
+      sprite: 'sp_ground_slam',
       anim: [
         [0, 'charge', 0.8],
         [5, 'windSlam', 0.9],
@@ -99,6 +92,8 @@ export const heavy: StyleDef = {
       proj: {
         t: 15,
         vx: 15,
+        look: 'wave',
+        sprite: 'pj_shockwave',
         x: 110,
         y: -60,
         w: 110,

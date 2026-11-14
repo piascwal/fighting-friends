@@ -42,6 +42,7 @@ const PALETTES: Record<HitFx | 'block', Palette> = {
   elec: ['#fff', '#8ff7ff', '#2aa8ff'],
   earth: ['#fff', '#e8c98a', '#9a6a3a'],
   slash: ['#fff', '#d8b4ff', '#8a3bff'],
+  ice: ['#fff', '#bfe9ff', '#3b9cff'],
   block: ['#fff', '#9fd8ff', '#3b7bff'],
 };
 const CONFETTI = ['#ff3d7f', '#ffd23a', '#19c6c6', '#fff', '#a25bff', '#7dff6a'];

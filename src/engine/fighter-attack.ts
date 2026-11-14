@@ -7,7 +7,12 @@ import type { MoveDef, MoveId } from '../data/types';
 import { JUMPSQUAT_FRAMES, type Fighter } from './fighter';
 
 export function startMove(f: Fighter, id: MoveId): void {
-  const move = f.moves[id];
+  startMoveDef(f, f.moves[id]);
+}
+
+/** Lance un coup à partir de sa définition (sert aussi aux ripostes, qui ne sont pas dans la liste des coups). */
+export function startMoveDef(f: Fighter, move: MoveDef): void {
+  const id = move.id;
   const chaining = f.state === 'attack';
   if (f.grounded && !chaining) f.faceOpponent();
   f.chain = chaining && f.move?.id === id ? f.chain + 1 : 0;
@@ -41,12 +46,16 @@ function applyAnim(f: Fighter, move: MoveDef, frame: number): void {
   }
 }
 
-function teleport(f: Fighter, mode: 'near' | 'front' | 'behind'): void {
+function teleport(f: Fighter, mode: NonNullable<MoveDef['tele']>['mode']): void {
   const { emit } = f.world;
   emit({ type: 'dust', x: f.x, y: GROUND_Y, dir: 0, count: 8 });
   if (mode === 'near') {
     // réapparaît au sol, au contact
     f.x = f.opp.x - f.facing * 88;
+  } else if (mode === 'cross') {
+    // passe dans le dos de l'adversaire, au sol, et se retourne
+    f.x = f.opp.x + f.facing * 90;
+    f.faceOpponent();
   } else {
     // réapparaît en l'air, devant ou derrière l'adversaire, et plonge sur lui
     const side = mode === 'behind' ? 1 : -1;
@@ -96,6 +105,7 @@ export function runAttack(f: Fighter): void {
   // lanceur : maintenir ↑ quand il touche enchaîne sur un saut
   if (move.jc && f.connected && f.ctrl.y < 0 && f.grounded) {
     f.jumpDir = f.ctrl.x;
+    f.pursuit = true;
     f.setState('jumpsquat');
     f.t = JUMPSQUAT_FRAMES;
     return;

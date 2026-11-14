@@ -7,20 +7,33 @@ const fireball = (heavy: boolean) =>
   special({
     name: 'Boule de feu',
     total: 34,
-    sprite: 'special1',
+    sprite: 'sp_energy_cast',
     anim: [
       [0, 'windCast', 0.9],
       [6, 'cast', 1],
       [24, 'idle', 0.35],
     ],
-    proj: { t: 9, vx: heavy ? 14 : 9.5, y: -128, w: 46, h: 40, dmg: 70, hs: 20, bs: 14, kb: 7, fx: 'fire' },
+    proj: {
+      t: 9,
+      vx: heavy ? 14 : 9.5,
+      look: 'fire',
+      sprite: 'pj_fireball',
+      y: -128,
+      w: 46,
+      h: 40,
+      dmg: 70,
+      hs: 20,
+      bs: 14,
+      kb: 7,
+      fx: 'fire',
+    },
   });
 
 const risingUppercut = (heavy: boolean) =>
   special({
     name: 'Comète ascendante',
     total: 60,
-    sprite: 'special2',
+    sprite: 'sp_rising_uppercut',
     landRec: 10,
     inv: [0, 7],
     trail: true,
@@ -45,17 +58,8 @@ export const balanced: StyleDef = {
   id: 'balanced',
   label: 'Équilibré',
   hint: 'Boule de feu, uppercut enflammé',
-  stats: { hp: 1000, speed: 4.7, jump: 20, power: 1 },
+  stats: { hp: 1000, speed: 4.7, jump: 24, power: 1 },
   names: { s1: 'Boule de feu', s2: 'Comète ascendante', super: 'BRASIER FINAL' },
-  spriteDesc: {
-    special1:
-      "lancer d'une boule d'énergie : jambes en fente, buste engagé, les deux bras tendus vers l'avant, paumes ouvertes jointes devant lui (ne dessine PAS la boule d'énergie)",
-    special2:
-      "uppercut sauté : en l'air, corps étiré en diagonale vers le haut, un poing levé très haut au-dessus de la tête, un genou relevé (aucun sol visible)",
-    projectile:
-      "une boule de feu / d'énergie incandescente avec une courte traînée de flammes vers la gauche",
-  },
-  spriteRig: { special1: 'cast', special2: 'upper' },
   moves: moveSet({
     ...NORMALS,
     s1l: fireball(false),
@@ -65,7 +69,7 @@ export const balanced: StyleDef = {
     super: superMove({
       name: 'BRASIER FINAL',
       total: 52,
-      sprite: 'special1',
+      sprite: 'sp_energy_cast',
       anim: [
         [0, 'charge', 0.8],
         [8, 'cast', 1],
@@ -74,6 +78,8 @@ export const balanced: StyleDef = {
       proj: {
         t: 11,
         vx: 16,
+        look: 'fire',
+        sprite: 'pj_fireball',
         y: -130,
         w: 120,
         h: 110,

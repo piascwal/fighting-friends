@@ -7,7 +7,7 @@ import {
   spriteEntry,
 } from '../assets/sprite-store';
 import { POSES } from '../data/poses';
-import { buildPrompt, guidePose } from '../data/prompts';
+import { buildPrompt, buildStagePrompt, guidePose } from '../data/prompts';
 import { SPRITE_BY_KEY, type SpriteKey, type SpritePoseSpec } from '../data/sprite-poses';
 import type { Character } from '../data/types';
 import { drawRig, drawRigPortrait } from '../render/rig';
@@ -30,7 +30,11 @@ export const POSE_MODAL_HTML = `
         </div>
       </div>
       <div class="mright">
-        <div class="lbl">1. Prompt à coller dans ton IA d'images, avec l'image de référence du personnage :</div>
+        <div class="hidden" id="mStageBox">
+          <div class="lbl">Décris ta scène : ce texte complète la fin du prompt (enregistré pour ce personnage).</div>
+          <textarea id="mStageDesc" rows="3" placeholder="ex. un toit de Tokyo la nuit sous la pluie, néons roses et bleus, château d'eau au loin"></textarea>
+        </div>
+        <div class="lbl" id="mPromptLbl">1. Prompt à coller dans ton IA d'images, avec l'image de référence du personnage :</div>
         <textarea id="mPrompt" readonly></textarea>
         <div class="row"><button class="nav sm" id="mCopy">COPIER LE PROMPT</button></div>
         <div class="lbl" id="mGuideLbl">2. Si l'IA ne trouve pas la posture, joins-lui aussi l'image guide (mannequin gris) :</div>
@@ -55,6 +59,41 @@ let onClose: () => void = () => {};
 
 export const isPoseModalOpen = (): boolean => open !== null;
 
+/* Description du décor, propre à chaque personnage, gardée sur l'appareil. */
+const stageDescKey = (charId: string) => `ff-stage-desc:${charId}`;
+function readStageDesc(charId: string): string {
+  try {
+    return localStorage.getItem(stageDescKey(charId)) ?? '';
+  } catch {
+    return '';
+  }
+}
+function saveStageDesc(charId: string, text: string): void {
+  try {
+    localStorage.setItem(stageDescKey(charId), text);
+  } catch {
+    // stockage indisponible : le texte reste dans le prompt pour cette session
+  }
+}
+
+/** Dessine une image entière dans un cadre, en gardant ses proportions. */
+function drawFitted(
+  ctx: Ctx,
+  image: CanvasImageSource & { width: number; height: number },
+  w: number,
+  h: number,
+  margin: number,
+): void {
+  const k = Math.min((w - margin * 2) / image.width, (h - margin * 2) / image.height);
+  ctx.drawImage(
+    image,
+    (w - image.width * k) / 2,
+    (h - image.height * k) / 2,
+    image.width * k,
+    image.height * k,
+  );
+}
+
 /**
  * Vignette d'une pose : l'image fournie si elle existe, sinon la silhouette du pantin en guise de guide.
  * Sert à la grille des poses et à l'aperçu de la fenêtre.
@@ -63,8 +102,12 @@ export function drawPoseThumbnail(ctx: Ctx, size: number, char: Character, spec:
   ctx.clearRect(0, 0, size, size);
   const entry = spriteEntry(char.id, spec.key);
   if (entry) {
-    const k = Math.min((size - 10) / entry.w, (size - 10) / entry.h);
-    ctx.drawImage(entry.img, (size - entry.w * k) / 2, (size - entry.h * k) / 2, entry.w * k, entry.h * k);
+    drawFitted(ctx, entry.img, size, size, 5);
+  } else if (spec.stage) {
+    arcadeText(ctx, 'DÉCOR', size / 2, size / 2, size * 0.2, {
+      colors: ['#666', '#555', '#444'],
+      stroke: '#222',
+    });
   } else if (spec.proj) {
     arcadeText(ctx, '✦', size / 2, size / 2, size * 0.58, {
       colors: ['#666', '#555', '#444'],
@@ -77,7 +120,7 @@ export function drawPoseThumbnail(ctx: Ctx, size: number, char: Character, spec:
     drawRigPortrait(ctx, char.look, size * 0.7);
     ctx.restore();
   } else {
-    const pose = POSES[guidePose(char, spec.key)];
+    const pose = POSES[guidePose(spec.key)];
     drawRig(ctx, char.look, pose, size / 2 - 4, size - 8, 1, {
       scale: size / 240 / char.look.h,
       silhouette: 'rgba(255,255,255,.22)',
@@ -91,6 +134,8 @@ function statusHtml(char: Character, spec: SpritePoseSpec): string {
     const origin = entry.src === 'repo' ? 'fournie avec le jeu' : 'importée sur cet appareil';
     return `<span class="okc">✓ Image ${origin}</span>`;
   }
+  if (spec.stage)
+    return '<span class="warn">Pas encore de décor : le jeu utilise un de ses décors dessinés</span>';
   const fallback = !spec.proj && !spec.portrait ? resolveSprite(char.id, spec.key) : null;
   if (fallback) {
     return `<span class="warn">Image manquante — le jeu utilise « ${SPRITE_BY_KEY[fallback.key].label} » à la place</span>`;
@@ -104,10 +149,19 @@ function refresh(): void {
   const spec = SPRITE_BY_KEY[key];
   const entry = spriteEntry(char.id, key);
   $('#mTitle').textContent = spec.label;
-  $<HTMLTextAreaElement>('#mPrompt').value = buildPrompt(char, key);
+  const stage = !!spec.stage;
+  $('#mStageBox').classList.toggle('hidden', !stage);
+  if (stage) $<HTMLTextAreaElement>('#mStageDesc').value = readStageDesc(char.id);
+  $('#mPromptLbl').textContent = stage
+    ? "1. Prompt à coller dans ton IA d'images (l'image de référence du personnage est facultative) :"
+    : "1. Prompt à coller dans ton IA d'images, avec l'image de référence du personnage :";
+  updatePrompt();
+  $('#mGuideLbl').textContent = stage
+    ? "2. Joins aussi l'image guide : elle montre le sol et la taille des combattants à respecter."
+    : "2. Si l'IA ne trouve pas la posture, joins-lui aussi l'image guide (mannequin gris) :";
   $('#mStatus').innerHTML = statusHtml(char, spec);
   // les réglages n'ont de sens que pour une pose de combat déjà fournie
-  $('#mAdj').classList.toggle('hidden', !entry || !!spec.portrait);
+  $('#mAdj').classList.toggle('hidden', !entry || !!spec.portrait || stage);
   $('#mDel').classList.toggle('hidden', !entry || entry.src === 'repo');
   $('#mGuideLbl').classList.toggle('hidden', !open.guide);
   $('#mGuideRow').classList.toggle('hidden', !open.guide);
@@ -118,8 +172,16 @@ function refresh(): void {
   }
 }
 
+function updatePrompt(): void {
+  if (!open) return;
+  const { char, key } = open;
+  $<HTMLTextAreaElement>('#mPrompt').value = SPRITE_BY_KEY[key].stage
+    ? buildStagePrompt(char, readStageDesc(char.id))
+    : buildPrompt(char, key);
+}
+
 export function openPoseModal(char: Character, key: SpriteKey, closed: () => void): void {
-  open = { char, key, guide: renderPoseGuide(char, key) };
+  open = { char, key, guide: renderPoseGuide(key) };
   onClose = closed;
   refresh();
   $('#chModal').classList.remove('hidden');
@@ -150,8 +212,11 @@ export function tickPoseModal(): void {
   const has = !!spriteEntry(char.id, key);
   if (!has && open.guide) {
     // pas encore d'image : on montre l'image guide, exactement celle qui sera copiée
-    const side = Math.min(width, height);
-    ctx.drawImage(open.guide, (width - side) / 2, (height - side) / 2, side, side);
+    drawFitted(ctx, open.guide, width, height, 0);
+    return;
+  }
+  if (spec.stage) {
+    drawFitted(ctx, spriteEntry(char.id, key)!.img, width, height, 0);
     return;
   }
   if (spec.portrait || spec.proj) {
@@ -172,7 +237,7 @@ export function tickPoseModal(): void {
   ctx.stroke();
   ctx.setLineDash([]);
   // image importée : la silhouette guide derrière permet de régler taille et position
-  drawRig(ctx, char.look, POSES[guidePose(char, key)], x, ground, 1, {
+  drawRig(ctx, char.look, POSES[guidePose(key)], x, ground, 1, {
     scale: 1 / char.look.h,
     silhouette: 'rgba(255,255,255,.12)',
   });
@@ -200,6 +265,15 @@ export function initPoseModal(): void {
     if ((event.target as HTMLElement).id === 'chModal') closePoseModal();
   });
   on('#mCopy', () => void copyText($<HTMLTextAreaElement>('#mPrompt').value, 'Prompt copié !'));
+  on(
+    '#mStageDesc',
+    (event) => {
+      if (!open) return;
+      saveStageDesc(open.char.id, (event.target as HTMLTextAreaElement).value);
+      updatePrompt();
+    },
+    'input',
+  );
   on('#mGuideCopy', async () => {
     if (!open?.guide) return;
     if (await copyImage(open.guide)) toast('Image guide copiée : colle-la dans ton IA avec le prompt');

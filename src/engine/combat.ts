@@ -2,6 +2,7 @@
 import { GROUND_Y } from '../core/constants';
 import type { HitDef, Launch } from '../data/types';
 import type { Fighter } from './fighter';
+import { startMoveDef } from './fighter-attack';
 
 export interface Rect {
   x0: number;
@@ -15,7 +16,8 @@ export interface ActiveHit extends Rect {
   hit: HitDef;
 }
 
-export type HitResult = 'hit' | 'block' | 'armor';
+/** counter : le coup a été absorbé par une garde de contre, qui riposte. */
+export type HitResult = 'hit' | 'block' | 'armor' | 'counter';
 
 const MAX_JUGGLE = 8;
 const MIN_DAMAGE_SCALE = 0.3;
@@ -106,6 +108,16 @@ export function applyHit(
   if (isInvulnerable(def)) return null;
   const base = hit.dmg * att.power;
 
+  // une prise ne saisit qu'un adversaire debout au sol
+  if (hit.grab && (!def.grounded || def.state === 'airhit')) return null;
+
+  const counter = def.state === 'attack' ? def.move?.counter : undefined;
+  if (counter && def.ft >= counter.from && def.ft < counter.to) {
+    def.faceOpponent();
+    startMoveDef(def, counter.riposte);
+    return 'counter';
+  }
+
   const armor = def.state === 'attack' ? def.move?.armor : undefined;
   if (armor && def.armorLeft > 0 && def.ft >= armor[0] && def.ft < armor[1]) {
     def.armorLeft--;
@@ -114,7 +126,8 @@ export function applyHit(
     return 'armor';
   }
 
-  const stance = blockStance(def, att.x, hit);
+  // une prise ne se bloque pas
+  const stance = hit.grab ? null : blockStance(def, att.x, hit);
   if (stance) {
     if (special) def.hp = Math.max(1, def.hp - Math.round(base * CHIP_RATIO));
     def.crouching = stance === 'crouch';

@@ -84,6 +84,9 @@ export function drawSprite(
     ctx.translate(0, h / 2);
   }
   ctx.scale(opt.sx ?? 1, sy);
+  // pixel art : agrandi, il reste net (pas de lissage) ; réduit, un lissage de qualité évite le scintillement
+  const onScreen = k * Math.hypot(ctx.getTransform().a, ctx.getTransform().b);
+  ctx.imageSmoothingEnabled = onScreen < 1;
   ctx.imageSmoothingQuality = 'high';
   const image = opt.flash ? whiteSilhouette(entry) : entry.img;
   ctx.drawImage(image, lying ? -w / 2 : -(spec.ax ?? 0.5) * w, -h, w, h);

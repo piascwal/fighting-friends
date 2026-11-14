@@ -9,7 +9,7 @@ export const BUTTONS: readonly Button[] = ['lp', 'hp', 'lk', 'hk'];
 
 /** 'low' se bloque accroupi, 'high' se bloque debout, 'mid' des deux façons. */
 export type HitLevel = 'mid' | 'low' | 'high';
-export type HitFx = 'punch' | 'kick' | 'heavy' | 'fire' | 'elec' | 'earth' | 'slash';
+export type HitFx = 'punch' | 'kick' | 'heavy' | 'fire' | 'elec' | 'earth' | 'slash' | 'ice';
 export type SwooshKind = 'thrust' | 'low' | 'up' | 'down' | 'side';
 
 /** [x, y, largeur, hauteur] relatif aux pieds du combattant, x vers l'avant, y négatif vers le haut. */
@@ -38,12 +38,25 @@ export interface HitDef {
   /** Arrêt sur image à l'impact (sinon valeur par défaut selon les dégâts). */
   stop?: number;
   sw?: SwooshKind;
+  /** Prise : imparable, mais ne saisit qu'un adversaire au sol et debout. */
+  grab?: boolean;
 }
+
+/** Apparence d'un projectile quand le personnage n'a pas fourni d'image pour lui. */
+export type ProjectileLook = 'fire' | 'blade' | 'wave' | 'ice' | 'spike' | 'bolt' | 'bottle' | 'palm';
 
 export interface ProjectileDef {
   /** Frame d'apparition. */
   t: number;
   vx: number;
+  look: ProjectileLook;
+  /** Image du projectile fournie par le personnage (sinon : dessin selon `look`). */
+  sprite?: SpriteKey;
+  /** Durée de vie en frames (projectiles fixes : pic, éclair). */
+  life?: number;
+  /** Vitesse verticale de départ et gravité (projectile lancé en cloche, qui se brise au sol). */
+  vy?: number;
+  gravity?: number;
   /** Décalage de départ par rapport au lanceur. */
   x?: number;
   y: number;
@@ -87,7 +100,8 @@ export interface MoveDef {
   inv?: readonly [from: number, to: number];
   /** Fenêtre pendant laquelle un coup est encaissé sans broncher. */
   armor?: readonly [from: number, to: number];
-  tele?: { t: number; mode: 'near' | 'front' | 'behind' };
+  /** near : au contact · front / behind : retombe en l'air devant / derrière · cross : passe dans son dos, au sol. */
+  tele?: { t: number; mode: 'near' | 'front' | 'behind' | 'cross' };
   /** Fenêtre pendant laquelle le combattant est invisible. */
   vanish?: readonly [from: number, to: number];
   /** Frame d'une secousse d'écran (frappe au sol). */
@@ -106,6 +120,8 @@ export interface MoveDef {
   /** Frames de récupération à l'atterrissage. */
   landRec?: number;
   sfx?: 'special' | 'super';
+  /** Garde de contre : un coup reçu pendant cette fenêtre est absorbé et déclenche la riposte. */
+  counter?: { from: number; to: number; riposte: MoveDef };
 }
 
 export type MoveSet = Record<MoveId, MoveDef>;
@@ -120,7 +136,19 @@ export interface FighterStats {
   power: number;
 }
 
-export type StyleId = 'balanced' | 'fast' | 'heavy' | 'tech';
+export type StyleId =
+  | 'balanced'
+  | 'fast'
+  | 'heavy'
+  | 'tech'
+  | 'grappler'
+  | 'counter'
+  | 'ice'
+  | 'acrobat'
+  | 'boxer'
+  | 'kicker'
+  | 'storm'
+  | 'drunken';
 
 /** Un style de combat : statistiques + jeu de coups. Plusieurs personnages peuvent partager un style. */
 export interface StyleDef {
@@ -129,10 +157,6 @@ export interface StyleDef {
   hint: string;
   stats: FighterStats;
   names: { s1: string; s2: string; super: string };
-  /** Descriptions des poses propres au style, pour les prompts de génération d'images. */
-  spriteDesc: Partial<Record<SpriteKey, string>>;
-  /** Posture du pantin servant de guide pour ces poses. */
-  spriteRig: Partial<Record<SpriteKey, PoseName>>;
   moves: MoveSet;
   /** Préférences de la console quand elle joue ce style. */
   ai: { zoner: number; antiAir: MoveId; ender: MoveId };

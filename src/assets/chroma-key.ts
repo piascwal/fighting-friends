@@ -21,6 +21,8 @@ export function removeMagentaBackground(image: HTMLImageElement | HTMLCanvasElem
   ctx.drawImage(image, 0, 0, w, h);
   const pixels = ctx.getImageData(0, 0, w, h);
   const d = pixels.data;
+  // déjà détourée (export du jeu, image du dépôt) : on ne touche pas aux couleurs, on recadre seulement
+  const keyed = isTransparentCorner(d, w, h);
 
   // boîte englobante de ce qui reste visible
   let x0 = w;
@@ -33,7 +35,7 @@ export function removeMagentaBackground(image: HTMLImageElement | HTMLCanvasElem
     const b = d[i + 2]!;
     const max = Math.max(r, b);
     // magenta = rouge et bleu forts et proches l'un de l'autre, vert faible
-    if (max > 60 && Math.abs(r - b) / max < 0.3) {
+    if (!keyed && max > 60 && Math.abs(r - b) / max < 0.3) {
       const magenta = (Math.min(r, b) - g) / max;
       if (magenta > KEY_FULL) {
         d[i + 3] = 0;
@@ -67,6 +69,27 @@ export function removeMagentaBackground(image: HTMLImageElement | HTMLCanvasElem
   out.height = y1 - y0 + 1;
   out.getContext('2d')!.drawImage(work, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
   return out;
+}
+
+/** Un coin transparent signale une image déjà détourée. */
+function isTransparentCorner(d: Uint8ClampedArray, w: number, h: number): boolean {
+  const corners = [0, w - 1, (h - 1) * w, h * w - 1];
+  return corners.some((p) => d[p * 4 + 3]! < 16);
+}
+
+/** Plus grande largeur conservée pour un décor (affiché au plus sur la largeur d'un grand écran). */
+const STAGE_MAX_WIDTH = 2560;
+
+/** Prépare une image de décor : pas de détourage, seulement réduite si elle est très grande. */
+export function prepareStage(image: HTMLImageElement): HTMLCanvasElement {
+  const k = Math.min(1, STAGE_MAX_WIDTH / image.naturalWidth);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(image.naturalWidth * k);
+  canvas.height = Math.round(image.naturalHeight * k);
+  const ctx = canvas.getContext('2d')!;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return canvas;
 }
 
 export function loadImage(src: string): Promise<HTMLImageElement> {

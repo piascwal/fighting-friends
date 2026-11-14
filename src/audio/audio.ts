@@ -112,6 +112,16 @@ function startMusic(): void {
   timer = setInterval(schedule, 40);
 }
 
+/**
+ * Coupe tout le son quand le jeu passe en arrière-plan (autre appli, écran verrouillé), et le rétablit au retour.
+ * Le contexte audio est suspendu : la musique reprend exactement où elle en était.
+ */
+export function setBackground(hidden: boolean): void {
+  if (!synth) return;
+  if (hidden) void synth.ctx.suspend();
+  else void synth.ctx.resume();
+}
+
 /** Change de musique (null = silence). Sans effet si c'est déjà celle qui joue. */
 export function playMusic(name: MusicName | null): void {
   wanted = name;

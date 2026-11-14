@@ -10,7 +10,7 @@ import { drawCharacter } from '../render/character-draw';
 import { Fx } from '../render/fx';
 import { drawRig } from '../render/rig';
 import { drawSprite } from '../render/sprite-draw';
-import { drawStage, getStage, type Stage } from '../render/stages';
+import { drawStage, stageForCharacter, type Stage } from '../render/stages';
 import { BLUE, WHITE, arcadeText } from '../render/text';
 import type { Scene } from './scene';
 
@@ -34,7 +34,7 @@ export class Ending implements Scene {
     private readonly champion: Character,
     private readonly onDone: () => void,
   ) {
-    this.stage = getStage(champion.stage);
+    this.stage = stageForCharacter(champion);
     playMusic('ending');
   }
 

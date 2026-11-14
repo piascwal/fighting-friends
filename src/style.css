@@ -1030,3 +1030,34 @@ i.b {
     font-size: 12px;
   }
 }
+
+/* sections de la grille des images (poses communes, coups du style, autres styles) */
+.gridTitle {
+  grid-column: 1 / -1;
+  margin: 12px 0 2px;
+  font:
+    800 13px system-ui,
+    sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--y);
+}
+.card.other {
+  border-color: #6a5a9a;
+  opacity: 0.75;
+}
+.card.other .badge {
+  background: #4a3d7a;
+}
+#mStageDesc {
+  width: 100%;
+  background: #0b0618;
+  border: 2px solid var(--y);
+  border-radius: 8px;
+  padding: 9px;
+  font-size: 13px;
+  line-height: 1.4;
+  resize: vertical;
+  -webkit-user-select: text;
+  user-select: text;
+}

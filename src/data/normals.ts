@@ -145,7 +145,12 @@ export const NORMALS: Record<NormalId, MoveSpec> = {
     total: 15,
     air: true,
     sprite: 'jump_punch',
-    anim: [[0, 'jP', 1]],
+    // replié, frappe, puis replié à nouveau : on voit le coup partir et revenir
+    anim: [
+      [0, 'jump', 1],
+      [2, 'jP', 1],
+      [11, 'jump', 0.6],
+    ],
     hits: [hit(3, 10, [5, -120, 78, 72], 36, { hs: 17, bs: 11, kb: 3, lvl: 'high' })],
   },
   jhp: {
@@ -154,7 +159,12 @@ export const NORMALS: Record<NormalId, MoveSpec> = {
     total: 20,
     air: true,
     sprite: 'jump_punch',
-    anim: [[0, 'jP', 1]],
+    // replié, frappe, puis replié à nouveau : on voit le coup partir et revenir
+    anim: [
+      [0, 'jump', 1],
+      [2, 'jP', 1],
+      [16, 'jump', 0.6],
+    ],
     hits: [
       hit(5, 10, [5, -125, 86, 86], 62, { hs: 21, bs: 13, kb: 4, lvl: 'high', fx: 'heavy', sw: 'down' }),
     ],
@@ -165,7 +175,12 @@ export const NORMALS: Record<NormalId, MoveSpec> = {
     total: 16,
     air: true,
     sprite: 'jump_kick',
-    anim: [[0, 'jK', 1]],
+    // replié, frappe, puis replié à nouveau : on voit le coup partir et revenir
+    anim: [
+      [0, 'jump', 1],
+      [2, 'jK', 1],
+      [12, 'jump', 0.6],
+    ],
     hits: [hit(4, 11, [5, -80, 92, 66], 40, { hs: 18, bs: 11, kb: 3, lvl: 'high', fx: 'kick' })],
   },
   jhk: {
@@ -174,7 +189,12 @@ export const NORMALS: Record<NormalId, MoveSpec> = {
     total: 22,
     air: true,
     sprite: 'jump_kick',
-    anim: [[0, 'jK', 1]],
+    // replié, frappe, puis replié à nouveau : on voit le coup partir et revenir
+    anim: [
+      [0, 'jump', 1],
+      [2, 'jK', 1],
+      [18, 'jump', 0.6],
+    ],
     hits: [hit(5, 12, [5, -85, 102, 76], 72, { hs: 22, bs: 14, kb: 6, lvl: 'high', fx: 'heavy' })],
   },
 };

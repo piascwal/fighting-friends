@@ -7,12 +7,13 @@ import { FightSim, type FightMode } from '../engine/fight';
 import { input } from '../input';
 import { bodyScaleOf } from '../render/character-draw';
 import { FightView } from '../render/fight-view';
+import type { Stage } from '../render/stages';
 import type { Scene } from './scene';
 
 export interface FightSceneOptions {
   chars: readonly [Character, Character];
   ais: readonly [Ai | null, Ai | null];
-  stage: number;
+  stage: Stage;
   rounds: number;
   mode: FightMode;
   onEnd?: (winner: number) => void;

@@ -28,7 +28,13 @@ export type FighterState =
   | 'dash'
   | 'lock'; // immobile : introduction, pose de victoire
 
-const GRAVITY = 1.15;
+/** Gravité d'un saut : forte, pour des sauts vifs. */
+const GRAVITY = 1.7;
+/** Gravité d'un coup spécial qui décolle (uppercut, vrille…) : plus douce, pour laisser le temps de frapper. */
+const SPECIAL_GRAVITY = 1.15;
+/** Saut de poursuite après un lanceur : impulsion verticale et vitesse horizontale, identiques pour tous. */
+const PURSUIT_JUMP = 19;
+const PURSUIT_DRIFT = 4;
 export const JUMPSQUAT_FRAMES = 2;
 const KNOCKDOWN_FRAMES = 24;
 const GETUP_FRAMES = 11;
@@ -90,6 +96,8 @@ export class Fighter {
   /** Répétitions consécutives du même coup léger. */
   chain = 0;
   airAttacks = 0;
+  /** Saut de poursuite après un lanceur : plus flottant, pour laisser le temps d'enchaîner en l'air. */
+  pursuit = false;
   /** Coups portés dans le combo en cours, et leurs dégâts cumulés. */
   combo = 0;
   comboDmg = 0;
@@ -155,6 +163,7 @@ export class Fighter {
     this.crouching = this.guard = this.connected = this.shaking = false;
     this.combo = this.comboDmg = this.juggle = this.stun = this.flash = 0;
     this.airAttacks = this.chain = this.armorLeft = this.walkPhase = 0;
+    this.pursuit = false;
     this.visible = true;
     this.used.clear();
     this.hitDone.clear();
@@ -314,8 +323,9 @@ export class Fighter {
 
   private stateJumpsquat(): void {
     if (this.t < JUMPSQUAT_FRAMES) return;
-    this.vy = -this.stats.jump;
-    this.vx = this.jumpDir * this.stats.speed * 1.1;
+    // le saut de poursuite est calé sur le lanceur (même hauteur pour tous) pour rester à portée de l'adversaire
+    this.vy = this.pursuit ? -PURSUIT_JUMP : -this.stats.jump;
+    this.vx = this.jumpDir * (this.pursuit ? PURSUIT_DRIFT : this.stats.speed * 1.35);
     this.y = -1;
     this.airAttacks = 0;
     this.setState('air');
@@ -345,7 +355,7 @@ export class Fighter {
     this.x += this.vx;
     if (this.y < 0 || this.vy < 0) {
       // plus on est repris en l'air, plus on retombe vite
-      this.vy += this.state === 'airhit' ? 0.95 + 0.09 * this.juggle : GRAVITY;
+      this.vy += this.state === 'airhit' ? 0.95 + 0.09 * this.juggle : this.gravity();
       this.y += this.vy;
       if (this.y >= 0) {
         this.y = 0;
@@ -356,7 +366,13 @@ export class Fighter {
     this.x = clamp(this.x, WALL_MARGIN, STAGE_W - WALL_MARGIN);
   }
 
+  private gravity(): number {
+    const special = this.state === 'attack' && !this.move!.air;
+    return special || this.pursuit ? SPECIAL_GRAVITY : GRAVITY;
+  }
+
   private land(): void {
+    this.pursuit = false;
     const { emit } = this.world;
     const dust = (count: number) => emit({ type: 'dust', x: this.x, y: GROUND_Y, dir: 0, count });
     if (this.state === 'airhit') {

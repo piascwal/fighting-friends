@@ -1,11 +1,12 @@
 /* Écran « Personnages & sprites » : créer un personnage, voir les images manquantes, copier les prompts. */
 import { playSfx } from '../audio/audio';
-import { exportCharacterZip, saveCustomCharacters } from '../assets/character-files';
-import { hasSprite, removeCharacterSprites, spriteCount } from '../assets/sprite-store';
+import { exportCharacterZip, saveCharacterSettings, saveCustomCharacters } from '../assets/character-files';
+import { hasSprite, removeCharacterSprites, spriteCount, spriteEntries } from '../assets/sprite-store';
 import { allowAnyOrientation, lockLandscape } from '../core/display';
 import { pick } from '../core/math';
 import { escapeHtml, slug } from '../core/text';
 import { buildPrompt, spritePosesFor } from '../data/prompts';
+import { SPRITE_BY_KEY, SPRITE_POSES, type SpritePoseSpec } from '../data/sprite-poses';
 import { addCharacter, characterById, removeCharacter, restyleCharacter, roster } from '../data/roster';
 import { STYLE_LIST } from '../data/styles';
 import type { Character, StyleId } from '../data/types';
@@ -30,7 +31,7 @@ export const CHARACTERS_HTML = `
         <select id="newStyle"></select>
         <button class="nav sm" id="newOk">CRÉER</button>
       </div>
-      <div class="row hidden" id="chEdit">
+      <div class="row" id="chEdit">
         <label>Style de combat <select id="edStyle"></select></label>
         <label>Couleur <input type="color" id="edCol"></label>
         <button class="nav sm alt" id="edDel">SUPPRIMER LE PERSONNAGE</button>
@@ -59,7 +60,26 @@ export const CHARACTERS_HTML = `
 
 const NEW_COLORS = ['#ff3d7f', '#3d9bff', '#7dff6a', '#ff9d2e', '#c56bff', '#2ee6c8'];
 
-let selectedId: string | null = null;
+/** Dernier personnage travaillé : on y revient directement à la prochaine ouverture de l'écran. */
+const SELECTED_KEY = 'ff-chars-selected';
+let selectedId: string | null = readSelected();
+
+function readSelected(): string | null {
+  try {
+    return localStorage.getItem(SELECTED_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function selectCharacter(id: string | null): void {
+  selectedId = id;
+  try {
+    if (id) localStorage.setItem(SELECTED_KEY, id);
+  } catch {
+    // stockage indisponible : la sélection vaut pour cette session
+  }
+}
 /** Où ramène le bouton Retour : les options par défaut, ou l'écran d'où l'on vient (raccourcis). */
 let goBack: () => void = () => {};
 let defaultBack: () => void = () => {};
@@ -76,7 +96,7 @@ function fillStyleSelect(select: HTMLSelectElement, value?: StyleId): void {
 
 function refresh(): void {
   const char = selected();
-  selectedId = char.id;
+  selectCharacter(char.id);
   const count = (c: Character) => `${spriteCount(c.id)} sprite${spriteCount(c.id) > 1 ? 's' : ''}`;
   const select = $<HTMLSelectElement>('#chSel');
   select.innerHTML = roster
@@ -84,13 +104,10 @@ function refresh(): void {
     .join('');
   select.value = char.id;
 
-  // seuls les personnages créés sur cet appareil sont modifiables
-  const editable = char.custom && !char.repo;
-  $('#chEdit').classList.toggle('hidden', !editable);
-  if (editable) {
-    fillStyleSelect($<HTMLSelectElement>('#edStyle'), char.styleId);
-    $<HTMLInputElement>('#edCol').value = char.color;
-  }
+  // style et couleur se changent pour tous ; seul un personnage créé sur cet appareil se supprime
+  fillStyleSelect($<HTMLSelectElement>('#edStyle'), char.styleId);
+  $<HTMLInputElement>('#edCol').value = char.color;
+  $('#edDel').classList.toggle('hidden', !(char.custom && !char.repo));
 
   const poses = spritePosesFor(char);
   const provided = poses.filter((p) => hasSprite(char.id, p.key)).length;
@@ -103,23 +120,53 @@ function refresh(): void {
 
   const grid = $('#chGrid');
   grid.innerHTML = '';
-  for (const spec of poses) {
-    const has = hasSprite(char.id, spec.key);
-    if (missingOnly && has) continue;
-    const card = document.createElement('button');
-    card.className = `nav card ${has ? 'ok' : spec.req ? 'req' : 'miss'}`;
-    const [canvas, ctx] = newCanvas(120);
-    drawPoseThumbnail(ctx, 120, char, spec);
-    card.appendChild(canvas);
-    const badge = has ? '✓ OK' : spec.req ? 'OBLIGATOIRE' : 'MANQUANT';
-    card.insertAdjacentHTML(
-      'beforeend',
-      `<span class="cl">${escapeHtml(spec.label)}</span><span class="badge">${badge}</span>`,
-    );
-    card.addEventListener('click', () => openPoseModal(char, spec.key, refresh));
-    grid.appendChild(card);
-  }
-  if (!grid.children.length) grid.innerHTML = '<p class="done">Toutes les images sont là. Beau travail !</p>';
+  // la liste donne d'abord les poses communes, puis celles du style
+  const shared = poses.slice(0, SPRITE_POSES.length);
+  const own = poses.slice(SPRITE_POSES.length);
+  addSection(grid, char, 'Poses communes à tous les styles', shared);
+  addSection(grid, char, `Coups spéciaux du style ${char.style.label}`, own);
+  // images d'autres styles : gardées si le personnage change de style, pour pouvoir y revenir
+  const wanted = new Set(poses.map((p) => p.key));
+  const kept = spriteEntries(char.id).filter(([key]) => !wanted.has(key));
+  addSection(
+    grid,
+    char,
+    'Images conservées des autres styles',
+    kept.map(([key]) => SPRITE_BY_KEY[key]),
+    'AUTRE STYLE',
+  );
+  if (!grid.querySelector('.card'))
+    grid.innerHTML = '<p class="done">Toutes les images sont là. Beau travail !</p>';
+}
+
+/** Une section de la grille : un titre, puis une vignette par image. Rien si la section est vide. */
+function addSection(
+  grid: HTMLElement,
+  char: Character,
+  title: string,
+  specs: SpritePoseSpec[],
+  badge?: string,
+): void {
+  const shown = specs.filter((spec) => !(missingOnly && hasSprite(char.id, spec.key) && !badge));
+  if (!shown.length) return;
+  grid.insertAdjacentHTML('beforeend', `<h4 class="gridTitle">${escapeHtml(title)}</h4>`);
+  for (const spec of shown) grid.appendChild(poseCard(char, spec, badge));
+}
+
+function poseCard(char: Character, spec: SpritePoseSpec, extraBadge?: string): HTMLButtonElement {
+  const has = hasSprite(char.id, spec.key);
+  const card = document.createElement('button');
+  card.className = `nav card ${extraBadge ? 'other' : has ? 'ok' : spec.req ? 'req' : 'miss'}`;
+  const [canvas, ctx] = newCanvas(120);
+  drawPoseThumbnail(ctx, 120, char, spec);
+  card.appendChild(canvas);
+  const badge = extraBadge ?? (has ? '✓ OK' : spec.req ? 'OBLIGATOIRE' : 'MANQUANT');
+  card.insertAdjacentHTML(
+    'beforeend',
+    `<span class="cl">${escapeHtml(spec.label)}</span><span class="badge">${badge}</span>`,
+  );
+  card.addEventListener('click', () => openPoseModal(char, spec.key, refresh));
+  return card;
 }
 
 function createCharacter(): void {
@@ -139,7 +186,7 @@ function createCharacter(): void {
     custom: true,
   });
   saveCustomCharacters();
-  selectedId = char.id;
+  selectCharacter(char.id);
   field.value = '';
   $('#chNew').classList.add('hidden');
   refresh();
@@ -152,7 +199,7 @@ async function deleteCharacter(): Promise<void> {
   await removeCharacterSprites(char.id);
   removeCharacter(char);
   saveCustomCharacters();
-  selectedId = null;
+  selectCharacter(null);
   refresh();
 }
 
@@ -188,7 +235,7 @@ export function initCharacters(onBack: () => void): void {
     void lockLandscape();
     goBack();
   });
-  on('#chSel', (e) => ((selectedId = valueOf(e)), refresh()), 'change');
+  on('#chSel', (e) => (selectCharacter(valueOf(e)), refresh()), 'change');
   on('#chNewBtn', () => {
     fillStyleSelect($<HTMLSelectElement>('#newStyle'));
     $('#chNew').classList.toggle('hidden');
@@ -198,8 +245,10 @@ export function initCharacters(onBack: () => void): void {
   on(
     '#edStyle',
     (e) => {
-      restyleCharacter(selected(), valueOf(e) as StyleId);
-      saveCustomCharacters();
+      const char = selected();
+      // les images déjà fournies sont conservées : celles du nouveau style apparaissent comme manquantes
+      restyleCharacter(char, valueOf(e) as StyleId);
+      saveCharacterSettings(char);
       refresh();
     },
     'change',
@@ -210,17 +259,18 @@ export function initCharacters(onBack: () => void): void {
       const char = selected();
       char.color = valueOf(e);
       restyleCharacter(char, char.styleId);
-      saveCustomCharacters();
+      saveCharacterSettings(char);
       refresh();
     },
     'change',
   );
   on('#edDel', () => void deleteCharacter());
   on('#chMiss', (e) => ((missingOnly = (e.target as HTMLInputElement).checked), refresh()), 'change');
-  on('#chZip', () => {
+  on('#chZip', async () => {
     const char = selected();
     if (!spriteCount(char.id)) return toast('Aucune image à exporter pour ce personnage');
-    exportCharacterZip(char);
+    toast('Préparation du fichier…');
+    await exportCharacterZip(char);
   });
   on('#chCopyAll', copyMissingPrompts);
 }

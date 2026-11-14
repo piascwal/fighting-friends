@@ -1,9 +1,10 @@
 /* Les sprites des personnages, en mémoire : images fournies avec le jeu ou importées par le joueur.
-   Les images importées sont aussi enregistrées sur l'appareil (IndexedDB). */
+   Les images importées sont enregistrées sur l'appareil (IndexedDB), compressées (voir image-codec.ts). */
 import { kvStore } from '../core/storage';
-import { SPRITE_BY_KEY, type SpriteKey } from '../data/sprite-poses';
+import { SPRITE_BY_KEY, isSpriteKey, type SpriteKey } from '../data/sprite-poses';
 import type { Character } from '../data/types';
-import { loadImage, removeMagentaBackground } from './chroma-key';
+import { loadImage, prepareStage, removeMagentaBackground } from './chroma-key';
+import { encodeImage, toCanvas } from './image-codec';
 
 /** Réglage manuel d'un sprite : échelle et décalage en pixels monde. */
 export interface SpriteAdjust {
@@ -19,13 +20,20 @@ export interface SpriteEntry {
   adj: SpriteAdjust;
   /** 'repo' = livré avec le jeu, 'local' = importé sur cet appareil. */
   src: 'repo' | 'local';
+  /** Fichier compressé d'origine : réutilisé tel quel (enregistrement, export), jamais recompressé. */
+  blob?: Blob;
+  /** Date d'import sur l'appareil (ms). Absente pour les images importées avant cette information. */
+  at?: number;
   /** Silhouette blanche (flash d'impact), créée à la demande. */
   white?: HTMLCanvasElement;
 }
 
+/** Forme enregistrée dans IndexedDB. `png` : ancien format (data URL), converti au chargement. */
 interface StoredSprite {
-  png: string;
+  blob?: Blob;
+  png?: string;
   adj: SpriteAdjust;
+  at?: number;
 }
 
 const sprites = new Map<string, Map<SpriteKey, SpriteEntry>>();
@@ -48,39 +56,50 @@ export function putSprite(
   key: SpriteKey,
   img: HTMLCanvasElement,
   src: SpriteEntry['src'],
-  adj?: Partial<SpriteAdjust>,
+  extra: { adj?: Partial<SpriteAdjust>; blob?: Blob; at?: number } = {},
 ): void {
   let set = sprites.get(charId);
   if (!set) sprites.set(charId, (set = new Map()));
-  set.set(key, { img, w: img.width, h: img.height, adj: { s: 1, dx: 0, dy: 0, ...adj }, src });
+  const adj = { s: 1, dx: 0, dy: 0, ...extra.adj };
+  set.set(key, { img, w: img.width, h: img.height, adj, src, blob: extra.blob, at: extra.at });
   portraits.delete(charId);
 }
 
-function persist(charId: string, key: SpriteKey): Promise<unknown> {
+const kindOf = (key: SpriteKey) => (SPRITE_BY_KEY[key].stage ? 'stage' : 'sprite');
+
+async function persist(charId: string, key: SpriteKey): Promise<void> {
   const entry = spriteEntry(charId, key);
-  if (!entry) return Promise.resolve();
-  const stored: StoredSprite = { png: entry.img.toDataURL('image/png'), adj: entry.adj };
-  return kvStore.set(storageKey(charId, key), stored);
+  if (!entry) return;
+  entry.blob ??= await encodeImage(entry.img, kindOf(key));
+  const stored: StoredSprite = { blob: entry.blob, adj: entry.adj, at: entry.at };
+  await kvStore.set(storageKey(charId, key), stored);
 }
 
-/** Importe une image choisie par le joueur : détourage, mise en mémoire, enregistrement. */
+/** Importe une image choisie par le joueur : détourage (sauf décor), compression, enregistrement. */
 export async function importSpriteFile(charId: string, key: SpriteKey, file: File): Promise<void> {
   const url = URL.createObjectURL(file);
   try {
-    putSprite(charId, key, removeMagentaBackground(await loadImage(url)), 'local');
+    const image = await loadImage(url);
+    const canvas = SPRITE_BY_KEY[key].stage ? prepareStage(image) : removeMagentaBackground(image);
+    putSprite(charId, key, canvas, 'local', { at: Date.now() });
     await persist(charId, key);
   } finally {
     URL.revokeObjectURL(url);
   }
 }
 
-export const saveSpriteAdjust = (charId: string, key: SpriteKey): Promise<unknown> => persist(charId, key);
+/** Enregistre un nouveau réglage de taille/position (l'image elle-même n'est pas recompressée). */
+export const saveSpriteAdjust = (charId: string, key: SpriteKey): Promise<void> => persist(charId, key);
 
 export async function removeSprite(charId: string, key: SpriteKey): Promise<void> {
   sprites.get(charId)?.delete(key);
   portraits.delete(charId);
   await kvStore.delete(storageKey(charId, key));
 }
+
+/** Supprime la copie enregistrée sur l'appareil (l'image affichée, elle, reste en mémoire). */
+export const forgetStoredSprite = (charId: string, key: SpriteKey): Promise<unknown> =>
+  kvStore.delete(storageKey(charId, key));
 
 export async function removeCharacterSprites(charId: string): Promise<void> {
   const all = await kvStore.entries<StoredSprite>();
@@ -89,22 +108,39 @@ export async function removeCharacterSprites(charId: string): Promise<void> {
   portraits.delete(charId);
 }
 
-/** Recharge les sprites importés lors des sessions précédentes. */
-export async function loadLocalSprites(): Promise<void> {
+async function decode(value: StoredSprite): Promise<HTMLCanvasElement> {
+  if (value.blob) return toCanvas(await createImageBitmap(value.blob));
+  return toCanvas(await loadImage(value.png!));
+}
+
+/**
+ * Recharge les images importées lors des sessions précédentes.
+ * Les images de l'ancien format (PNG non compressé) sont converties une fois pour toutes ;
+ * `rename` permet de reclasser une image enregistrée sous un ancien nom de pose.
+ */
+export async function loadLocalSprites(
+  rename: (charId: string, key: string) => SpriteKey | null,
+): Promise<void> {
   const all = await kvStore.entries<StoredSprite>();
   await Promise.all(
-    all.map(async ({ key, value }) => {
-      const match = /^spr:(.+):([a-z0-9_]+)$/.exec(key);
-      if (!match || !(match[2]! in SPRITE_BY_KEY)) return;
+    all.map(async ({ key: recordKey, value }) => {
+      const match = /^spr:(.+):([a-z0-9_]+)$/.exec(recordKey);
+      if (!match) return;
+      const charId = match[1]!;
+      const key = isSpriteKey(match[2]!) ? match[2] : rename(charId, match[2]!);
+      if (!key) return;
       try {
-        const img = await loadImage(value.png);
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        canvas.getContext('2d')!.drawImage(img, 0, 0);
-        putSprite(match[1]!, match[2] as SpriteKey, canvas, 'local', value.adj);
+        putSprite(charId, key, await decode(value), 'local', {
+          adj: value.adj,
+          blob: value.blob,
+          at: value.at,
+        });
+        if (value.blob && key === match[2]) return;
+        // conversion à l'ancien format ou nouveau nom : on réenregistre, puis on retire l'ancienne copie
+        await persist(charId, key);
+        if (key !== match[2]) await kvStore.delete(recordKey);
       } catch {
-        // image corrompue : on l'ignore, le personnage utilisera une pose de repli
+        // image illisible : on l'ignore, le personnage utilisera une pose de repli
       }
     }),
   );
@@ -132,6 +168,7 @@ export function portraitCanvas(charId: string): HTMLCanvasElement | null {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = PORTRAIT_SIZE;
   const ctx = canvas.getContext('2d')!;
+  ctx.imageSmoothingQuality = 'high';
   if (portrait) {
     const s = Math.max(PORTRAIT_SIZE / portrait.w, PORTRAIT_SIZE / portrait.h);
     ctx.drawImage(portrait.img, (PORTRAIT_SIZE - portrait.w * s) / 2, 0, portrait.w * s, portrait.h * s);

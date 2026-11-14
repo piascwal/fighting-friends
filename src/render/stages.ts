@@ -1,5 +1,8 @@
-/* Décors : préparation à la demande (mise en cache) et affichage avec parallaxe + ambiance animée. */
+/* Décors : soit l'image fournie pour un personnage, soit un décor dessiné par le jeu (préparé à la demande,
+   affiché avec parallaxe et ambiance animée). */
+import { spriteEntry } from '../assets/sprite-store';
 import { STAGE_W, VIEW_H, VIEW_W } from '../core/constants';
+import type { Character } from '../data/types';
 import { rand } from '../core/math';
 import { BACK_W, STAGE_DEFS, type StageDef } from './stage-painters';
 
@@ -12,12 +15,22 @@ interface Mote {
   phase: number;
 }
 
-export interface Stage {
+/** Décor dessiné par le jeu, en deux calques. */
+interface PaintedStage {
+  kind: 'painted';
   def: StageDef;
   back: HTMLCanvasElement;
   front: HTMLCanvasElement;
   motes: Mote[];
 }
+
+/** Décor fourni sous forme d'image (un par personnage). */
+interface ImageStage {
+  kind: 'image';
+  image: HTMLCanvasElement;
+}
+
+export type Stage = PaintedStage | ImageStage;
 
 export const STAGE_COUNT = STAGE_DEFS.length;
 export const randomStageIndex = (): number => Math.floor(Math.random() * STAGE_COUNT);
@@ -25,7 +38,8 @@ export const randomStageIndex = (): number => Math.floor(Math.random() * STAGE_C
 /** Vitesse de défilement du calque lointain par rapport à la caméra. */
 const PARALLAX = 0.35;
 const MOTE_COUNT = 36;
-const cache = new Map<number, Stage>();
+const cache = new Map<number, PaintedStage>();
+const imageStages = new WeakMap<HTMLCanvasElement, ImageStage>();
 
 function layer(width: number): [HTMLCanvasElement, CanvasRenderingContext2D] {
   const canvas = document.createElement('canvas');
@@ -48,13 +62,13 @@ export function getStage(index: number): Stage {
       s: rand(0.5, 1.5),
       phase: rand(6.3),
     }));
-    stage = { def, back, front, motes };
+    stage = { kind: 'painted', def, back, front, motes };
     cache.set(i, stage);
   }
   return stage;
 }
 
-function drawMote(ctx: CanvasRenderingContext2D, stage: Stage, m: Mote, time: number): void {
+function drawMote(ctx: CanvasRenderingContext2D, stage: PaintedStage, m: Mote, time: number): void {
   switch (stage.def.ambience) {
     case 'petal':
       m.x -= 1.2 * m.s;
@@ -101,8 +115,35 @@ function drawMote(ctx: CanvasRenderingContext2D, stage: Stage, m: Mote, time: nu
   if (m.x < -20) m.x = VIEW_W + 10;
 }
 
+/** Décor d'un personnage : l'image qu'il a fournie, sinon son décor dessiné. */
+export function stageForCharacter(char: Character): Stage {
+  const entry = spriteEntry(char.id, 'stage');
+  if (!entry) return getStage(char.stage);
+  let stage = imageStages.get(entry.img);
+  if (!stage) imageStages.set(entry.img, (stage = { kind: 'image', image: entry.img }));
+  return stage;
+}
+
+/**
+ * Image de décor : calée sur la hauteur de l'écran, sol en bas. Si elle est plus large que l'écran,
+ * elle défile avec la caméra ; sinon elle est agrandie pour couvrir toute la largeur.
+ */
+function drawImageStage(ctx: CanvasRenderingContext2D, image: HTMLCanvasElement, camX: number): void {
+  let k = VIEW_H / image.height;
+  if (image.width * k < VIEW_W) k = VIEW_W / image.width;
+  const w = image.width * k;
+  const h = image.height * k;
+  const travel = (w - VIEW_W) * (camX / (STAGE_W - VIEW_W));
+  ctx.save();
+  // pixel art : agrandi sans lissage pour rester net
+  ctx.imageSmoothingEnabled = k * ctx.getTransform().a < 1;
+  ctx.drawImage(image, -travel, VIEW_H - h, w, h);
+  ctx.restore();
+}
+
 /** @param camX bord gauche de l'écran dans le décor */
 export function drawStage(ctx: CanvasRenderingContext2D, stage: Stage, camX: number, time: number): void {
+  if (stage.kind === 'image') return drawImageStage(ctx, stage.image, camX);
   ctx.drawImage(stage.back, -camX * PARALLAX - 4, 0);
   ctx.drawImage(stage.front, -camX, 0);
   for (const mote of stage.motes) drawMote(ctx, stage, mote, time);

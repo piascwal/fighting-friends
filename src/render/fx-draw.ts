@@ -112,7 +112,8 @@ function drawSwoosh(ctx: CanvasRenderingContext2D, p: Of<'swoosh'>, k: number): 
 export function drawParticle(ctx: CanvasRenderingContext2D, p: Particle): void {
   /** Avancement de 0 (naissance) à 1 (disparition). */
   const k = p.t / p.life;
-  const fade = 1 - k;
+  // l'opacité baisse par paliers (et non en douceur) : rendu plus rétro
+  const fade = Math.ceil((1 - k) * 4) / 4;
   ctx.save();
   switch (p.type) {
     case 'burst':

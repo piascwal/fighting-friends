@@ -8,7 +8,7 @@ const lightningDash = (heavy: boolean) =>
     name: 'Éclair',
     total: 32,
     trail: true,
-    sprite: 'special1',
+    sprite: 'sp_dash_punch',
     anim: [
       [0, 'windP', 0.9],
       [4, 'dashP', 1],
@@ -34,7 +34,7 @@ const cyclone = (heavy: boolean) => {
     name: 'Cyclone',
     total: heavy ? 40 : 32,
     trail: true,
-    sprite: 'special2',
+    sprite: 'sp_spin_kick',
     anim: [
       [0, 'windK', 0.9],
       [3, 'spinK', 1],
@@ -93,15 +93,8 @@ export const fast: StyleDef = {
   id: 'fast',
   label: 'Rapide',
   hint: 'Ruée éclair, cyclone de coups de pied',
-  stats: { hp: 900, speed: 5.7, jump: 21, power: 0.9 },
+  stats: { hp: 900, speed: 5.7, jump: 25, power: 0.9 },
   names: { s1: 'Éclair', s2: 'Cyclone', super: 'MILLE ÉCLAIRS' },
-  spriteDesc: {
-    special1:
-      "coup de poing en pleine ruée : corps très penché vers l'avant presque à l'horizontale, bras avant tendu droit devant, jambe arrière tendue loin derrière, comme un sprint",
-    special2:
-      "coup de pied tournoyant : debout sur une jambe, l'autre jambe tendue à l'horizontale à hauteur de poitrine, bras écartés pour l'équilibre, corps en pleine rotation",
-  },
-  spriteRig: { special1: 'dashP', special2: 'spinK' },
   moves: moveSet({
     ...NORMALS,
     s1l: lightningDash(false),

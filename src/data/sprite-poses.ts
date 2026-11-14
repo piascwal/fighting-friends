@@ -1,8 +1,11 @@
 /* Liste des images (sprites) qu'un personnage peut fournir : une image par pose.
+   Ici les poses communes à tous les styles ; les coups spéciaux et projectiles sont dans special-poses.ts.
    Seule « idle » est obligatoire ; une pose absente utilise la première image disponible de sa liste `fb`. */
 import type { PoseName } from './poses';
+import { SPECIAL_POSES, type SpecialSpriteKey } from './special-poses';
 
-export type SpriteKey =
+/** Poses communes, demandées quel que soit le style de combat. */
+export type CommonSpriteKey =
   | 'idle'
   | 'portrait'
   | 'walk1'
@@ -20,15 +23,15 @@ export type SpriteKey =
   | 'uppercut'
   | 'jump_punch'
   | 'jump_kick'
-  | 'special1'
-  | 'special2'
   | 'super'
   | 'hit'
   | 'fall'
   | 'down'
   | 'win'
   | 'intro'
-  | 'projectile';
+  | 'stage';
+
+export type SpriteKey = CommonSpriteKey | SpecialSpriteKey;
 
 export interface SpritePoseSpec {
   key: SpriteKey;
@@ -49,9 +52,12 @@ export interface SpritePoseSpec {
   desc: string | null;
   portrait?: boolean;
   proj?: boolean;
+  /** Décor du personnage : image entière, sans détourage. */
+  stage?: boolean;
 }
 
-export const SPRITE_POSES: readonly SpritePoseSpec[] = [
+/** Poses communes, dans l'ordre d'affichage. */
+export const SPRITE_POSES: readonly (SpritePoseSpec & { key: CommonSpriteKey })[] = [
   {
     key: 'idle',
     label: 'Garde (repos)',
@@ -206,24 +212,6 @@ export const SPRITE_POSES: readonly SpritePoseSpec[] = [
     desc: "en l'air (aucun sol visible), coup de pied sauté : une jambe tendue en diagonale vers le bas et l'avant, l'autre jambe repliée sous le corps",
   },
   {
-    key: 'special1',
-    label: 'Coup spécial 1',
-    rig: null,
-    h: 0.95,
-    ax: 0.38,
-    fb: ['punch_heavy', 'punch_light', 'idle'],
-    desc: null,
-  },
-  {
-    key: 'special2',
-    label: 'Coup spécial 2',
-    rig: null,
-    h: 1,
-    ax: 0.42,
-    fb: ['kick_heavy', 'uppercut', 'punch_heavy', 'idle'],
-    desc: null,
-  },
-  {
     key: 'super',
     label: 'Super (concentration)',
     rig: 'charge',
@@ -277,10 +265,14 @@ export const SPRITE_POSES: readonly SpritePoseSpec[] = [
     fb: ['idle'],
     desc: "pose d'entrée en scène avant le combat : debout bien droit, bras croisés sur la poitrine, regard de défi",
   },
-  { key: 'projectile', label: 'Projectile', rig: null, proj: true, fb: [], desc: null },
+  { key: 'stage', label: 'Décor (scène du personnage)', rig: null, stage: true, fb: [], desc: null },
 ];
 
-export const SPRITE_BY_KEY = Object.fromEntries(SPRITE_POSES.map((s) => [s.key, s])) as Record<
-  SpriteKey,
-  SpritePoseSpec
->;
+const SPECIAL_LIST = Object.entries(SPECIAL_POSES).map(([key, spec]) => ({ key, ...spec }) as SpritePoseSpec);
+
+export const SPRITE_BY_KEY = Object.fromEntries(
+  [...SPRITE_POSES, ...SPECIAL_LIST].map((s) => [s.key, s]),
+) as Record<SpriteKey, SpritePoseSpec>;
+
+export const isSpriteKey = (key: string): key is SpriteKey => key in SPRITE_BY_KEY;
+export const isSpecialKey = (key: SpriteKey): key is SpecialSpriteKey => key in SPECIAL_POSES;

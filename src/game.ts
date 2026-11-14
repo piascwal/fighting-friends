@@ -6,7 +6,7 @@ import { roster } from './data/roster';
 import type { Character } from './data/types';
 import { Ai } from './engine/ai';
 import { input } from './input';
-import { randomStageIndex } from './render/stages';
+import { getStage, randomStageIndex, stageForCharacter } from './render/stages';
 import { Ending } from './scenes/ending';
 import { FightScene } from './scenes/fight-scene';
 import type { Scene } from './scenes/scene';
@@ -88,7 +88,7 @@ class Game implements UiActions {
       new FightScene({
         chars: [a, b ?? a],
         ais: [new Ai(ATTRACT_LEVEL), new Ai(ATTRACT_LEVEL)],
-        stage: randomStageIndex(),
+        stage: stageForCharacter(b ?? a),
         rounds: 1,
         mode: 'attract',
         onEnd: () => this.startAttract(),
@@ -132,6 +132,13 @@ class Game implements UiActions {
     }
   }
 
+  /** Décor du combat : celui de l'adversaire ; en duo et en entraînement, celui du joueur 1 s'il en a un. */
+  private stageFor(player: Character, opponent: Character) {
+    if (this.mode !== 'duo' && this.mode !== 'training') return stageForCharacter(opponent);
+    const own = stageForCharacter(player);
+    return own.kind === 'image' ? own : getStage(randomStageIndex());
+  }
+
   private startMatch(player: Character, opponent: Character): void {
     const { mode } = this;
     this.fighters = [player, opponent];
@@ -142,7 +149,7 @@ class Game implements UiActions {
         new FightScene({
           chars: [player, opponent],
           ais: [null, this.opponentAi()],
-          stage: mode === 'duo' || mode === 'training' ? randomStageIndex() : opponent.stage,
+          stage: this.stageFor(player, opponent),
           rounds: settings.rounds,
           mode: mode === 'training' ? 'training' : 'match',
           onEnd: (winner) => this.endMatch(winner),

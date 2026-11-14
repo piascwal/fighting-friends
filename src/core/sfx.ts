@@ -10,6 +10,7 @@ export type SfxName =
   | 'elec'
   | 'earth'
   | 'slash'
+  | 'ice'
   | 'special'
   | 'super'
   | 'ko'

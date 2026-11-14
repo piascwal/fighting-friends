@@ -91,20 +91,24 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
 
 ## 4. Où mettre quoi
 
-| Je veux…                                                  | Je touche…                                                                                 |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Ajouter un personnage                                     | une fiche dans `data/characters.ts` (ou un dossier `public/assets/characters/<id>/`)       |
-| Régler un coup (dégâts, vitesse, zone)                    | `data/normals.ts` ou `data/styles/<style>.ts`                                              |
-| Créer un style de combat                                  | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` |
-| Changer une règle d'enchaînement                          | `engine/move-select.ts` (+ un test dans `tests/combos.test.ts`)                            |
-| Changer une manipulation (↓↘→…)                           | `engine/input-buffer.ts`, constante `MOTIONS`                                              |
-| Ajouter un effet visuel                                   | `render/fx.ts` (création) et `render/fx-draw.ts` (dessin)                                  |
-| Ajouter un son                                            | `core/sfx.ts` (son nom) puis `audio/sounds.ts` (sa recette)                                |
-| Ajouter un décor                                          | `render/stage-painters.ts`                                                                 |
-| Changer l'icône, le nom ou l'orientation de l'application | `public/manifest.webmanifest` et `public/icons/`                                           |
-| Changer ce qui marche hors ligne                          | `public/sw.js` (service worker)                                                            |
-| Ajouter un écran de menu                                  | un fichier dans `ui/`, branché dans `ui/index.ts`                                          |
-| Changer l'enchaînement des écrans                         | `game.ts`                                                                                  |
+| Je veux…                                                         | Je touche…                                                                                                                          |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Ajouter un personnage                                            | une fiche dans `data/characters.ts` (ou un dossier `public/assets/characters/<id>/`)                                                |
+| Régler un coup (dégâts, vitesse, zone)                           | `data/normals.ts` ou `data/styles/<style>.ts`                                                                                       |
+| Créer un style de combat                                         | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` + son pantin dans `data/styles/looks.ts` |
+| Ajouter une image de coup spécial ou de projectile               | `data/special-poses.ts` (nom, description pour le prompt, posture guide) ; le coup la cite dans `sprite` ou `proj.sprite`           |
+| Changer la direction artistique des prompts                      | `ART_DIRECTION` dans `data/prompts.ts`                                                                                              |
+| Changer une règle d'enchaînement                                 | `engine/move-select.ts` (+ un test dans `tests/combos.test.ts`)                                                                     |
+| Changer une manipulation (↓↘→…)                                  | `engine/input-buffer.ts`, constante `MOTIONS`                                                                                       |
+| Ajouter un effet visuel                                          | `render/fx.ts` (création) et `render/fx-draw.ts` (dessin)                                                                           |
+| Ajouter un son                                                   | `core/sfx.ts` (son nom) puis `audio/sounds.ts` (sa recette)                                                                         |
+| Ajouter un décor dessiné par le jeu                              | `render/stage-painters.ts` (un décor par personnage, lui, est une image importée)                                                   |
+| Changer l'icône, le nom ou l'orientation de l'application        | `public/manifest.webmanifest` et `public/icons/`                                                                                    |
+| Changer ce qui marche hors ligne                                 | `public/sw.js` (service worker)                                                                                                     |
+| Changer la compression des images                                | `assets/image-codec.ts`                                                                                                             |
+| Changer la reprise d'un personnage local par sa version du dépôt | `assets/repo-characters.ts`                                                                                                         |
+| Ajouter un écran de menu                                         | un fichier dans `ui/`, branché dans `ui/index.ts`                                                                                   |
+| Changer l'enchaînement des écrans                                | `game.ts`                                                                                                                           |
 
 ## 5. Application installable (PWA)
 
@@ -122,7 +126,20 @@ Le jeu est une application web installable, qui se lance en plein écran à l'ho
   pour passer facilement du jeu au générateur d'images. On y accède depuis ce message, ou par le raccourci de
   l'icône (`?ecran=personnages`) ; ce qui se jouait derrière reste figé pendant ce temps (`game.ts`).
 
-## 6. Conventions de code
+## 6. Images des personnages
+
+- **Une image par pose, nommée par ce qu'elle montre.** Les poses communes (`data/sprite-poses.ts`) servent
+  à tous les styles ; les coups spéciaux et projectiles ont chacun leur image (`data/special-poses.ts`),
+  partagée par les styles qui font le même geste. La liste demandée pour un style se déduit de ses coups
+  (`styleSprites`) : rien à tenir à jour à la main.
+- **Rien ne se perd en changeant de style** : les images sont rangées par nom, pas par « spécial 1/2 ».
+  Celles qui ne servent plus apparaissent dans « Images conservées des autres styles ».
+- **Compression** : WebP 95 % (`assets/image-codec.ts`), visuellement identique au PNG et 5 fois plus léger.
+  Un fichier compressé est gardé tel quel (enregistrement, export) : il n'est jamais recompressé.
+- **Personnage du dépôt déjà présent sur l'appareil** : la version du dépôt remplace la version locale
+  (copies locales effacées) sauf pour les images importées après son export (`updated` du character.json).
+
+## 7. Conventions de code
 
 - **TypeScript strict**, pas de `any`. Les données de jeu ont des types précis (`MoveDef`, `HitDef`…) :
   une faute de frappe dans un coup est une erreur de compilation.
@@ -138,7 +155,7 @@ Le jeu est une application web installable, qui se lance en plein écran à l'ho
   les données compactes, et elles y sont documentées (`hs`, `bs`, `kb` dans `HitDef`).
 - **Formatage** automatique par Prettier (`npm run format`) : on ne discute jamais de mise en page.
 
-## 7. Tests
+## 8. Tests
 
 - Toute règle de gameplay a un test dans `tests/` : un enchaînement, une manipulation, une garde. Les tests
   rejouent une suite d'entrées frame par frame dans une vraie simulation (`tests/harness.ts`) et vérifient
@@ -148,7 +165,7 @@ Le jeu est une application web installable, qui se lance en plein écran à l'ho
   personnages ne bloque le jeu.
 - Pas de tests sur l'affichage : il est vérifié à l'œil (`npm run dev`).
 
-## 8. Chaîne de vérification
+## 9. Chaîne de vérification
 
 `npm run check` = types + lint (règles ci-dessus) + tests. La CI le lance à chaque push, avant de construire
 et de déployer sur GitHub Pages : **un code qui ne respecte pas l'architecture n'est jamais déployé.**

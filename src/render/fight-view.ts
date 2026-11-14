@@ -10,8 +10,8 @@ import { SUPER_FREEZE, type FightSim } from '../engine/fight';
 import { drawFighter, drawShadow, drawTrail } from './fighter-view';
 import { Fx } from './fx';
 import { drawHud } from './hud';
-import { drawProjectile, emitProjectileTrail } from './projectile-view';
-import { drawStage, getStage, type Stage } from './stages';
+import { drawProjectile, emitProjectileTrail, projectileSprite } from './projectile-view';
+import { drawStage, type Stage } from './stages';
 import { BLUE, GOLD, RED, arcadeText, type Gradient } from './text';
 
 type Ctx = CanvasRenderingContext2D;
@@ -26,6 +26,8 @@ interface Banner {
 }
 
 const TONES: Record<BannerTone, Gradient> = { gold: GOLD, red: RED, blue: BLUE };
+/** Taille d'un « pixel » des effets, en pixels monde : 3 donne un grain proche des sprites en pixel art. */
+const PIXEL = 3;
 
 export class FightView {
   readonly fx = new Fx();
@@ -36,11 +38,18 @@ export class FightView {
   /** Vie affichée « en retard » : laisse voir les dégâts qui viennent d'être infligés. */
   private delayedHp: [number, number];
 
+  /** Couche basse résolution où se dessinent les effets : agrandie sans lissage, elle les pixelise. */
+  private readonly pixels: CanvasRenderingContext2D;
+
   constructor(
     private readonly sim: FightSim,
-    stageIndex: number,
+    stage: Stage,
   ) {
-    this.stage = getStage(stageIndex);
+    this.stage = stage;
+    const layer = document.createElement('canvas');
+    layer.width = VIEW_W / PIXEL;
+    layer.height = VIEW_H / PIXEL;
+    this.pixels = layer.getContext('2d')!;
     this.delayedHp = [sim.fighters[0].hp, sim.fighters[1].hp];
   }
 
@@ -103,8 +112,10 @@ export class FightView {
   render(ctx: Ctx): void {
     const { sim } = this;
     const [a, b] = sim.fighters;
+    const shakeX = this.shake ? rand(-1, 1) * this.shake : 0;
+    const shakeY = this.shake ? rand(-1, 1) * this.shake : 0;
     ctx.save();
-    if (this.shake) ctx.translate(rand(-1, 1) * this.shake, rand(-1, 1) * this.shake);
+    ctx.translate(shakeX, shakeY);
     drawStage(ctx, this.stage, sim.camX, sim.tick);
     ctx.translate(-sim.camX, 0);
     if (sim.superFreeze > 0) this.drawSuperBackdrop(ctx);
@@ -116,10 +127,11 @@ export class FightView {
     const front = b.state === 'attack' && a.state !== 'attack' ? b : a;
     drawFighter(ctx, front.opp);
     drawFighter(ctx, front);
-    for (const p of sim.projectiles) drawProjectile(ctx, p);
-    this.fx.draw(ctx);
+    // projectiles en image : déjà en pixel art, dessinés tels quels
+    for (const p of sim.projectiles) if (projectileSprite(p)) drawProjectile(ctx, p);
     if (settings.hitboxes && sim.mode !== 'attract') this.drawBoxes(ctx);
     ctx.restore();
+    this.drawPixelLayer(ctx, shakeX - sim.camX, shakeY);
 
     if (sim.mode !== 'attract') drawHud(ctx, sim, this.delayedHp);
     if (sim.superFreeze > 0 && sim.superBy) {
@@ -135,6 +147,20 @@ export class FightView {
       ctx.fillStyle = `rgba(255,255,255,${this.flash})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     }
+  }
+
+  /** Effets et projectiles dessinés : rendus en basse résolution puis agrandis, pour un rendu pixel art. */
+  private drawPixelLayer(ctx: Ctx, offsetX: number, offsetY: number): void {
+    const px = this.pixels;
+    px.setTransform(1, 0, 0, 1, 0, 0);
+    px.clearRect(0, 0, px.canvas.width, px.canvas.height);
+    px.setTransform(1 / PIXEL, 0, 0, 1 / PIXEL, offsetX / PIXEL, offsetY / PIXEL);
+    for (const p of this.sim.projectiles) if (!projectileSprite(p)) drawProjectile(px, p);
+    this.fx.draw(px);
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(px.canvas, 0, 0, VIEW_W, VIEW_H);
+    ctx.restore();
   }
 
   /** Pendant un super : l'écran s'assombrit et des traits fusent autour de l'attaquant. */

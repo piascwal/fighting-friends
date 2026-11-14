@@ -1,6 +1,6 @@
 /* Outils de test : un combat d'entraînement piloté par un script d'entrées, sans navigateur. */
-import { characterById } from '../src/data/roster';
-import type { Button, MoveId } from '../src/data/types';
+import { characterById, makeCharacter } from '../src/data/roster';
+import type { Button, Character, MoveId, StyleId } from '../src/data/types';
 import { Ai } from '../src/engine/ai';
 import { Controller } from '../src/engine/controller';
 import { FightSim, type FightMode } from '../src/engine/fight';
@@ -27,14 +27,22 @@ export interface Setup {
   /** Distance initiale entre les deux combattants. */
   distance?: number;
   meter?: number;
+  /** Style de combat du joueur (sinon celui de son personnage). */
+  style?: StyleId;
   /** L'adversaire est piloté par le test (via sa manette) au lieu d'être un mannequin immobile. */
   humanOpponent?: boolean;
+}
+
+/** Un personnage du jeu, éventuellement avec un autre style de combat. */
+export function fighterChar(id: string, style?: StyleId): Character {
+  const base = characterById(id)!;
+  return style ? makeCharacter({ id: `${id}-${style}`, name: base.name, style, color: base.color }) : base;
 }
 
 export function createTraining(setup: Setup = {}): { sim: FightSim; pad: Controller } {
   const pad = new Controller();
   const sim = new FightSim({
-    chars: [characterById(setup.char ?? 'ardan')!, characterById(setup.opponent ?? 'bruno')!],
+    chars: [fighterChar(setup.char ?? 'ardan', setup.style), characterById(setup.opponent ?? 'bruno')!],
     ctrls: [pad, new Controller()],
     ais: [null, setup.humanOpponent ? null : new Ai(0, true)],
     bodyScales: [1, 1],
@@ -78,11 +86,11 @@ export const press = (button: Button, frames = 7): Step => ({ press: button, fra
 export const wait = (frames: number): Step => ({ frames });
 
 /** Combat complet console contre console ; renvoie le vainqueur et la durée en frames. */
-export function autoFight(a: string, b: string, mode: FightMode = 'match') {
+export function autoFight(a: string | Character, b: string | Character, mode: FightMode = 'match') {
   let winner = -1;
   const ctrls = [new Controller(), new Controller()] as const;
   const sim = new FightSim({
-    chars: [characterById(a)!, characterById(b)!],
+    chars: [typeof a === 'string' ? characterById(a)! : a, typeof b === 'string' ? characterById(b)! : b],
     ctrls,
     ais: [new Ai(2), new Ai(2)],
     bodyScales: [1, 1],

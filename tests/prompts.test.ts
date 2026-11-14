@@ -10,7 +10,8 @@ describe('prompts de génération des sprites', () => {
     '%s : chaque pose a une description et un prompt',
     (_id, char) => {
       for (const spec of spritePosesFor(char)) {
-        expect(poseDescription(char, spec.key), spec.key).not.toBe('');
+        if (spec.stage) continue; // le décor se décrit librement, par le joueur
+        expect(poseDescription(spec.key), spec.key).not.toBe('');
         expect(buildPrompt(char, spec.key)).toContain(char.name);
       }
     },

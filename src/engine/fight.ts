@@ -53,6 +53,7 @@ const ELEMENT_SFX: Partial<Record<HitFx, SfxName>> = {
   elec: 'elec',
   earth: 'earth',
   slash: 'slash',
+  ice: 'ice',
 };
 
 export class FightSim implements FighterWorld {
@@ -130,7 +131,7 @@ export class FightSim implements FighterWorld {
 
   spawnProjectile(owner: Fighter, def: ProjectileDef): void {
     this.projectiles.push(createProjectile(owner, def));
-    this.emit({ type: 'sfx', name: def.fx === 'slash' ? 'slash' : def.fx === 'earth' ? 'earth' : 'fire' });
+    this.emit({ type: 'sfx', name: ELEMENT_SFX[def.fx] ?? 'special' });
   }
 
   superFlash(by: Fighter, move: MoveDef): void {
@@ -328,7 +329,8 @@ export class FightSim implements FighterWorld {
       const result = applyHit(def, att, active.hit, dir, att.move!.rank >= 10);
       if (!result) continue;
       att.hitDone.add(active.index);
-      att.connected = true;
+      // un coup absorbé par un contre ne compte pas comme réussi : pas d'enchaînement
+      if (result !== 'counter') att.connected = true;
       const x = (Math.max(active.x0, box.x0) + Math.min(active.x1, box.x1)) / 2;
       const y = (Math.max(active.y0, box.y0) + Math.min(active.y1, box.y1)) / 2;
       this.onHit(att, def, active.hit, result, x, y, dir);
@@ -356,6 +358,14 @@ export class FightSim implements FighterWorld {
       this.hitstop = 3;
       gain(att, 2);
       gain(def, 2);
+      return;
+    }
+    if (result === 'counter') {
+      this.emit({ type: 'guard', x, y });
+      this.emit({ type: 'flash', amount: 0.35 });
+      this.emit({ type: 'sfx', name: 'block' });
+      this.emit({ type: 'sfx', name: 'special' });
+      this.hitstop = 10;
       return;
     }
     if (result === 'armor') {
