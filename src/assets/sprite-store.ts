@@ -1,5 +1,8 @@
-/* Les sprites des personnages, en mémoire : images fournies avec le jeu ou importées par le joueur.
-   Les images importées sont enregistrées sur l'appareil (IndexedDB), compressées (voir image-codec.ts). */
+/* Les sprites des personnages, en mémoire, en deux couches :
+   - « repo » : les images livrées avec le jeu (public/assets/characters) ;
+   - « local » : celles importées sur cet appareil, enregistrées dans IndexedDB (compressées, voir image-codec.ts).
+   Une image locale passe devant celle du jeu ; la supprimer fait réapparaître celle du jeu.
+   Les réglages faits sur une image du jeu sont gérés dans local-changes.ts. */
 import { kvStore } from '../core/storage';
 import { SPRITE_BY_KEY, isSpriteKey, type SpriteKey } from '../data/sprite-poses';
 import type { Character } from '../data/types';
@@ -24,6 +27,11 @@ export interface SpriteEntry {
   blob?: Blob;
   /** Date d'import sur l'appareil (ms). Absente pour les images importées avant cette information. */
   at?: number;
+  /** Image du jeu : nom de son fichier dans le dossier du personnage, et réglage livré avec elle. */
+  file?: string;
+  repoAdj?: SpriteAdjust;
+  /** Image du jeu dont le réglage a été modifié sur l'appareil : date de la modification (ms). */
+  adjAt?: number;
   /** Silhouette blanche (flash d'impact), créée à la demande. */
   white?: HTMLCanvasElement;
 }
@@ -36,17 +44,30 @@ interface StoredSprite {
   at?: number;
 }
 
-const sprites = new Map<string, Map<SpriteKey, SpriteEntry>>();
+type Layer = Map<string, Map<SpriteKey, SpriteEntry>>;
+const layers: Record<SpriteEntry['src'], Layer> = { local: new Map(), repo: new Map() };
 const portraits = new Map<string, HTMLCanvasElement>();
 const PORTRAIT_SIZE = 160;
 
 const storageKey = (charId: string, key: SpriteKey) => `spr:${charId}:${key}`;
 
+export const localEntry = (charId: string, key: SpriteKey): SpriteEntry | undefined =>
+  layers.local.get(charId)?.get(key);
+export const repoEntry = (charId: string, key: SpriteKey): SpriteEntry | undefined =>
+  layers.repo.get(charId)?.get(key);
+/** L'image affichée : celle de l'appareil si elle existe, sinon celle du jeu. */
 export const spriteEntry = (charId: string, key: SpriteKey): SpriteEntry | undefined =>
-  sprites.get(charId)?.get(key);
+  localEntry(charId, key) ?? repoEntry(charId, key);
 export const hasSprite = (charId: string, key: SpriteKey = 'idle'): boolean => !!spriteEntry(charId, key);
-export const spriteCount = (charId: string): number => sprites.get(charId)?.size ?? 0;
-export const spriteEntries = (charId: string): [SpriteKey, SpriteEntry][] => [...(sprites.get(charId) ?? [])];
+/** Les images affichées d'un personnage (une par pose, celle de l'appareil en priorité). */
+export function spriteEntries(charId: string): [SpriteKey, SpriteEntry][] {
+  const merged = new Map(layers.repo.get(charId));
+  for (const [key, entry] of layers.local.get(charId) ?? []) merged.set(key, entry);
+  return [...merged];
+}
+export const spriteCount = (charId: string): number => spriteEntries(charId).length;
+/** Le personnage a-t-il une version livrée avec le jeu ? */
+export const hasRepoLayer = (charId: string): boolean => !!layers.repo.get(charId)?.size;
 
 /** Un personnage s'affiche avec ses images dès que sa pose de repos existe ; sinon, avec le pantin. */
 export const usesSprites = (char: Character): boolean => hasSprite(char.id, 'idle');
@@ -56,19 +77,23 @@ export function putSprite(
   key: SpriteKey,
   img: HTMLCanvasElement,
   src: SpriteEntry['src'],
-  extra: { adj?: Partial<SpriteAdjust>; blob?: Blob; at?: number } = {},
+  extra: { adj?: Partial<SpriteAdjust>; blob?: Blob; at?: number; file?: string } = {},
 ): void {
-  let set = sprites.get(charId);
-  if (!set) sprites.set(charId, (set = new Map()));
+  const layer = layers[src];
+  let set = layer.get(charId);
+  if (!set) layer.set(charId, (set = new Map()));
   const adj = { s: 1, dx: 0, dy: 0, ...extra.adj };
-  set.set(key, { img, w: img.width, h: img.height, adj, src, blob: extra.blob, at: extra.at });
+  const entry: SpriteEntry = { img, w: img.width, h: img.height, adj, src, blob: extra.blob, at: extra.at };
+  if (src === 'repo') Object.assign(entry, { file: extra.file, repoAdj: { ...adj } });
+  set.set(key, entry);
   portraits.delete(charId);
 }
 
 const kindOf = (key: SpriteKey) => (SPRITE_BY_KEY[key].stage ? 'stage' : 'sprite');
 
-async function persist(charId: string, key: SpriteKey): Promise<void> {
-  const entry = spriteEntry(charId, key);
+/** Enregistre sur l'appareil l'image locale d'une pose (avec son réglage). */
+export async function persist(charId: string, key: SpriteKey): Promise<void> {
+  const entry = localEntry(charId, key);
   if (!entry) return;
   entry.blob ??= await encodeImage(entry.img, kindOf(key));
   const stored: StoredSprite = { blob: entry.blob, adj: entry.adj, at: entry.at };
@@ -88,23 +113,18 @@ export async function importSpriteFile(charId: string, key: SpriteKey, file: Fil
   }
 }
 
-/** Enregistre un nouveau réglage de taille/position (l'image elle-même n'est pas recompressée). */
-export const saveSpriteAdjust = (charId: string, key: SpriteKey): Promise<void> => persist(charId, key);
-
+/** Supprime l'image importée sur l'appareil : celle du jeu, s'il y en a une, reprend sa place. */
 export async function removeSprite(charId: string, key: SpriteKey): Promise<void> {
-  sprites.get(charId)?.delete(key);
+  layers.local.get(charId)?.delete(key);
   portraits.delete(charId);
   await kvStore.delete(storageKey(charId, key));
 }
 
-/** Supprime la copie enregistrée sur l'appareil (l'image affichée, elle, reste en mémoire). */
-export const forgetStoredSprite = (charId: string, key: SpriteKey): Promise<unknown> =>
-  kvStore.delete(storageKey(charId, key));
-
 export async function removeCharacterSprites(charId: string): Promise<void> {
   const all = await kvStore.entries<StoredSprite>();
   await Promise.all(all.filter((e) => e.key.startsWith(`spr:${charId}:`)).map((e) => kvStore.delete(e.key)));
-  sprites.delete(charId);
+  layers.local.delete(charId);
+  layers.repo.delete(charId);
   portraits.delete(charId);
 }
 
@@ -148,10 +168,8 @@ export async function loadLocalSprites(
 
 /** Le sprite à afficher pour une pose : l'image demandée, sinon le premier repli disponible. */
 export function resolveSprite(charId: string, key: SpriteKey): { entry: SpriteEntry; key: SpriteKey } | null {
-  const set = sprites.get(charId);
-  if (!set) return null;
   for (const candidate of [key, ...SPRITE_BY_KEY[key].fb, 'idle' as const]) {
-    const entry = set.get(candidate);
+    const entry = spriteEntry(charId, candidate);
     if (entry) return { entry, key: candidate };
   }
   return null;

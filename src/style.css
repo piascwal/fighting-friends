@@ -1142,3 +1142,29 @@ i.b {
   margin-top: 3px;
   font-size: clamp(9px, 2vmin, 12px);
 }
+
+/* changements faits sur l'appareil à un personnage livré avec le jeu */
+.card.changed {
+  border-color: #2ee6c8;
+  opacity: 1;
+}
+.card.changed .badge {
+  background: #2ee6c8;
+  color: #0b0618;
+}
+.send {
+  color: #2ee6c8;
+  font-weight: bold;
+}
+.changes {
+  margin-top: 6px;
+  color: #2ee6c8;
+  font-size: 0.9em;
+}
+.changes ul {
+  margin: 4px 0 0 18px;
+  padding: 0;
+}
+#mAdjReset {
+  margin-top: 6px;
+}

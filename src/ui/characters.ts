@@ -1,7 +1,14 @@
 /* Écran « Personnages & sprites » : créer un personnage, voir les images manquantes, copier les prompts. */
 import { playSfx } from '../audio/audio';
 import { exportCharacterZip, saveCharacterSettings, saveCustomCharacters } from '../assets/character-files';
-import { hasSprite, removeCharacterSprites, spriteCount, spriteEntries } from '../assets/sprite-store';
+import { exportChanges, pendingChange, pendingChanges } from '../assets/local-changes';
+import {
+  hasRepoLayer,
+  hasSprite,
+  removeCharacterSprites,
+  spriteCount,
+  spriteEntries,
+} from '../assets/sprite-store';
 import { allowAnyOrientation, lockLandscape } from '../core/display';
 import { pick } from '../core/math';
 import { escapeHtml, slug } from '../core/text';
@@ -47,6 +54,7 @@ export const CHARACTERS_HTML = `
       <div id="chInfo"></div>
       <div class="row">
         <button class="nav sm" id="chCopyAll">COPIER TOUS LES PROMPTS MANQUANTS</button>
+        <button class="nav sm hidden" id="chSend">EXPORTER LES CHANGEMENTS</button>
         <button class="nav sm alt" id="chZip">EXPORTER .ZIP</button>
         <label class="chk"><input type="checkbox" id="chMiss"> Manquants seulement</label>
       </div>
@@ -58,6 +66,7 @@ export const CHARACTERS_HTML = `
           <li>Récupère l'image générée (fond magenta <code>#FF00FF</code>) et fais <b>IMPORTER L'IMAGE</b> : le fond est retiré automatiquement et le sprite est utilisable tout de suite.</li>
           <li>Seule la pose <b>Garde (repos)</b> est obligatoire pour jouer : les poses manquantes réutilisent la pose la plus proche. Plus tu en ajoutes, plus le personnage est vivant.</li>
           <li><b>EXPORTER .ZIP</b> crée le dossier à déposer dans <code>public/assets/characters/</code> du projet pour que le personnage soit disponible pour tout le monde.</li>
+          <li>Pour un personnage déjà livré avec le jeu, ce que tu changes ici (image remplacée ou ajoutée, taille/position modifiée) est marqué <b>✎ À ENVOYER</b>. <b>EXPORTER LES CHANGEMENTS</b> crée un petit .zip avec seulement ces images et la liste des changements, à envoyer pour qu'ils soient intégrés au jeu.</li>
         </ol>
         <p>Les images importées ici sont enregistrées uniquement sur cet appareil.</p>
       </details>
@@ -119,7 +128,8 @@ function fillStyleSelect(select: HTMLSelectElement, value?: StyleId, owner?: Cha
 function refresh(): void {
   const char = selected();
   selectCharacter(char.id);
-  const count = (c: Character) => `${spriteCount(c.id)} sprite${spriteCount(c.id) > 1 ? 's' : ''}`;
+  const count = (c: Character) =>
+    `${spriteCount(c.id)} sprite${spriteCount(c.id) > 1 ? 's' : ''}${pendingChanges(c.id).length ? ' · ✎ à envoyer' : ''}`;
   const select = $<HTMLSelectElement>('#chSel');
   select.innerHTML = roster
     .map((c) => `<option value="${c.id}">${escapeHtml(c.name)} (${count(c)})</option>`)
@@ -139,7 +149,8 @@ function refresh(): void {
     : 'Sans image « Garde (repos) », ce personnage est affiché avec le <b>pantin provisoire</b>.';
   $('#chInfo').innerHTML =
     `<b style="color:${char.color}">${escapeHtml(char.name)}</b> — style ${char.style.label.toLowerCase()} — ` +
-    `<b>${provided} / ${poses.length}</b> sprites. ${display}`;
+    `<b>${provided} / ${poses.length}</b> sprites. ${display}${changesHtml(char)}`;
+  $('#chSend').classList.toggle('hidden', !hasRepoLayer(char.id));
 
   const grid = $('#chGrid');
   grid.innerHTML = '';
@@ -183,13 +194,31 @@ function poseCard(char: Character, spec: SpritePoseSpec, extraBadge?: string): H
   const [canvas, ctx] = newCanvas(120);
   drawPoseThumbnail(ctx, 120, char, spec);
   card.appendChild(canvas);
-  const badge = extraBadge ?? (has ? '✓ OK' : spec.req ? 'OBLIGATOIRE' : 'MANQUANT');
+  const change = pendingChange(char.id, spec.key);
+  if (change) card.classList.add('changed');
+  const badge = change
+    ? '✎ À ENVOYER'
+    : (extraBadge ?? (has ? '✓ OK' : spec.req ? 'OBLIGATOIRE' : 'MANQUANT'));
   card.insertAdjacentHTML(
     'beforeend',
     `<span class="cl">${escapeHtml(spec.label)}</span><span class="badge">${badge}</span>`,
   );
   card.addEventListener('click', () => openPoseModal(char, spec.key, refresh));
   return card;
+}
+
+/** Liste des changements faits sur cet appareil à un personnage livré avec le jeu. */
+function changesHtml(char: Character): string {
+  if (!hasRepoLayer(char.id)) return '';
+  const changes = pendingChanges(char.id);
+  if (!changes.length) return '<div class="changes">Aucun changement par rapport à la version du jeu.</div>';
+  const items = changes
+    .map(
+      (c) =>
+        `<li>${escapeHtml(SPRITE_BY_KEY[c.key].label)} — ${c.kind === 'image' ? 'image remplacée' : 'taille / position'}</li>`,
+    )
+    .join('');
+  return `<div class="changes"><b>✎ ${changes.length} changement${changes.length > 1 ? 's' : ''} à envoyer</b> (fais EXPORTER LES CHANGEMENTS) :<ul>${items}</ul></div>`;
 }
 
 /** Ce que permet le style choisi, et un avertissement s'il est déjà celui d'un autre personnage. */
@@ -306,6 +335,12 @@ export function initCharacters(onBack: () => void): void {
     if (!spriteCount(char.id)) return toast('Aucune image à exporter pour ce personnage');
     toast('Préparation du fichier…');
     await exportCharacterZip(char);
+  });
+  on('#chSend', async () => {
+    const char = selected();
+    if (!pendingChanges(char.id).length) return toast('Aucun changement à envoyer pour ce personnage');
+    toast('Préparation du fichier…');
+    await exportChanges(char);
   });
   on('#chCopyAll', copyMissingPrompts);
 }

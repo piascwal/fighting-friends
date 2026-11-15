@@ -1,9 +1,10 @@
 /* Fenêtre d'une pose : aperçu, prompt à copier, import de l'image générée, réglages de taille/position. */
+import { pendingChange, resetAdjust, saveAdjust } from '../assets/local-changes';
 import {
   importSpriteFile,
   removeSprite,
+  repoEntry,
   resolveSprite,
-  saveSpriteAdjust,
   spriteEntry,
 } from '../assets/sprite-store';
 import { POSES } from '../data/poses';
@@ -27,6 +28,7 @@ export const POSE_MODAL_HTML = `
           <label>Taille <input type="range" id="adS" min="0.5" max="1.7" step="0.01"></label>
           <label>Décalage ↔ <input type="range" id="adX" min="-80" max="80" step="1"></label>
           <label>Décalage ↕ <input type="range" id="adY" min="-80" max="80" step="1"></label>
+          <button class="nav sm alt hidden" id="mAdjReset">REVENIR AUX RÉGLAGES DU JEU</button>
         </div>
       </div>
       <div class="mright">
@@ -131,6 +133,13 @@ export function drawPoseThumbnail(ctx: Ctx, size: number, char: Character, spec:
 function statusHtml(char: Character, spec: SpritePoseSpec): string {
   const entry = spriteEntry(char.id, spec.key);
   if (entry) {
+    const change = pendingChange(char.id, spec.key);
+    if (change?.kind === 'image') {
+      const replaces = repoEntry(char.id, spec.key) ? ', elle remplace celle du jeu' : '';
+      return `<span class="okc">✓ Image importée sur cet appareil${replaces}</span><br><span class="send">✎ À ENVOYER</span>`;
+    }
+    if (change?.kind === 'adjust')
+      return '<span class="okc">✓ Image fournie avec le jeu</span><br><span class="send">✎ Réglage modifié — À ENVOYER</span>';
     const origin = entry.src === 'repo' ? 'fournie avec le jeu' : 'importée sur cet appareil';
     return `<span class="okc">✓ Image ${origin}</span>`;
   }
@@ -163,6 +172,8 @@ function refresh(): void {
   // les réglages n'ont de sens que pour une pose de combat déjà fournie
   $('#mAdj').classList.toggle('hidden', !entry || !!spec.portrait || stage);
   $('#mDel').classList.toggle('hidden', !entry || entry.src === 'repo');
+  $('#mDel').textContent = repoEntry(char.id, key) ? "REVENIR À L'IMAGE DU JEU" : "SUPPRIMER L'IMAGE";
+  $('#mAdjReset').classList.toggle('hidden', !entry || entry.src !== 'repo' || !entry.adjAt);
   $('#mGuideLbl').classList.toggle('hidden', !open.guide);
   $('#mGuideRow').classList.toggle('hidden', !open.guide);
   if (entry) {
@@ -289,6 +300,11 @@ export function initPoseModal(): void {
     await removeSprite(open.char.id, open.key);
     refresh();
   });
+  on('#mAdjReset', () => {
+    if (!open) return;
+    resetAdjust(open.char.id, open.key);
+    refresh();
+  });
   for (const id of ['adS', 'adX', 'adY']) {
     // pendant le glissement : effet immédiat ; au relâchement : enregistrement
     on(
@@ -305,8 +321,8 @@ export function initPoseModal(): void {
     on(
       `#${id}`,
       () => {
-        const entry = open && spriteEntry(open.char.id, open.key);
-        if (open && entry && entry.src !== 'repo') void saveSpriteAdjust(open.char.id, open.key);
+        if (!open) return;
+        void saveAdjust(open.char.id, open.key).then(refresh);
       },
       'change',
     );

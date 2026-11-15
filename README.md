@@ -42,6 +42,16 @@ fichiers) et une image par pose, en WebP (`idle.webp`, `punch_light.webp`… —
 `src/data/sprite-poses.ts` et `src/data/special-poses.ts`). Les images importées sont compressées
 automatiquement : 5 fois plus légères qu'en PNG, sans différence visible.
 
+### Envoyer les retouches d'un personnage déjà livré
+
+Sur un personnage livré avec le jeu, tout ce qui est changé sur l'appareil (image importée qui remplace ou
+complète celles du jeu, taille/position retouchée) est marqué **✎ À ENVOYER** sur sa carte et listé sous le
+personnage. **Exporter les changements** télécharge `<id>-changements.zip` : le `character.json` complet à
+jour (avec `"changes": { "images": [...], "adjust": [...] }`) et **seulement** les images modifiées.
+Pour l'intégrer : copier le contenu du dossier dans `public/assets/characters/<id>/` (les images s'ajoutent
+ou remplacent, `character.json` est remplacé). Sa date `updated` étant plus récente que les retouches, les
+copies locales sont effacées et les marqueurs disparaissent au chargement suivant.
+
 Chaque personnage peut aussi avoir son **décor** : carte « Décor » dans l'écran des sprites, avec un prompt à
 compléter par la description de la scène et une image guide qui fixe le sol et la taille des combattants.
 

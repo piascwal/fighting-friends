@@ -4,14 +4,16 @@
    ajouté au dépôt). Dans ce cas la version du dépôt le remplace, sans rien perdre :
    - ses images locales importées AVANT l'export sont remplacées par celles du dépôt (copies locales effacées) ;
    - une image importée APRÈS l'export reste prioritaire (date `updated` du character.json) ;
-   - son style et sa couleur locaux, s'ils diffèrent, deviennent des réglages du joueur. */
+   - son style et sa couleur locaux, s'ils diffèrent, deviennent des réglages du joueur ;
+   - les réglages de taille/position modifiés après l'export sont réappliqués (local-changes.ts). */
 import { addCharacter, characterById } from '../data/roster';
 import { SPRITE_BY_KEY, SPRITE_POSES, isSpriteKey, type SpriteKey } from '../data/sprite-poses';
 import type { CharacterDef } from '../data/types';
 import { saveCustomCharacters, setOverride, type CharacterFile } from './character-files';
 import { loadImage, prepareStage, removeMagentaBackground } from './chroma-key';
 import { toCanvas } from './image-codec';
-import { forgetStoredSprite, putSprite, spriteEntry, type SpriteAdjust } from './sprite-store';
+import { applyAdjustOverrides } from './local-changes';
+import { localEntry, putSprite, removeSprite, type SpriteAdjust } from './sprite-store';
 
 const REPO_DIR = 'assets/characters/';
 
@@ -79,16 +81,17 @@ async function loadRepoCharacter(id: string): Promise<void> {
   const exportedAt = file.updated ?? 0;
   await Promise.all(
     imageFiles(file).map(async ([key, name]) => {
-      const local = spriteEntry(id, key);
-      if (local?.src === 'local' && local.at && local.at > exportedAt) return; // importée après l'export
       try {
         const { canvas, blob } = await loadRepoImage(dir + name, key);
         const adj: Partial<SpriteAdjust> | undefined = file.adjust?.[key];
-        putSprite(id, key, canvas, 'repo', { adj, blob });
-        if (local?.src === 'local') await forgetStoredSprite(id, key);
+        putSprite(id, key, canvas, 'repo', { adj, blob, file: name });
+        // image locale importée avant l'export : déjà dans le dépôt, la copie locale est effacée
+        const local = localEntry(id, key);
+        if (local && !(local.at && local.at > exportedAt)) await removeSprite(id, key);
       } catch {
         // image absente du dossier : on garde l'éventuelle image locale, sinon une pose de repli
       }
     }),
   );
+  applyAdjustOverrides(id, file);
 }

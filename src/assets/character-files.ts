@@ -28,6 +28,8 @@ export interface CharacterFile {
   adjust?: Partial<Record<SpriteKey, SpriteAdjust>>;
   /** Date de l'export (ms) : une image importée sur l'appareil après cette date reste prioritaire. */
   updated?: number;
+  /** Export des changements seulement : poses dont l'image ou le réglage a changé sur l'appareil. */
+  changes?: { images: SpriteKey[]; adjust: SpriteKey[] };
 }
 
 /** Ce que le joueur a changé sur un personnage qu'il n'a pas créé lui-même (style, couleur). */
@@ -36,7 +38,7 @@ interface Override {
   color?: string;
 }
 
-function readJson<T>(key: string, fallback: T): T {
+export function readJson<T>(key: string, fallback: T): T {
   try {
     return JSON.parse(localStorage.getItem(key) ?? '') as T;
   } catch {
@@ -44,7 +46,7 @@ function readJson<T>(key: string, fallback: T): T {
   }
 }
 
-function writeJson(key: string, value: unknown): void {
+export function writeJson(key: string, value: unknown): void {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
@@ -139,10 +141,14 @@ export async function exportCharacterZip(char: Character): Promise<void> {
     name: `${char.id}/character.json`,
     data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)),
   });
+  downloadZip(zipFiles, `${char.id}.zip`);
+}
 
+/** Propose le téléchargement d'un .zip. */
+export function downloadZip(zipFiles: ZipFile[], fileName: string): void {
   const link = document.createElement('a');
   link.href = URL.createObjectURL(buildZip(zipFiles));
-  link.download = `${char.id}.zip`;
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   link.remove();
