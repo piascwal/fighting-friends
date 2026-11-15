@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildPrompt, poseDescription, spritePosesFor } from '../src/data/prompts';
-import { roster } from '../src/data/roster';
+import { makeCharacter, roster } from '../src/data/roster';
 import { SPRITE_BY_KEY } from '../src/data/sprite-poses';
 
 const ardan = roster[0]!;
@@ -16,6 +16,17 @@ describe('prompts de génération des sprites', () => {
       }
     },
   );
+
+  it('hockeyeur : la crosse est demandée sur les poses communes, mais pas sur le portrait', () => {
+    const hockey = makeCharacter({ id: 'h', name: 'PUCK', style: 'hockey', color: '#fff' });
+    for (const spec of spritePosesFor(hockey)) {
+      if (spec.stage || spec.proj || spec.portrait || spec.key === 'sp_hockey_fight') continue;
+      expect(buildPrompt(hockey, spec.key), spec.key).toContain('crosse');
+    }
+    expect(buildPrompt(hockey, 'idle')).toContain('à deux mains');
+    expect(buildPrompt(hockey, 'portrait')).not.toContain('crosse');
+    expect(buildPrompt(ardan, 'idle')).not.toContain('crosse');
+  });
 
   it("une posture basse demande un personnage plus petit dans l'image", () => {
     const standing = buildPrompt(ardan, 'idle');

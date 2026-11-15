@@ -3,7 +3,7 @@
    le maillot et cogne. */
 import { hit, moveSet, special, superMove } from '../move-builders';
 import { NORMALS } from '../normals';
-import type { AnimKey, HitDef, StyleDef } from '../types';
+import type { AnimKey, HitDef, StyleDef, StyleGear } from '../types';
 
 /** Lancer frappé : crosse armée haut derrière, frappe, le palet part au ras de la glace. */
 const slapshot = (heavy: boolean) =>
@@ -79,6 +79,29 @@ function dropTheGloves() {
   return superMove({ name: 'JETTE LES GANTS', total: 72, sprite: 'sp_hockey_fight', anim, hits });
 }
 
+/** La crosse, présente sur toutes les images sauf la bagarre (gants jetés) et le portrait. */
+const STICK: StyleGear = {
+  hold: 'Il garde sa crosse de hockey en main : serrée dans le poing ARRIÈRE (celui qui ne frappe pas), lame vers le bas, entière et bien visible, sans cacher le visage',
+  poses: {
+    idle: "posture de garde de hockeyeur : debout, genoux fléchis, buste légèrement penché vers l'avant, sa crosse de hockey tenue à deux mains devant lui (main arrière en haut du manche, main avant plus bas), lame posée au sol devant ses pieds, regard déterminé",
+    walk1:
+      "en train d'avancer, sa crosse de hockey tenue à deux mains devant lui, lame au ras du sol : grand pas en avant, jambe avant loin devant, jambe arrière tendue derrière",
+    walk2:
+      "en train d'avancer, sa crosse de hockey tenue à deux mains devant lui, lame au ras du sol : jambes croisées en plein milieu d'un pas (la jambe arrière passe devant)",
+    crouch:
+      "accroupi TRÈS bas, comme un combattant qui esquive en se baissant : genoux complètement fléchis, fesses presque posées sur les talons, genou de la jambe arrière quasiment au sol, buste penché vers l'avant, sa crosse de hockey tenue à deux mains devant lui, lame posée au sol",
+    block:
+      "en train de bloquer un coup : debout, sa crosse de hockey tenue à deux mains à l'horizontale devant le visage, comme une barrière, buste légèrement en retrait",
+    crouch_block:
+      "accroupi TRÈS bas en train de bloquer (fesses presque posées sur les talons, genou arrière quasiment au sol) : sa crosse de hockey tenue à deux mains à l'horizontale devant le visage, comme une barrière, tête rentrée",
+    super:
+      'il se prépare à la bagarre : il vient de jeter sa crosse et ses gants, qui tombent à ses pieds ; jambes écartées, poings nus serrés et levés, il hurle',
+    win: "pose de victoire : debout bien droit, il brandit sa crosse de hockey à bout de bras au-dessus de la tête, l'autre poing serré, grand sourire triomphant",
+    intro:
+      "pose d'entrée en scène avant le combat : debout bien droit, sa crosse de hockey posée sur l'épaule, l'autre main sur la hanche, regard de défi",
+  },
+};
+
 export const hockey: StyleDef = {
   id: 'hockey',
   label: 'Hockeyeur',
@@ -95,5 +118,6 @@ export const hockey: StyleDef = {
     s2h: bodyCheck(true),
     super: dropTheGloves(),
   }),
+  gear: STICK,
   ai: { zoner: 0.45, antiAir: 'chp', ender: 's2h' },
 };

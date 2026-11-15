@@ -217,6 +217,14 @@ export type StyleTag =
   | 'Fige'
   | 'À distance';
 
+/** Accessoire d'un style, pour les prompts des images communes (garde, marche, coups de base…). */
+export interface StyleGear {
+  /** Phrase ajoutée aux poses qui n'ont pas de description propre : comment l'accessoire est tenu. */
+  hold: string;
+  /** Description complète, à la place de celle de la pose commune, quand l'accessoire change la posture. */
+  poses?: Partial<Record<SpriteKey, string>>;
+}
+
 /** Un style de combat : statistiques + jeu de coups. Plusieurs personnages peuvent partager un style. */
 export interface StyleDef {
   id: StyleId;
@@ -230,6 +238,8 @@ export interface StyleDef {
   /** Manipulation des coups spéciaux : quart de cercle (par défaut) ou charge (arrière puis avant…). */
   input?: 'motion' | 'charge';
   moves: MoveSet;
+  /** Accessoire porté en permanence (crosse…) : les prompts des poses communes en tiennent compte. */
+  gear?: StyleGear;
   /** Préférences de la console quand elle joue ce style. */
   ai: { zoner: number; antiAir: MoveId; ender: MoveId };
 }

@@ -40,6 +40,20 @@ export function poseDescription(key: SpriteKey): string {
   return SPRITE_BY_KEY[key].desc ?? '';
 }
 
+/**
+ * Description d'une pose pour un style qui porte un accessoire (crosse…) : celle propre au style si elle
+ * existe, sinon la pose commune suivie de la façon de tenir l'accessoire. Les images de coups spéciaux
+ * décrivent déjà l'accessoire ; le portrait n'en a pas besoin.
+ */
+function styledDescription(style: StyleDef, key: SpriteKey): string {
+  const gear = style.gear;
+  const spec = SPRITE_BY_KEY[key];
+  if (!gear || isSpecialKey(key) || spec.portrait) return poseDescription(key);
+  const own = gear.poses?.[key];
+  const desc = own ?? `${poseDescription(key)}. ${gear.hold}`;
+  return `${desc}. (L'accessoire décrit ici n'apparaît pas sur le mannequin gris : dessine-le comme indiqué)`;
+}
+
 /** Posture du pantin qui sert de guide visuel pour cette image. */
 export function guidePose(key: SpriteKey): PoseName {
   return SPRITE_BY_KEY[key].rig ?? 'idle';
@@ -80,7 +94,7 @@ export function buildStagePrompt(char: Character, description: string): string {
 
 export function buildPrompt(char: Character, key: SpriteKey): string {
   const spec = SPRITE_BY_KEY[key];
-  const desc = poseDescription(key);
+  const desc = styledDescription(char.style, key);
   if (spec.stage) return buildStagePrompt(char, '');
   if (spec.proj) {
     return `Génère UNE SEULE image d'un effet de jeu de combat, dans l'esprit et la palette de couleurs du personnage « ${char.name} » de l'image de référence jointe, SANS aucun personnage : ${desc}. L'effet se déplace vers la DROITE, il est centré et occupe environ 70 % de l'image. ${STYLE} ${BACKGROUND} ${FORMAT}`;
