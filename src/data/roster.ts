@@ -3,6 +3,17 @@ import { BASE_CHARACTERS } from './characters';
 import { DEFAULT_LOOKS, STYLES } from './styles';
 import type { Character, CharacterDef, Look, StyleId } from './types';
 
+/** Tailles proposées à la création d'un personnage. Un petit est plus dur à toucher mais a moins d'allonge. */
+export const SIZES = [
+  { value: 0.8, label: 'Petit' },
+  { value: 1, label: 'Normal' },
+  { value: 1.12, label: 'Grand' },
+] as const;
+
+/** Taille ramenée aux bornes prévues (une valeur absente ou invalide vaut « normal »). */
+export const clampSize = (size: number | undefined): number =>
+  typeof size === 'number' && size >= 0.7 && size <= 1.3 ? size : 1;
+
 /** Pantin d'un personnage sans apparence propre : celui de son style, recoloré à sa couleur. */
 function defaultLook(style: StyleId, color: string, tint: boolean): Look {
   const base = DEFAULT_LOOKS[style];
@@ -22,6 +33,7 @@ export function makeCharacter(def: CharacterDef): Character {
     title: def.title ?? 'Nouveau challenger',
     quote: def.quote ?? 'À qui le tour ?',
     stage: def.stage ?? 0,
+    size: clampSize(def.size),
     ending: def.ending ?? [
       'Un nouveau champion est né.',
       `${def.name} a prouvé sa valeur face aux meilleurs.`,

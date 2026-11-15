@@ -16,8 +16,8 @@ export interface CharacterDrawOptions {
 
 const scratch = clonePose('idle');
 
-/** Échelle des zones de collision : la taille du pantin, ou 1 pour un personnage en images. */
-export const bodyScaleOf = (char: Character): number => (usesSprites(char) ? 1 : char.look.h);
+/** Échelle des zones de collision : la taille du personnage × celle du pantin (1 pour un personnage en images). */
+export const bodyScaleOf = (char: Character): number => char.size * (usesSprites(char) ? 1 : char.look.h);
 
 export function drawCharacter(
   ctx: CanvasRenderingContext2D,
@@ -33,7 +33,7 @@ export function drawCharacter(
   const breathing = Math.sin(time * 0.09);
   if (usesSprites(char)) {
     drawSprite(ctx, char, POSE_SPRITE[poseName], x, y, facing, {
-      scale,
+      scale: scale * char.size,
       sy: 1 + breathing * 0.012,
       flash: opt.flash,
       alpha: opt.alpha,
@@ -42,7 +42,7 @@ export function drawCharacter(
   }
   const pose =
     poseName === 'idle' ? mixPose(POSES.idle, POSES.idle2, (breathing + 1) / 2, scratch) : POSES[poseName];
-  drawRig(ctx, char.look, pose, x, y, facing, { scale, time, ...opt });
+  drawRig(ctx, char.look, pose, x, y, facing, { scale: scale * char.size, time, ...opt });
 }
 
 /** Portrait carré sur fond à la couleur du personnage. */

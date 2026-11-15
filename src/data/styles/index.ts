@@ -12,6 +12,7 @@ import { drunken } from './drunken';
 import { fast } from './fast';
 import { grappler } from './grappler';
 import { heavy } from './heavy';
+import { hockey } from './hockey';
 import { ice } from './ice';
 import { kicker } from './kicker';
 import { mirror } from './mirror';
@@ -45,5 +46,6 @@ export const STYLES: Record<StyleId, StyleDef> = {
   mirror,
   beam,
   monk,
+  hockey,
 };
 export const STYLE_LIST: readonly StyleDef[] = Object.values(STYLES);

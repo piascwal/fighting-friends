@@ -90,6 +90,10 @@ const RAW = {
   burst: { t: -10, hd: -16, aF: [140, 160], aB: [-140, -160], lF: [40, 2], lB: [-40, -4] },
   lotusKnee: { t: -6, hd: -10, aF: [150, 60], aB: [-40, 40], lF: [120, -10], lB: [10, -20] },
   meditate: { t: 0, hd: 6, aF: [40, 100], aB: [30, 100], lF: [95, 175], lB: [80, -170] },
+  windStick: { t: -14, hd: -6, aF: [-120, -80], aB: [-140, -100], lF: [30, 0], lB: [-30, -46] },
+  slapshot: { t: 34, hd: 10, aF: [60, 40], aB: [50, 30], lF: [50, -6], lB: [-44, -60] },
+  bodyCheck: { t: 30, hd: 6, aF: [70, 160], aB: [60, 150], lF: [50, -10], lB: [-46, -60] },
+  brawl: { t: 16, hd: -4, aF: [80, 88], aB: [100, 170], lF: [36, -2], lB: [-28, -44] },
 } satisfies Record<string, RawPose>;
 
 export type PoseName = keyof typeof RAW;
@@ -221,6 +225,10 @@ export const POSE_SPRITE: Record<PoseName, SpriteKey> = {
   burst: 'sp_burst',
   lotusKnee: 'sp_lotus_knee',
   meditate: 'sp_meditate',
+  windStick: 'sp_slapshot',
+  slapshot: 'sp_slapshot',
+  bodyCheck: 'sp_body_check',
+  brawl: 'sp_hockey_fight',
 };
 
 /** Postures de préparation : pendant un coup, elles gardent leur propre sprite au lieu de celui du coup. */

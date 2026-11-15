@@ -20,6 +20,7 @@ import {
   removeCharacter,
   restyleCharacter,
   roster,
+  SIZES,
   styleUsers,
 } from '../data/roster';
 import { STYLE_LIST } from '../data/styles';
@@ -35,6 +36,10 @@ import {
 } from './pose-modal';
 import { showScreen } from './screens';
 
+const SIZE_OPTIONS = SIZES.map(
+  (s) => `<option value="${s.value}"${s.value === 1 ? ' selected' : ''}>${s.label}</option>`,
+).join('');
+
 export const CHARACTERS_HTML = `
   <div class="screen panel" id="s-chars">
     <div class="bar"><button class="nav sm alt" id="chBack">◀ RETOUR</button><h2>PERSONNAGES &amp; SPRITES</h2></div>
@@ -43,10 +48,12 @@ export const CHARACTERS_HTML = `
       <div class="row hidden" id="chNew">
         <input id="newName" maxlength="16" placeholder="Nom du personnage">
         <select id="newStyle"></select>
+        <label>Taille <select id="newSize">${SIZE_OPTIONS}</select></label>
         <button class="nav sm" id="newOk">CRÉER</button>
       </div>
       <div class="row" id="chEdit">
         <label>Style de combat <select id="edStyle"></select></label>
+        <label>Taille <select id="edSize">${SIZE_OPTIONS}</select></label>
         <label>Couleur <input type="color" id="edCol"></label>
         <button class="nav sm alt" id="edDel">SUPPRIMER LE PERSONNAGE</button>
       </div>
@@ -140,6 +147,7 @@ function refresh(): void {
   fillStyleSelect($<HTMLSelectElement>('#edStyle'), char.styleId, char);
   $('#styleNote').innerHTML = styleNote(char);
   $<HTMLInputElement>('#edCol').value = char.color;
+  $<HTMLSelectElement>('#edSize').value = String(sizeChoice(char.size));
   $('#edDel').classList.toggle('hidden', !(char.custom && !char.repo));
 
   const poses = spritePosesFor(char);
@@ -233,6 +241,10 @@ function styleNote(char: Character): string {
   return `<div class="styleInfo"><b>${escapeHtml(style.archetype)}</b> ${tags}<div class="moves">${escapeHtml(names)}</div>${warning}</div>`;
 }
 
+/** La taille proposée la plus proche (pour afficher une taille venue d'un fichier). */
+const sizeChoice = (size: number): number =>
+  SIZES.reduce((best, s) => (Math.abs(s.value - size) < Math.abs(best - size) ? s.value : best), 1 as number);
+
 function createCharacter(): void {
   const field = $<HTMLInputElement>('#newName');
   const name = field.value.trim();
@@ -247,6 +259,7 @@ function createCharacter(): void {
     style: $<HTMLSelectElement>('#newStyle').value as StyleId,
     color: pick(NEW_COLORS),
     stage: Math.floor(Math.random() * STAGE_COUNT),
+    size: Number($<HTMLSelectElement>('#newSize').value),
     custom: true,
   });
   saveCustomCharacters();
@@ -323,6 +336,16 @@ export function initCharacters(onBack: () => void): void {
       const char = selected();
       char.color = valueOf(e);
       restyleCharacter(char, char.styleId);
+      saveCharacterSettings(char);
+      refresh();
+    },
+    'change',
+  );
+  on(
+    '#edSize',
+    (e) => {
+      const char = selected();
+      char.size = Number(valueOf(e));
       saveCharacterSettings(char);
       refresh();
     },

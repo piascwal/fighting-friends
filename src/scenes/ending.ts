@@ -82,10 +82,12 @@ export class Ending implements Scene {
     const stride = Math.sin(t * 0.2);
     if (usesSprites(champion)) {
       const y = GROUND_Y - Math.abs(stride) * 5;
-      drawSprite(ctx, champion, stride > 0 ? 'walk1' : 'walk2', this.x, y, 1, { scale: CHAR_SCALE });
+      drawSprite(ctx, champion, stride > 0 ? 'walk1' : 'walk2', this.x, y, 1, {
+        scale: CHAR_SCALE * champion.size,
+      });
     } else {
       const pose = mixPose(POSES.walkA, POSES.walkB, (stride + 1) / 2, this.walkPose);
-      drawRig(ctx, champion.look, pose, this.x, GROUND_Y, 1, { scale: CHAR_SCALE, time: t });
+      drawRig(ctx, champion.look, pose, this.x, GROUND_Y, 1, { scale: CHAR_SCALE * champion.size, time: t });
     }
   }
 

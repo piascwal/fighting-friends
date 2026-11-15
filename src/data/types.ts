@@ -56,7 +56,8 @@ export type ProjectileLook =
   | 'mine'
   | 'grenade'
   | 'light'
-  | 'beam';
+  | 'beam'
+  | 'puck';
 
 export interface ProjectileDef {
   /** Frame d'apparition. */
@@ -84,6 +85,8 @@ export interface ProjectileDef {
   fx: HitFx;
   /** Court au ras du sol. */
   ground?: boolean;
+  /** Hauteur de la touche ('low' : à bloquer accroupi). 'mid' par défaut. */
+  lvl?: HitLevel;
   /** Projection appliquée par la dernière touche. */
   launchLast?: Launch;
 }
@@ -188,7 +191,8 @@ export type StyleId =
   | 'trapper'
   | 'mirror'
   | 'beam'
-  | 'monk';
+  | 'monk'
+  | 'hockey';
 
 /** Capacités d'un style, affichées pour aider à choisir. */
 export type StyleTag =
@@ -267,6 +271,8 @@ export interface CharacterDef {
   quote?: string;
   /** Numéro du décor « à domicile ». */
   stage?: number;
+  /** Taille relative (1 = normale, voir SIZES) : change l'affichage ET les zones de coups. */
+  size?: number;
   ending?: readonly string[];
   /** Créé par le joueur (modifiable dans Options ▸ Personnages). */
   custom?: boolean;

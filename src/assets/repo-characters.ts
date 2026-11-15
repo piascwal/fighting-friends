@@ -40,6 +40,7 @@ function registerCharacter(id: string, file: CharacterFile): void {
     name: file.name ?? id.toUpperCase(),
     style: file.style ?? file.template ?? 'balanced',
     color: file.color ?? '#ff3d7f',
+    size: file.size,
     title: file.title,
     quote: file.quote,
     custom: true,
@@ -47,8 +48,8 @@ function registerCharacter(id: string, file: CharacterFile): void {
   };
   addCharacter(def);
   if (local?.custom && !local.repo) {
-    if (local.styleId !== def.style || local.color !== def.color) {
-      setOverride(id, { style: local.styleId, color: local.color });
+    if (local.styleId !== def.style || local.color !== def.color || local.size !== (def.size ?? 1)) {
+      setOverride(id, { style: local.styleId, color: local.color, size: local.size });
     }
     saveCustomCharacters(); // il n'est plus dans la liste des personnages créés sur l'appareil
   }

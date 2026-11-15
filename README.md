@@ -28,7 +28,8 @@ La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**
 
 ## Ajouter un personnage avec ses propres sprites
 
-1. Dans le jeu : **Options ▸ Personnages & sprites ▸ Nouveau personnage** (nom + style de combat).
+1. Dans le jeu : **Options ▸ Personnages & sprites ▸ Nouveau personnage** (nom, style de combat et taille :
+   petit, normal ou grand ; un petit est plus dur à toucher mais a moins d'allonge).
 2. Toucher une pose ▸ **Copier le prompt**, le coller dans une IA d'images avec l'image de référence du personnage.
    Si l'IA ne trouve pas la posture, lui joindre aussi l'**image guide** (mannequin gris dans la posture
    exacte) : **Copier l'image guide** ou **Partager / Enregistrer**.
@@ -55,11 +56,12 @@ copies locales sont effacées et les marqueurs disparaissent au chargement suiva
 Chaque personnage peut aussi avoir son **décor** : carte « Décor » dans l'écran des sprites, avec un prompt à
 compléter par la description de la scène et une image guide qui fixe le sol et la taille des combattants.
 
-**20 styles de combat**, chacun avec sa famille et ses capacités (affichées à la sélection) :
+**21 styles de combat**, chacun avec sa famille et ses capacités (affichées à la sélection) :
 Équilibré, Rapide, Lourd, Technique, Lutteur (prises imparables), Maître du contre, Givre, Voltigeur, Boxeur,
 Taekwondo, Tempête, Poing ivre, Soldat (coups à charge), Enchaîneur (frappe en trois temps), Tigre (posture
 à quatre sorties), Berserker (rage temporaire), Artificier (mines), Miroir (renvoie les projectiles), Énergiste
-(rayon) et Moine (méditation qui soigne). Changer le style d'un personnage ne fait perdre aucune image ; la liste
+(rayon), Moine (méditation qui soigne) et Hockeyeur (palet au ras du sol à bloquer accroupi, mise en
+échec avec armure, bagarre « gants jetés » en super). Changer le style d'un personnage ne fait perdre aucune image ; la liste
 des styles indique ceux qui sont déjà pris, et un nouveau personnage reçoit d'office un style libre.
 
 ## Installer le jeu sur un téléphone

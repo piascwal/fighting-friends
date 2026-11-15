@@ -1,7 +1,7 @@
 /* Personnages créés par le joueur et réglages qu'il a modifiés, enregistrés sur l'appareil ;
    export d'un personnage en .zip prêt à déposer dans le dépôt (public/assets/characters). */
 import { moveSprites } from '../data/prompts';
-import { characterById, addCharacter, restyleCharacter, roster } from '../data/roster';
+import { characterById, addCharacter, clampSize, restyleCharacter, roster } from '../data/roster';
 import { SPRITE_BY_KEY, type SpriteKey } from '../data/sprite-poses';
 import { STYLES } from '../data/styles';
 import type { Character, StyleId } from '../data/types';
@@ -20,6 +20,8 @@ export interface CharacterFile {
   /** Ancien nom du champ `style`. */
   template?: StyleId;
   color?: string;
+  /** Taille relative (1 = normale). */
+  size?: number;
   title?: string;
   quote?: string;
   /** Fichier de chaque image (`{ "idle": "idle.webp" }`). Ancien format : liste de poses en .png. */
@@ -36,6 +38,7 @@ export interface CharacterFile {
 interface Override {
   style?: StyleId;
   color?: string;
+  size?: number;
 }
 
 export function readJson<T>(key: string, fallback: T): T {
@@ -62,6 +65,7 @@ export function loadCustomCharacters(): void {
       name: file.name,
       style: file.style ?? file.template ?? 'balanced',
       color: file.color ?? '#ff3d7f',
+      size: file.size,
       custom: true,
     });
   }
@@ -70,7 +74,7 @@ export function loadCustomCharacters(): void {
 export function saveCustomCharacters(): void {
   const list = roster
     .filter((c) => c.custom && !c.repo)
-    .map((c) => ({ id: c.id, name: c.name, style: c.styleId, color: c.color }));
+    .map((c) => ({ id: c.id, name: c.name, style: c.styleId, color: c.color, size: c.size }));
   writeJson(CUSTOM_KEY, list);
 }
 
@@ -86,6 +90,7 @@ export function applyOverrides(): void {
     const char = characterById(id);
     if (!char) continue;
     if (override.color) char.color = override.color;
+    if (override.size) char.size = clampSize(override.size);
     if (override.style && STYLES[override.style]) restyleCharacter(char, override.style);
   }
 }
@@ -93,7 +98,7 @@ export function applyOverrides(): void {
 /** Enregistre le style et la couleur d'un personnage, quelle que soit son origine. */
 export function saveCharacterSettings(char: Character): void {
   if (char.custom && !char.repo) saveCustomCharacters();
-  else setOverride(char.id, { style: char.styleId, color: char.color });
+  else setOverride(char.id, { style: char.styleId, color: char.color, size: char.size });
 }
 
 /**
@@ -131,6 +136,7 @@ export async function exportCharacterZip(char: Character): Promise<void> {
     name: char.name,
     style: char.styleId,
     color: char.color,
+    size: char.size,
     title: char.title,
     quote: char.quote,
     files,

@@ -154,6 +154,19 @@ function drawDisc(ctx: Ctx, w: number, h: number, age: number): void {
   ctx.fillRect(-w * 0.35, -1.5, w * 0.7, 3);
 }
 
+/** Palet de hockey : disque noir vu de côté, traînée de glace pilée derrière lui. */
+function drawPuck(ctx: Ctx, w: number, h: number, age: number): void {
+  ctx.fillStyle = 'rgba(220,240,255,.7)';
+  for (let i = 1; i <= 3; i++) {
+    const size = 6 - i;
+    ctx.fillRect(-w / 2 - i * 9, h * 0.2 - ((age + i * 3) % 6), size, size);
+  }
+  ctx.fillStyle = '#111318';
+  ctx.fillRect(-w / 2, -h / 2, w, h);
+  ctx.fillStyle = '#3a3f4a';
+  ctx.fillRect(-w / 2, -h / 2, w, 3);
+}
+
 /** Mine posée au sol, voyant qui clignote. */
 function drawMine(ctx: Ctx, w: number, h: number, age: number): void {
   ctx.fillStyle = '#3a3f4a';
@@ -231,5 +244,7 @@ export function drawProjectileShape(ctx: Ctx, look: ProjectileLook, w: number, h
       return drawLight(ctx, w, h);
     case 'beam':
       return drawBeam(ctx, w, h, age);
+    case 'puck':
+      return drawPuck(ctx, w, h, age);
   }
 }

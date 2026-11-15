@@ -114,7 +114,7 @@ function hitTarget(p: Projectile, onHit: OnHit, emit: Emit): void {
     hs: d.hs,
     bs: d.bs,
     kb: d.kb,
-    lvl: 'mid',
+    lvl: d.lvl ?? 'mid',
     fx: d.fx,
     launch: p.hits === 1 ? d.launchLast : undefined,
     stop: d.hits ? 5 : undefined,

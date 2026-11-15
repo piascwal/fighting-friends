@@ -119,6 +119,7 @@ export function changesManifest(char: Character, names: Partial<Record<SpriteKey
     name: char.name,
     style: char.styleId,
     color: char.color,
+    size: char.size,
     files,
     adjust,
     updated: Date.now(),

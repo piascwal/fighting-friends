@@ -22,9 +22,17 @@ export function drawTrail(ctx: CanvasRenderingContext2D, f: Fighter): void {
     const y = GROUND_Y + ghost.y;
     if (sprites) {
       const facing = ghost.facing * (ghost.pose.flip ? -1 : 1);
-      drawSprite(ctx, f.char, ghost.spriteKey, ghost.x, y, facing, { alpha, flash: true });
+      drawSprite(ctx, f.char, ghost.spriteKey, ghost.x, y, facing, {
+        alpha,
+        flash: true,
+        scale: f.char.size,
+      });
     } else {
-      drawRig(ctx, f.char.look, ghost.pose, ghost.x, y, ghost.facing, { silhouette: f.char.color, alpha });
+      drawRig(ctx, f.char.look, ghost.pose, ghost.x, y, ghost.facing, {
+        silhouette: f.char.color,
+        alpha,
+        scale: f.char.size,
+      });
     }
   }
 }
@@ -85,10 +93,14 @@ export function drawFighter(ctx: CanvasRenderingContext2D, f: Fighter): void {
   const y = GROUND_Y + f.y;
   const flash = f.flash > 2;
   if (!usesSprites(f.char)) {
-    drawRig(ctx, f.char.look, f.pose, x, y, f.facing, { flash, time: f.age });
+    drawRig(ctx, f.char.look, f.pose, x, y, f.facing, { flash, time: f.age, scale: f.char.size });
     return;
   }
   const { dx, dy, ...motion } = spriteMotion(f);
   const facing = f.facing * (f.pose.flip ? -1 : 1);
-  drawSprite(ctx, f.char, f.spriteKey, x + dx * f.facing, y + dy, facing, { flash, ...motion });
+  drawSprite(ctx, f.char, f.spriteKey, x + dx * f.facing, y + dy, facing, {
+    flash,
+    scale: f.char.size,
+    ...motion,
+  });
 }

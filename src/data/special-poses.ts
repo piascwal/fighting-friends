@@ -207,6 +207,24 @@ export const SPECIAL_POSES = {
     'en méditation : assis en tailleur au sol, dos bien droit, mains posées sur les genoux paumes vers le haut, yeux fermés, expression sereine',
     { h: 0.55, ax: 0.5, fb: ['crouch', 'idle'] },
   ),
+  sp_slapshot: pose(
+    'Lancer frappé',
+    'slapshot',
+    "lancer frappé au hockey : il tient sa crosse de hockey à deux mains, buste penché vers l'avant, la crosse vient de frapper au ras du sol et part vers l'avant, jambes en fente (ne dessine PAS le palet)",
+    { h: 0.9, ax: 0.38, fb: ['punch_heavy', 'idle'] },
+  ),
+  sp_body_check: pose(
+    'Mise en échec',
+    'bodyCheck',
+    'mise en échec au hockey : il fonce épaule en avant, buste penché, sa crosse de hockey tenue à deux mains en travers devant la poitrine, jambes en pleine course',
+    { h: 0.9, ax: 0.42, fb: ['punch_heavy', 'idle'] },
+  ),
+  sp_hockey_fight: pose(
+    'Bagarre de hockey',
+    'brawl',
+    "bagarre de hockey, gants jetés : sans crosse, une main agrippe vers l'avant un maillot invisible (poing fermé tendu à hauteur d'épaule), l'autre poing armé au-dessus de la tête prêt à frapper, mâchoire serrée",
+    { h: 1, ax: 0.42, fb: ['punch_light', 'idle'] },
+  ),
 
   // ---------- projectiles ----------
   pj_fireball: projectile(
@@ -257,6 +275,10 @@ export const SPECIAL_POSES = {
   pj_beam: projectile(
     'Rayon',
     "un rayon d'énergie horizontal, long et épais, très lumineux au centre, qui traverse toute la largeur de l'image",
+  ),
+  pj_puck: projectile(
+    'Palet',
+    "un palet de hockey noir vu de côté (disque plat et épais), qui glisse très vite au ras du sol, avec une traînée de glace pilée et d'étincelles blanches vers la gauche",
   ),
 } satisfies Record<string, SpecialSpec>;
 
