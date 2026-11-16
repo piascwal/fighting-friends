@@ -29,13 +29,24 @@ export type FighterState =
   | 'lock'; // immobile : introduction, pose de victoire
 
 /** Gravité d'un saut : forte, pour des sauts vifs. */
-const GRAVITY = 1.7;
+const GRAVITY = 1.6;
+/**
+ * Impulsion d'un saut : assez haute pour passer par-dessus l'adversaire (sommet vers 210-250 px pour
+ * un personnage de 200 px). Le style ne fait varier que légèrement la hauteur autour de JUMP_BASE.
+ */
+const JUMP_BASE = 27;
+const JUMP_STYLE_WEIGHT = 0.5;
+const REFERENCE_JUMP = 23;
 /** Gravité d'un coup spécial qui décolle (uppercut, vrille…) : plus douce, pour laisser le temps de frapper. */
 const SPECIAL_GRAVITY = 1.15;
 /** Saut de poursuite après un lanceur : impulsion verticale et vitesse horizontale, identiques pour tous. */
 const PURSUIT_JUMP = 19;
 const PURSUIT_DRIFT = 4;
 export const JUMPSQUAT_FRAMES = 2;
+
+/** Impulsion verticale d'un saut normal à partir de la statistique « saut » du style. */
+export const jumpImpulse = (styleJump: number): number =>
+  JUMP_BASE + (styleJump - REFERENCE_JUMP) * JUMP_STYLE_WEIGHT;
 const KNOCKDOWN_FRAMES = 24;
 const GETUP_FRAMES = 11;
 export const TRAIL_LIFE = 9;
@@ -346,7 +357,7 @@ export class Fighter {
     if (this.tryAttack()) return;
     if (this.t < JUMPSQUAT_FRAMES) return;
     // le saut de poursuite est calé sur le lanceur (même hauteur pour tous) pour rester à portée de l'adversaire
-    this.vy = this.pursuit ? -PURSUIT_JUMP : -this.stats.jump;
+    this.vy = this.pursuit ? -PURSUIT_JUMP : -jumpImpulse(this.stats.jump);
     this.vx = this.jumpDir * (this.pursuit ? PURSUIT_DRIFT : this.speed * 1.35);
     this.y = -1;
     this.airAttacks = 0;

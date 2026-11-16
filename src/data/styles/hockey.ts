@@ -108,7 +108,7 @@ export const hockey: StyleDef = {
   hint: 'Palet au ras du sol, mise en échec, bagarre',
   archetype: 'Bagarreur',
   tags: ['Projectile', 'Coup bas', 'Armure', 'Prise'],
-  stats: { hp: 1050, speed: 4.4, jump: 21, power: 1.05 },
+  stats: { hp: 1050, speed: 4.4, jump: 22, power: 1.05 },
   names: { s1: 'Lancer frappé', s2: 'Mise en échec', super: 'JETTE LES GANTS' },
   moves: moveSet({
     ...NORMALS,
