@@ -1126,3 +1126,86 @@ i.b {
 #update button {
   border-radius: 0 !important;
 }
+
+/* transition entre écrans : volets penchés qui s'écartent en cascade (voir ui/transition.ts) */
+#wipe {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  overflow: hidden;
+  display: flex;
+}
+#wipe i {
+  flex: 1;
+  margin: -10% -1px;
+  background: #000;
+  border-right: 6px solid #ffd23a;
+  box-shadow: 10px 0 0 #c8001e;
+  transform: skewX(-14deg) scaleX(0);
+  transform-origin: 100% 50%;
+}
+#wipe.go i {
+  animation: wipe 0.34s steps(7) both;
+  animation-delay: calc(var(--i) * 0.022s);
+}
+@keyframes wipe {
+  0%,
+  25% {
+    transform: skewX(-14deg) scaleX(1.25);
+  }
+  100% {
+    transform: skewX(-14deg) scaleX(0);
+  }
+}
+
+/* écran titre : bandeau animé derrière le logo, et logo qui arrive en claquant */
+#s-title {
+  overflow: hidden;
+}
+#titleFx {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  transform: translateY(-58%);
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+#s-title .logo,
+#s-title .blink,
+#s-title .install,
+#s-title .version {
+  z-index: 1;
+}
+#s-title .logo,
+#s-title .blink {
+  position: relative;
+}
+.logo.slam span {
+  animation: logoLeft 0.3s steps(6) 0.15s both;
+}
+.logo.slam b {
+  animation:
+    logoRight 0.3s steps(6) 0.3s both,
+    logoHit 0.25s steps(4) 0.6s;
+}
+@keyframes logoLeft {
+  from {
+    transform: translateX(-120vw);
+  }
+}
+@keyframes logoRight {
+  from {
+    transform: translateX(120vw);
+  }
+}
+@keyframes logoHit {
+  0% {
+    transform: scale(1.35);
+    filter: brightness(3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

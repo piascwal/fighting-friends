@@ -3,29 +3,21 @@
 import { settings } from '../core/settings';
 import { rgba } from '../core/color';
 import { GROUND_Y, VIEW_H, VIEW_W } from '../core/constants';
-import { clamp, easeBack, rand } from '../core/math';
+import { rand } from '../core/math';
 import { activeHits, hurtbox, type Rect } from '../engine/combat';
 import type { BannerTone, FightEvent } from '../engine/events';
 import { SUPER_FREEZE, type FightSim } from '../engine/fight';
 import { drawFighter, drawShadow, drawTrail } from './fighter-view';
 import { Fx } from './fx';
+import { drawAnnouncement, type Banner } from './announce';
 import { drawHud } from './hud';
 import { PixelLayer, burstLines } from './motion';
 import { drawSuperCutIn } from './super-cutin';
 import { drawProjectile, emitProjectileTrail, projectileSprite } from './projectile-view';
 import { drawStage, type Stage } from './stages';
-import { BLUE, GOLD, RED, arcadeText, type Gradient } from './text';
+import { BLUE, GOLD, RED, type Gradient } from './text';
 
 type Ctx = CanvasRenderingContext2D;
-
-interface Banner {
-  text: string;
-  age: number;
-  duration: number;
-  size: number;
-  y: number;
-  colors: Gradient;
-}
 
 const TONES: Record<BannerTone, Gradient> = { gold: GOLD, red: RED, blue: BLUE };
 /** Taille d'un « pixel » des effets, en pixels monde : 3 donne un grain proche des sprites en pixel art. */
@@ -243,12 +235,7 @@ export class FightView {
   }
 
   private drawBanners(ctx: Ctx): void {
-    for (const b of this.banners) {
-      const appear = easeBack(b.age / 9);
-      const leave = clamp((b.duration - b.age) / 8, 0, 1);
-      const scale = (0.3 + 0.7 * appear) * (1 + (1 - leave) * 0.5);
-      arcadeText(ctx, b.text, VIEW_W / 2, b.y, b.size, { scale, alpha: leave, colors: b.colors });
-    }
+    for (const b of this.banners) drawAnnouncement(ctx, b);
   }
 
   /** Option de mise au point : zones vulnérables en vert, zones de frappe en rouge. */

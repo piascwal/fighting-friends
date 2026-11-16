@@ -20,6 +20,7 @@ import {
   showScreen,
   type GameMode,
   type UiActions,
+  wipe,
 } from './ui';
 
 /** Niveau des combattants du combat de démonstration. */
@@ -145,6 +146,7 @@ class Game implements UiActions {
     hideScreens();
     const fight = () => {
       playMusic('fight');
+      wipe();
       this.setScene(
         new FightScene({
           chars: [player, opponent],
@@ -169,6 +171,7 @@ class Game implements UiActions {
     playMusic('menu');
     const playerLost = this.mode !== 'duo' && !playerWon;
     this.setScene(new Victory(playerWon ? player : opponent, playerLost));
+    wipe();
 
     const menu = ['MENU', () => this.toMenu()] as const;
     const rematch = () => this.startMatch(player, opponent);

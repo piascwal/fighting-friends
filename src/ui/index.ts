@@ -10,6 +10,7 @@ import { OPTIONS_HTML, initOptions, openOptions } from './options';
 import { closePoseModal, isPoseModalOpen, tickPoseModal } from './pose-modal';
 import { currentScreen, hideScreens, mountScreens, showScreen } from './screens';
 import { SELECT_HTML, backFromSelect, initSelect, openSelect, tickSelect } from './select';
+import { resetTitle, tickTitle } from './title-fx';
 
 export type { GameMode, UiActions } from './actions';
 export { showResult } from './menus';
@@ -93,9 +94,13 @@ export function openCharactersShortcut(): void {
   openCharacters(() => (from ? showScreen(from) : hideScreens()));
 }
 
+export { wipe } from './transition';
+
 /** Anime les aperçus des menus ; appelé à chaque image. */
 export function tickUi(): void {
   const screen = currentScreen();
-  if (screen === 'select') tickSelect();
+  if (screen !== 'title') resetTitle();
+  if (screen === 'title') tickTitle();
+  else if (screen === 'select') tickSelect();
   else if (screen === 'chars') tickPoseModal();
 }

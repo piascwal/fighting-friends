@@ -6,10 +6,12 @@ import { versionLabel } from '../core/version';
 import { game, type GameMode } from './actions';
 import { $, $$, on } from './dom';
 import { showScreen } from './screens';
+import { TITLE_FX_HTML } from './title-fx';
 
 export const MENUS_HTML = `
   <div class="screen" id="s-title">
-    <div class="logo"><span>FIGHTING</span><b>FRIENDS</b></div>
+    ${TITLE_FX_HTML}
+    <div class="logo slam"><span>FIGHTING</span><b>FRIENDS</b></div>
     <div class="blink">TOUCHE L'ÉCRAN POUR JOUER</div>
     <div class="install">
       <button class="nav sm hidden" id="installBtn">📲 INSTALLER LE JEU<small>Plein écran, à l'horizontale, même hors ligne</small></button>
