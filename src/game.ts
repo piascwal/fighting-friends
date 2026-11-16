@@ -161,7 +161,8 @@ class Game implements UiActions {
     if (mode === 'training') return fight();
     playMusic(null);
     const label = mode === 'arcade' ? `COMBAT ${this.ladderStep + 1} / ${this.ladder.length}` : '';
-    this.setScene(new Versus(player, opponent, label, fight));
+    const ladder = mode === 'arcade' ? { opponents: this.ladder, step: this.ladderStep } : undefined;
+    this.setScene(new Versus(player, opponent, label, fight, ladder));
   }
 
   private endMatch(winnerIndex: number): void {

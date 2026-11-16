@@ -5,6 +5,7 @@ import { pick } from '../core/math';
 import { roster } from '../data/roster';
 import type { Character } from '../data/types';
 import { drawCharacter, drawPortrait } from '../render/character-draw';
+import { burstLines, tones } from '../render/motion';
 import { arcadeText, bands } from '../render/text';
 import { game, type GameMode } from './actions';
 import { $, $$, newCanvas, on } from './dom';
@@ -179,6 +180,15 @@ function drawPreview(side: 0 | 1): void {
   } else if (who) {
     const facing = side ? -1 : 1;
     const pose = s.picks[side] ? 'win' : 'idle';
+    if (s.picks[side]) {
+      // choix validé : rayons derrière lui, et ses échos colorés qui s'écartent le temps du flash
+      const colors = tones(who.color);
+      burstLines(ctx, PREVIEW_W / 2, PREVIEW_H * 0.45, time, colors[0]!, 150);
+      for (let i = 3; i >= 1 && s.flash[side] > 0; i--) {
+        const x = PREVIEW_W / 2 - facing * s.flash[side] * 5 * i;
+        drawCharacter(ctx, who, pose, x, PREVIEW_H - 8, facing, PREVIEW_SCALE, 0, { silhouette: colors[i]! });
+      }
+    }
     drawCharacter(ctx, who, pose, PREVIEW_W / 2, PREVIEW_H - 8, facing, PREVIEW_SCALE, time, {
       flash: s.flash[side] > 8,
     });

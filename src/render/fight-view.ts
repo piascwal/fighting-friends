@@ -44,6 +44,8 @@ export class FightView {
   private readonly motion = new PixelLayer();
   /** Frames restantes du fond de K.O. */
   private koTime = 0;
+  /** Frames depuis que la jauge de super de chaque combattant est pleine (0 : pas pleine). */
+  private readyAge: [number, number] = [0, 0];
 
   constructor(
     private readonly sim: FightSim,
@@ -108,6 +110,12 @@ export class FightView {
     this.flash *= 0.82;
     if (this.koTime > 0) this.koTime--;
     sim.fighters.forEach((f, i) => {
+      this.readyAge[i] = f.meter >= 100 ? this.readyAge[i]! + 1 : 0;
+      if (this.readyAge[i] === 1 && sim.mode !== 'attract') {
+        // super prêt : un éclat à sa couleur autour du combattant
+        fx.add({ type: 'ring', x: f.x, y: GROUND_Y + f.y - 100, life: 18, size: 150, col: f.char.color });
+        for (let n = 0; n < 6; n++) fx.aura(f.x, GROUND_Y + f.y, f.char.color);
+      }
       // pendant un combo la trace rouge reste, puis elle rattrape vite la vie réelle
       this.delayedHp[i]! += (f.hp - this.delayedHp[i]!) * (f.inHit ? 0.02 : 0.12);
       if (f.hp > this.delayedHp[i]!) this.delayedHp[i] = f.hp;
@@ -199,7 +207,7 @@ export class FightView {
     ui.clearRect(0, 0, ui.canvas.width, ui.canvas.height);
     ui.setTransform(1 / HUD_PIXEL, 0, 0, 1 / HUD_PIXEL, 0, 0);
     ui.imageSmoothingEnabled = false;
-    if (sim.mode !== 'attract') drawHud(ui, sim, this.delayedHp);
+    if (sim.mode !== 'attract') drawHud(ui, sim, this.delayedHp, this.readyAge);
     this.drawBanners(ui);
     ctx.save();
     ctx.imageSmoothingEnabled = false;
