@@ -1,0 +1,110 @@
+{
+  "id": "bubu",
+  "name": "BUBU",
+  "style": "beam",
+  "color": "#3d9bff",
+  "size": 1,
+  "title": "Nouveau challenger",
+  "quote": "À qui le tour ?",
+  "files": {
+    "kick_heavy": "kick_heavy.webp",
+    "idle": "idle.webp",
+    "punch_heavy": "punch_heavy.webp",
+    "portrait": "portrait.webp",
+    "jump": "jump.webp",
+    "super": "super.webp",
+    "hit": "hit.webp",
+    "crouch": "crouch.webp",
+    "kick_light": "kick_light.webp",
+    "block": "block.webp",
+    "punch_light": "punch_light.webp",
+    "sp_energy_cast": "sp_energy_cast.webp",
+    "intro": "intro.webp",
+    "win": "win.webp",
+    "pj_beam": "pj_beam.webp",
+    "crouch_punch": "crouch_punch.webp"
+  },
+  "adjust": {
+    "kick_heavy": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "idle": {
+      "s": 1,
+      "dx": 5,
+      "dy": 0
+    },
+    "punch_heavy": {
+      "s": 1,
+      "dx": -29,
+      "dy": 0
+    },
+    "portrait": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "jump": {
+      "s": 1,
+      "dx": 12,
+      "dy": 0
+    },
+    "super": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "hit": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "crouch": {
+      "s": 1.17,
+      "dx": 33,
+      "dy": 0
+    },
+    "kick_light": {
+      "s": 1.03,
+      "dx": 10,
+      "dy": 0
+    },
+    "block": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "punch_light": {
+      "s": 1,
+      "dx": 9,
+      "dy": 0
+    },
+    "sp_energy_cast": {
+      "s": 1.03,
+      "dx": 0,
+      "dy": 0
+    },
+    "intro": {
+      "s": 1.04,
+      "dx": 8,
+      "dy": 0
+    },
+    "win": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "pj_beam": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "crouch_punch": {
+      "s": 1.19,
+      "dx": 31,
+      "dy": 0
+    }
+  },
+  "updated": 1794862010903
+}
