@@ -71,6 +71,7 @@ export const mirror: StyleDef = {
       proj: {
         t: 14,
         look: 'beam',
+        persist: true,
         sprite: 'pj_beam',
         vx: 0,
         x: 300,

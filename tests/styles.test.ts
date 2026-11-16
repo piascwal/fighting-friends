@@ -366,3 +366,21 @@ describe('mécaniques inspirées des jeux de combat', () => {
     expect(player.hp).toBeGreaterThan(500);
   });
 });
+
+describe('rayon', () => {
+  it('reste affiché toute sa durée après avoir touché, sans toucher deux fois', () => {
+    const { sim, pad } = createTraining({ style: 'beam', distance: 200 });
+    const dummy = sim.fighters[1];
+    pad.commands.push('s1l');
+    let visible = 0;
+    let hits = 0;
+    for (let f = 0; f < 60; f++) {
+      const before = dummy.hp;
+      stepBoth(pad, sim);
+      if (sim.projectiles.length) visible++;
+      if (dummy.hp < before) hits++;
+    }
+    expect(hits).toBe(1);
+    expect(visible).toBeGreaterThan(12);
+  });
+});

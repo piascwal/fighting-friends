@@ -17,6 +17,7 @@ const ray = (heavy: boolean) =>
     proj: {
       t: 16,
       look: 'beam',
+      persist: true,
       sprite: 'pj_beam',
       vx: 0,
       x: heavy ? 290 : 220,
@@ -80,6 +81,7 @@ export const beam: StyleDef = {
       proj: {
         t: 16,
         look: 'beam',
+        persist: true,
         sprite: 'pj_beam',
         vx: 0,
         x: 380,

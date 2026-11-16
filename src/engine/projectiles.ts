@@ -86,14 +86,15 @@ export function updateProjectiles(list: Projectile[], emit: Emit, onHit: OnHit):
     clash(p, list, emit);
   }
   return list.filter(
-    (p) => p.hits > 0 && p.x > -150 && p.x < STAGE_W + 150 && p.age <= (p.def.life ?? MAX_AGE),
+    (p) =>
+      (p.hits > 0 || p.def.persist) && p.x > -150 && p.x < STAGE_W + 150 && p.age <= (p.def.life ?? MAX_AGE),
   );
 }
 
 function hitTarget(p: Projectile, onHit: OnHit, emit: Emit): void {
   const target = p.owner.opp;
   const box = hurtbox(target);
-  if (!box || p.cooldown > 0 || !overlaps(projectileBox(p), box)) return;
+  if (!box || p.hits <= 0 || p.cooldown > 0 || !overlaps(projectileBox(p), box)) return;
   if (isReflecting(target)) {
     // renvoyé : le projectile repart plus vite vers son lanceur, qui en devient la cible
     p.owner = target;

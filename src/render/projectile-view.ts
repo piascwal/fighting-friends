@@ -1,5 +1,5 @@
 /* Affichage des projectiles : sprite du personnage s'il en fournit un, sinon dessin selon l'élément. */
-import { spriteEntry } from '../assets/sprite-store';
+import { spriteEntry, type SpriteEntry } from '../assets/sprite-store';
 import { GROUND_Y } from '../core/constants';
 import { pick, rand } from '../core/math';
 import { drawProjectileShape } from './projectile-shapes';
@@ -25,7 +25,9 @@ export function drawProjectile(ctx: Ctx, p: Projectile): void {
   ctx.translate(p.x, p.y);
   ctx.scale(p.dir, 1);
   const sprite = projectileSprite(p);
-  if (sprite) {
+  if (sprite && def.look === 'beam') {
+    drawBeamSprite(ctx, p, sprite, w, h);
+  } else if (sprite) {
     // l'image couvre la zone de frappe : en hauteur pour les projectiles hauts (éclair, pic), en largeur sinon
     const k =
       (def.h > def.w * 2 ? h / sprite.h : (Math.max(w, h) * 1.6) / Math.max(sprite.w, sprite.h)) *
@@ -36,6 +38,21 @@ export function drawProjectile(ctx: Ctx, p: Projectile): void {
     drawProjectileShape(ctx, def.look, w, h, p.age);
   }
   ctx.restore();
+}
+
+/**
+ * Rayon en image : il part des mains du lanceur et s'étire sur toute la longueur de sa zone de frappe
+ * (l'image est étirée en longueur, pas en épaisseur). Il jaillit en quelques images, vibre, puis s'amincit.
+ */
+function drawBeamSprite(ctx: Ctx, p: Projectile, sprite: SpriteEntry, w: number, h: number): void {
+  const life = p.def.life ?? 30;
+  const grow = Math.min(1, (p.age + 1) / 4);
+  const fade = Math.min(1, (life - p.age) / 6);
+  // épaisseur : le cœur lumineux de l'image couvre la zone de frappe, avec un léger halo autour
+  const thickness = h * 1.5 * fade * (p.age % 4 < 2 ? 1 : 0.92) * sprite.adj.s;
+  const length = w * grow;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(sprite.img, -w / 2, -thickness / 2, length, thickness);
 }
 
 /** Particules laissées dans le sillage d'un projectile. */
