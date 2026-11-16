@@ -66,6 +66,6 @@ export default defineConfig(({ command }) => {
     build: { target: 'es2022', sourcemap: true },
     define: { __VERSION__: JSON.stringify(info.version), __COMMIT__: JSON.stringify(info.commit) },
     plugins: [versionFile(info), serviceWorker(info)],
-    test: { environment: 'node', include: ['tests/**/*.test.ts'] },
+    test: { environment: 'node', include: ['tests/**/*.test.ts'], setupFiles: ['tests/setup.ts'] },
   };
 });

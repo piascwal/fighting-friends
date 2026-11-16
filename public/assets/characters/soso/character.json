@@ -1,0 +1,74 @@
+{
+  "id": "soso",
+  "name": "SOSO",
+  "style": "acrobat",
+  "color": "#ff3d7f",
+  "size": 1,
+  "title": "Nouveau challenger",
+  "quote": "À qui le tour ?",
+  "files": {
+    "crouch": "crouch.webp",
+    "hit": "hit.webp",
+    "jump_kick": "jump_kick.webp",
+    "jump": "jump.webp",
+    "idle": "idle.webp",
+    "block": "block.webp",
+    "punch_light": "punch_light.webp",
+    "punch_heavy": "punch_heavy.webp",
+    "kick_heavy": "kick_heavy.webp",
+    "kick_light": "kick_light.webp"
+  },
+  "adjust": {
+    "crouch": {
+      "s": 1.17,
+      "dx": 29,
+      "dy": 0
+    },
+    "hit": {
+      "s": 1,
+      "dx": -25,
+      "dy": 0
+    },
+    "jump_kick": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "jump": {
+      "s": 1,
+      "dx": 5,
+      "dy": 0
+    },
+    "idle": {
+      "s": 1,
+      "dx": 12,
+      "dy": 0
+    },
+    "block": {
+      "s": 1,
+      "dx": -24,
+      "dy": 0
+    },
+    "punch_light": {
+      "s": 1,
+      "dx": 15,
+      "dy": 0
+    },
+    "punch_heavy": {
+      "s": 1,
+      "dx": -34,
+      "dy": 0
+    },
+    "kick_heavy": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "kick_light": {
+      "s": 1.01,
+      "dx": 0,
+      "dy": 0
+    }
+  },
+  "updated": 1794808664887
+}

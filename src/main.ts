@@ -3,6 +3,7 @@ import './style.css';
 import { setBackground } from './audio/audio';
 import { applyOverrides, loadCustomCharacters, renameLegacySprite } from './assets/character-files';
 import { loadRepoCharacters } from './assets/repo-characters';
+import { addCharacter, roster } from './data/roster';
 import { loadLocalSprites } from './assets/sprite-store';
 import { FPS, VIEW_H, VIEW_W } from './core/constants';
 import { isPortrait, isTouchDevice } from './core/display';
@@ -67,6 +68,10 @@ async function boot(): Promise<void> {
   await loadLocalSprites(renameLegacySprite).catch(() => {});
   await loadRepoCharacters().catch(() => {});
   applyOverrides();
+  // plus aucun personnage intégré : sans ceux du dépôt (hors ligne, premier lancement), on en crée un
+  if (!roster.length) {
+    addCharacter({ id: 'recrue', name: 'RECRUE', style: 'balanced', color: '#ff6a2b', custom: true });
+  }
 
   input.init();
   input.onPause = () => gameState.togglePause();

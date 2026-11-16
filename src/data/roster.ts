@@ -1,5 +1,4 @@
 /* La liste des personnages jouables, en mémoire : ceux du jeu + ceux ajoutés par le joueur ou par le dépôt. */
-import { BASE_CHARACTERS } from './characters';
 import { DEFAULT_LOOKS, STYLES } from './styles';
 import type { Character, CharacterDef, Look, StyleId } from './types';
 
@@ -44,7 +43,8 @@ export function makeCharacter(def: CharacterDef): Character {
   };
 }
 
-export const roster: Character[] = BASE_CHARACTERS.map(makeCharacter);
+/** Rempli au démarrage : personnages livrés dans public/assets/characters, puis ceux créés sur l'appareil. */
+export const roster: Character[] = [];
 
 export const characterById = (id: string): Character | undefined => roster.find((c) => c.id === id);
 

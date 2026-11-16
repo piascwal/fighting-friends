@@ -29,7 +29,12 @@ async function fetchJson<T>(url: string): Promise<T | null> {
 /** Charge les personnages listés dans public/assets/characters/index.json. */
 export async function loadRepoCharacters(): Promise<void> {
   const ids = (await fetchJson<string[]>(`${REPO_DIR}index.json`)) ?? [];
-  await Promise.all(ids.map(loadRepoCharacter));
+  const files = await Promise.all(
+    ids.map(async (id) => (await fetchJson<CharacterFile>(`${REPO_DIR}${id}/character.json`)) ?? {}),
+  );
+  // déclarés dans l'ordre de index.json (ordre de la sélection), puis images chargées en parallèle
+  ids.forEach((id, i) => registerCharacter(id, files[i]!));
+  await Promise.all(ids.map((id, i) => loadRepoImages(id, files[i]!)));
 }
 
 /** Déclare le personnage du dépôt, en remplaçant une éventuelle version créée sur l'appareil. */
@@ -75,10 +80,8 @@ async function loadRepoImage(
   return { canvas: removeMagentaBackground(toCanvas(await createImageBitmap(blob))), blob };
 }
 
-async function loadRepoCharacter(id: string): Promise<void> {
+async function loadRepoImages(id: string, file: CharacterFile): Promise<void> {
   const dir = `${REPO_DIR}${id}/`;
-  const file = (await fetchJson<CharacterFile>(`${dir}character.json`)) ?? {};
-  registerCharacter(id, file);
   const exportedAt = file.updated ?? 0;
   await Promise.all(
     imageFiles(file).map(async ([key, name]) => {

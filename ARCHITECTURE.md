@@ -93,7 +93,7 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
 
 | Je veux…                                                                         | Je touche…                                                                                                                          |
 | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Ajouter un personnage                                                            | une fiche dans `data/characters.ts` (ou un dossier `public/assets/characters/<id>/`)                                                |
+| Ajouter un personnage                                                            | un dossier `public/assets/characters/<id>/` (export du jeu) + son id dans `index.json`                                              |
 | Régler un coup (dégâts, vitesse, zone)                                           | `data/normals.ts` ou `data/styles/<style>.ts`                                                                                       |
 | Créer un style de combat                                                         | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` + son pantin dans `data/styles/looks.ts` |
 | Donner une suite à un coup (enchaînement, posture), un bonus, un soin, un renvoi | champs `followUps`, `buff`, `heal`, `reflect` du coup (`data/types.ts`), lus par `engine/`                                          |

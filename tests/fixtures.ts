@@ -1,7 +1,8 @@
-/* Personnages livrés avec le jeu. Un personnage = une fiche ici ; ses coups viennent de son style. */
-import type { CharacterDef } from './types';
+/* Personnages de test : des fiches fixes (styles variés, sans images) pour que les tests ne dépendent pas
+   des personnages livrés dans public/assets/characters. Enregistrés par tests/setup.ts. */
+import type { CharacterDef } from '../src/data/types';
 
-export const BASE_CHARACTERS: readonly CharacterDef[] = [
+export const TEST_CHARACTERS: readonly CharacterDef[] = [
   {
     id: 'ardan',
     name: 'ARDAN',
