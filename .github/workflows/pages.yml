@@ -1,7 +1,7 @@
 name: Vérifier et déployer
 on:
   push:
-    branches: [main, claude/street-fighter-arcade-game-d70qm7]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 permissions:
