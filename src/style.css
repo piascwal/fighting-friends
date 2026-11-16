@@ -1134,6 +1134,9 @@ i.b {
   z-index: 40;
   pointer-events: none;
   overflow: hidden;
+  display: none;
+}
+#wipe.go {
   display: flex;
 }
 #wipe i {

@@ -2,7 +2,10 @@
    cascade. Le changement d'écran lui-même reste immédiat (il se fait sous les volets). */
 
 const BARS = 8;
+/** Durée totale de la transition (animation + cascade), avec une marge. */
+const DURATION_MS = 650;
 let overlay: HTMLElement | null = null;
+let hideTimer = 0;
 
 function ensureOverlay(): HTMLElement {
   if (!overlay) {
@@ -24,4 +27,8 @@ export function wipe(): void {
   el.classList.remove('go');
   void el.offsetWidth; // relance l'animation si elle était déjà en cours
   el.classList.add('go');
+  // une fois les volets partis, la couche est retirée de l'affichage : sur certains navigateurs
+  // (Safari), un volet pouvait rester figé à l'écran après l'animation
+  clearTimeout(hideTimer);
+  hideTimer = window.setTimeout(() => el.classList.remove('go'), DURATION_MS);
 }
