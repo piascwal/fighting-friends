@@ -19,6 +19,19 @@ export interface ArcadeTextOptions {
   glow?: string;
 }
 
+/**
+ * Dégradé en bandes franches (pas de fondu) : l'ombrage en aplats des jeux d'arcade en pixel art.
+ * Les couleurs se succèdent de haut (y0) en bas (y1), à parts égales.
+ */
+export function bands(ctx: CanvasRenderingContext2D, y0: number, y1: number, colors: readonly string[]) {
+  const fill = ctx.createLinearGradient(0, y0, 0, y1);
+  colors.forEach((color, i) => {
+    fill.addColorStop(i / colors.length, color);
+    fill.addColorStop((i + 1) / colors.length - 0.001, color);
+  });
+  return fill;
+}
+
 export function arcadeText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -34,7 +47,8 @@ export function arcadeText(
   ctx.font = `900 ${size}px ${ARCADE_FONT}`;
   ctx.textAlign = opt.align ?? 'center';
   ctx.textBaseline = 'middle';
-  ctx.lineJoin = 'round';
+  ctx.lineJoin = 'miter';
+  ctx.miterLimit = 3;
   if (opt.alpha !== undefined) ctx.globalAlpha = opt.alpha;
 
   ctx.lineWidth = size * 0.22;
@@ -46,11 +60,7 @@ export function arcadeText(
     ctx.shadowBlur = size * 0.4;
   }
   const [top, middle, bottom] = opt.colors ?? GOLD;
-  const fill = ctx.createLinearGradient(0, -size * 0.5, 0, size * 0.5);
-  fill.addColorStop(0, top);
-  fill.addColorStop(0.5, middle);
-  fill.addColorStop(1, bottom);
-  ctx.fillStyle = fill;
+  ctx.fillStyle = bands(ctx, -size * 0.42, size * 0.42, [top, middle, bottom]);
   ctx.fillText(text, 0, 0);
 
   ctx.shadowBlur = 0;

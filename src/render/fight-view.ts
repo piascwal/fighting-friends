@@ -28,6 +28,8 @@ interface Banner {
 const TONES: Record<BannerTone, Gradient> = { gold: GOLD, red: RED, blue: BLUE };
 /** Taille d'un « pixel » des effets, en pixels monde : 3 donne un grain proche des sprites en pixel art. */
 const PIXEL = 3;
+/** Grain de l'interface (barres, textes) : plus fin que celui des effets, pour rester lisible. */
+const HUD_PIXEL = 2;
 
 export class FightView {
   readonly fx = new Fx();
@@ -40,6 +42,8 @@ export class FightView {
 
   /** Couche basse résolution où se dessinent les effets : agrandie sans lissage, elle les pixelise. */
   private readonly pixels: CanvasRenderingContext2D;
+  /** Couche de l'interface, à mi-résolution. */
+  private readonly hud: CanvasRenderingContext2D;
 
   constructor(
     private readonly sim: FightSim,
@@ -50,6 +54,10 @@ export class FightView {
     layer.width = VIEW_W / PIXEL;
     layer.height = VIEW_H / PIXEL;
     this.pixels = layer.getContext('2d')!;
+    const hud = document.createElement('canvas');
+    hud.width = VIEW_W / HUD_PIXEL;
+    hud.height = VIEW_H / HUD_PIXEL;
+    this.hud = hud.getContext('2d')!;
     this.delayedHp = [sim.fighters[0].hp, sim.fighters[1].hp];
   }
 
@@ -138,16 +146,7 @@ export class FightView {
     ctx.restore();
     this.drawPixelLayer(ctx, shakeX - sim.camX, shakeY);
 
-    if (sim.mode !== 'attract') drawHud(ctx, sim, this.delayedHp);
-    if (sim.superFreeze > 0 && sim.superBy) {
-      const k = easeOut((SUPER_FREEZE - sim.superFreeze) / 8);
-      const color = sim.superBy.char.color;
-      arcadeText(ctx, sim.superName, VIEW_W / 2, 150, 68, {
-        scale: 0.6 + 0.4 * k,
-        colors: ['#fff', '#ffe27a', color],
-      });
-    }
-    this.drawBanners(ctx);
+    this.drawInterface(ctx);
     if (this.flash > 0.02) {
       ctx.fillStyle = `rgba(255,255,255,${this.flash})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
@@ -165,6 +164,33 @@ export class FightView {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(px.canvas, 0, 0, VIEW_W, VIEW_H);
+    ctx.restore();
+  }
+
+  /**
+   * Interface (barres, chrono, textes) : dessinée à mi-résolution puis agrandie sans lissage,
+   * pour le même grain que les sprites, en restant lisible.
+   */
+  private drawInterface(ctx: Ctx): void {
+    const { sim } = this;
+    const ui = this.hud;
+    ui.setTransform(1, 0, 0, 1, 0, 0);
+    ui.clearRect(0, 0, ui.canvas.width, ui.canvas.height);
+    ui.setTransform(1 / HUD_PIXEL, 0, 0, 1 / HUD_PIXEL, 0, 0);
+    ui.imageSmoothingEnabled = false;
+    if (sim.mode !== 'attract') drawHud(ui, sim, this.delayedHp);
+    if (sim.superFreeze > 0 && sim.superBy) {
+      const k = easeOut((SUPER_FREEZE - sim.superFreeze) / 8);
+      const color = sim.superBy.char.color;
+      arcadeText(ui, sim.superName, VIEW_W / 2, 150, 68, {
+        scale: 0.6 + 0.4 * k,
+        colors: ['#fff', '#ffe27a', color],
+      });
+    }
+    this.drawBanners(ui);
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(ui.canvas, 0, 0, VIEW_W, VIEW_H);
     ctx.restore();
   }
 

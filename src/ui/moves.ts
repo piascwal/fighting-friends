@@ -94,6 +94,7 @@ function render(): void {
       ${row('Ruée', '<b>→ →</b> rapidement (ou <b>← ←</b> pour une esquive arrière invincible)')}
       ${row(`↓ + ${B}`, "Uppercut : <b>lance l'adversaire en l'air</b>. Maintiens ↑ pour le suivre et continuer le combo.")}
       ${row(`↓ + ${D}`, 'Balayette : fait tomber')}
+      ${row('Bouton maintenu', 'Un coup normal reste tendu tant que tu gardes le bouton (½ s au plus) : la pose se voit mieux, mais tu restes exposé.')}
       ${row(`→ + ${B}`, 'Marteau : touche les adversaires accroupis en garde')}
     </table>
     <h3>Coups spéciaux de ${escapeHtml(char.name)}</h3>

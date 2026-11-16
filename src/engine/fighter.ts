@@ -106,6 +106,8 @@ export class Fighter {
   lastDmg = 0;
   hitDone = new Set<number>();
   armorLeft = 0;
+  /** Frames passées à garder la pose d'un coup normal parce que son bouton reste enfoncé. */
+  holdFrames = 0;
 
   // --- présentation (lue par l'affichage) ---
   readonly pose: Pose = clonePose('idle');

@@ -1,27 +1,30 @@
 /* Écran de sélection : cases-portraits au centre, personnage en entier de chaque côté. */
 import { playSfx } from '../audio/audio';
-import { rgba, shade } from '../core/color';
-import { clamp, pick } from '../core/math';
-import { escapeHtml } from '../core/text';
+import { shade } from '../core/color';
+import { pick } from '../core/math';
 import { roster } from '../data/roster';
 import type { Character } from '../data/types';
 import { drawCharacter, drawPortrait } from '../render/character-draw';
-import { arcadeText } from '../render/text';
+import { arcadeText, bands } from '../render/text';
 import { game, type GameMode } from './actions';
 import { $, $$, newCanvas, on } from './dom';
 import { currentScreen, showScreen } from './screens';
 
+/* Comme en arcade : les deux combattants en pied sur toute la hauteur, de chaque côté, et au milieu
+   la grille des visages, collés les uns aux autres. Rien d'autre. */
 export const SELECT_HTML = `
   <div class="screen" id="s-select">
-    <h2 id="selTitle"></h2>
     <div class="selWrap">
-      <div class="side" id="side0"><canvas width="300" height="360"></canvas><div class="pname"></div><div class="ptag">JOUEUR 1</div></div>
-      <div class="mid"><div id="selGrid"></div><div id="selInfo"></div></div>
-      <div class="side" id="side1"><canvas width="300" height="360"></canvas><div class="pname"></div><div class="ptag" id="tag1"></div></div>
-    </div>
-    <div class="foot">
-      <button class="nav sm alt" id="selBack">◀ RETOUR</button>
-      <button class="nav sm" id="selOk">VALIDER ▶</button>
+      <div class="side" id="side0"><canvas width="360" height="600"></canvas><div class="ptag">1P</div><div class="pname"></div></div>
+      <div class="mid">
+        <h2 id="selTitle"></h2>
+        <div id="selGrid"></div>
+        <div class="foot">
+          <button class="nav sm alt" id="selBack">◀ RETOUR</button>
+          <button class="nav sm" id="selOk">VALIDER ▶</button>
+        </div>
+      </div>
+      <div class="side" id="side1"><canvas width="360" height="600"></canvas><div class="ptag" id="tag1"></div><div class="pname"></div></div>
     </div>
   </div>`;
 
@@ -36,8 +39,10 @@ interface Selection {
   flash: [number, number];
 }
 
-const PREVIEW_W = 300;
-const PREVIEW_H = 360;
+const PREVIEW_W = 360;
+const PREVIEW_H = 600;
+/** Zoom de l'aperçu : un personnage de taille normale occupe presque toute la hauteur. */
+const PREVIEW_SCALE = (PREVIEW_H * 0.9) / 200;
 /** Délai avant de lancer le combat, le temps de voir la pose de victoire. */
 const CONFIRM_DELAY_MS = 650;
 
@@ -50,11 +55,6 @@ function shown(side: 0 | 1): Character | 'random' | null {
   if (s.picks[side]) return s.picks[side];
   if (s.step !== side) return null;
   return roster[s.cursor[side]] ?? 'random';
-}
-
-function statBar(label: string, value: number): string {
-  const percent = Math.round(clamp(value, 0.08, 1) * 100);
-  return `<div class="stat"><span>${label}</span><i><b style="width:${percent}%"></b></i></div>`;
 }
 
 function refresh(): void {
@@ -81,26 +81,6 @@ function refresh(): void {
     box.style.setProperty('--c', who && who !== 'random' ? who.color : '#555555');
     box.classList.toggle('active', s.step === side);
   }
-
-  const char = roster[s.cursor[s.step]];
-  const info = $('#selInfo');
-  if (!char) {
-    info.innerHTML = '<div class="iname">AU HASARD</div><div class="ititle">Laisse le destin choisir</div>';
-    return;
-  }
-  const { stats, label, hint, archetype, tags, names } = char.style;
-  const chips = tags.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join('');
-  info.innerHTML = `
-    <div class="iname" style="color:${char.color}">${escapeHtml(char.name)}</div>
-    <div class="ititle">${escapeHtml(char.title)} — style ${label.toLowerCase()}</div>
-    <div class="stats">
-      ${statBar('Vie', (stats.hp - 780) / 400)}
-      ${statBar('Vitesse', (stats.speed - 3.2) / 2.7)}
-      ${statBar('Puissance', (stats.power - 0.8) / 0.38)}
-    </div>
-    <div class="ihint">${escapeHtml(hint)}</div>
-    <div class="itags"><b>${escapeHtml(archetype)}</b> ${chips}</div>
-    <div class="ihint">${escapeHtml(`${names.s1} · ${names.s2} · ${names.super}`)}</div>`;
 }
 
 function confirm(): void {
@@ -134,7 +114,7 @@ function confirm(): void {
 
 function buildTile(char: Character | undefined, index: number): HTMLButtonElement {
   const tile = document.createElement('button');
-  tile.className = 'nav tile';
+  tile.className = 'tile';
   if (char) {
     const [canvas, ctx] = newCanvas(120);
     drawPortrait(ctx, char, 120);
@@ -166,10 +146,13 @@ function buildTile(char: Character | undefined, index: number): HTMLButtonElemen
 
 export function openSelect(mode: GameMode): void {
   sel = { mode, step: 0, picks: [null, null], cursor: [0, Math.min(1, roster.length - 1)], flash: [0, 0] };
-  $('#tag1').textContent = mode === 'duo' ? 'JOUEUR 2' : mode === 'arcade' ? 'ADVERSAIRES' : 'ADVERSAIRE';
+  $('#tag1').textContent = mode === 'duo' ? '2P' : 'CPU';
   const grid = $('#selGrid');
   grid.innerHTML = '';
-  [...roster, undefined].forEach((char, i) => grid.appendChild(buildTile(char, i)));
+  const tiles = [...roster, undefined];
+  tiles.forEach((char, i) => grid.appendChild(buildTile(char, i)));
+  // grille la plus carrée possible : 3 colonnes jusqu'à 9 cases, puis 4
+  grid.style.gridTemplateColumns = `repeat(${Math.min(tiles.length, tiles.length > 9 ? 4 : 3)}, var(--tile))`;
   showScreen('select');
   refresh();
 }
@@ -179,24 +162,24 @@ function drawPreview(side: 0 | 1): void {
   const ctx = $<HTMLCanvasElement>(`#side${side} canvas`).getContext('2d')!;
   const who = shown(side);
   const color = who && who !== 'random' ? who.color : '#666666';
+  ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, PREVIEW_W, PREVIEW_H);
-  const bg = ctx.createLinearGradient(0, 0, 0, PREVIEW_H);
-  bg.addColorStop(0, rgba('#000000', 0));
-  bg.addColorStop(1, shade(color, -0.3));
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, PREVIEW_W, PREVIEW_H);
-  ctx.fillStyle = 'rgba(0,0,0,.35)';
-  ctx.beginPath();
-  ctx.ellipse(PREVIEW_W / 2, PREVIEW_H - 22, 90, 12, 0, 0, 7);
-  ctx.fill();
+  // fond : bandes franches de la couleur du personnage, qui montent du sol
+  ctx.fillStyle = bands(ctx, PREVIEW_H * 0.35, PREVIEW_H, [
+    shade(color, -0.88),
+    shade(color, -0.78),
+    shade(color, -0.64),
+    shade(color, -0.48),
+  ]);
+  ctx.fillRect(0, PREVIEW_H * 0.35, PREVIEW_W, PREVIEW_H * 0.65);
 
   const mystery = who === 'random' || (!who && s.mode === 'arcade' && side === 1);
   if (mystery) {
-    arcadeText(ctx, '?', PREVIEW_W / 2, PREVIEW_H / 2, 200, { colors: ['#fff', '#bbb', '#666'] });
+    arcadeText(ctx, '?', PREVIEW_W / 2, PREVIEW_H / 2, 260, { colors: ['#fff', '#bbb', '#666'] });
   } else if (who) {
     const facing = side ? -1 : 1;
     const pose = s.picks[side] ? 'win' : 'idle';
-    drawCharacter(ctx, who, pose, PREVIEW_W / 2 - facing * 10, PREVIEW_H - 24, facing, 1.42, time, {
+    drawCharacter(ctx, who, pose, PREVIEW_W / 2, PREVIEW_H - 8, facing, PREVIEW_SCALE, time, {
       flash: s.flash[side] > 8,
     });
   }

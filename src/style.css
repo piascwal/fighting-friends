@@ -248,8 +248,11 @@ body.portrait.touch:not([data-screen='chars']) #rotate {
   pointer-events: none;
 }
 #s-select {
-  background: linear-gradient(rgba(8, 4, 22, 0.86), rgba(8, 4, 22, 0.96));
-  justify-content: space-between;
+  background:
+    repeating-linear-gradient(-60deg, transparent 0 14px, rgba(255, 255, 255, 0.03) 14px 16px),
+    linear-gradient(#1a0820 0 30%, #10051a 30% 65%, #05030c 65%);
+  padding-top: 0;
+  padding-bottom: 0;
 }
 h2 {
   font-family: var(--f);
@@ -260,8 +263,10 @@ h2 {
   letter-spacing: 0.03em;
   color: var(--y);
   text-shadow:
-    0 3px 0 #000,
-    0 0 18px rgba(255, 90, 31, 0.6);
+    3px 3px 0 #000,
+    -2px 0 0 #000,
+    0 -2px 0 #000,
+    5px 6px 0 #c8001e;
   text-align: center;
 }
 h3 {
@@ -279,7 +284,7 @@ h3 {
   text-align: center;
   line-height: 0.86;
   transform: skewX(-8deg) rotate(-3deg);
-  filter: drop-shadow(0 6px 0 #000) drop-shadow(0 0 26px rgba(255, 90, 31, 0.7));
+  filter: drop-shadow(0 6px 0 #000) drop-shadow(6px 0 0 #c8001e) drop-shadow(-3px -3px 0 #000);
 }
 .logo span {
   display: block;
@@ -291,7 +296,7 @@ h3 {
 .logo b {
   display: block;
   font-size: clamp(46px, 15vmin, 128px);
-  background: linear-gradient(#fff7c2, #ffd23a 45%, #ff5a1f 80%, #c8001e);
+  background: linear-gradient(#fff7c2 0 25%, #ffd23a 25% 50%, #ff5a1f 50% 75%, #c8001e 75%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -356,41 +361,42 @@ textarea {
   font: inherit;
   color: inherit;
 }
+/* Boutons : angles droits, fort penchant, ombrage en bandes franches et ombre portée dure,
+   comme les menus des jeux de combat d'arcade (aucun flou, aucun arrondi). */
 .nav {
   font-family: var(--f);
   font-style: italic;
   font-weight: 900;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   color: #1a0c00;
-  background: linear-gradient(#fff3a8, #ffd23a 45%, #ff9d2e);
-  border: 3px solid #140a1e;
-  border-radius: 10px;
-  box-shadow:
-    0 4px 0 #140a1e,
-    inset 0 2px 0 rgba(255, 255, 255, 0.6);
+  text-shadow: 1px 1px 0 #fff3a8;
+  background: linear-gradient(#fff3a8 0 20%, #ffd23a 20% 55%, #ff9d2e 55% 80%, #e8620e 80%);
+  border: 3px solid #000;
+  border-radius: 0;
+  box-shadow: 5px 5px 0 #000;
   cursor: pointer;
-  transform: skewX(-6deg);
+  transform: skewX(-14deg);
   outline: none;
-  transition:
-    transform 0.06s,
-    filter 0.06s;
+  transition: transform 0.05s;
   padding: 0;
 }
 .nav:focus-visible,
 .nav:hover {
-  filter: brightness(1.12);
+  color: #fff;
+  text-shadow: 2px 2px 0 #000;
+  background: linear-gradient(#ff7a5a 0 20%, #ff3d1f 20% 55%, #d81e0e 55% 80%, #9a0a0a 80%);
   box-shadow:
-    0 4px 0 #140a1e,
-    0 0 0 3px #fff,
-    0 0 22px var(--o);
+    5px 5px 0 #000,
+    0 0 0 3px #fff;
 }
 .nav:active {
-  transform: skewX(-6deg) translateY(3px);
-  box-shadow: 0 1px 0 #140a1e;
+  transform: skewX(-14deg) translate(4px, 4px);
+  box-shadow: 1px 1px 0 #000;
 }
 .nav.alt {
-  background: linear-gradient(#5a4a8a, #3a2a66);
   color: #fff;
+  text-shadow: 2px 2px 0 #000;
+  background: linear-gradient(#7a6ab0 0 20%, #4a3a80 20% 60%, #2a1d56 60%);
 }
 .nav.big {
   font-size: clamp(17px, 4.4vmin, 30px);
@@ -415,202 +421,149 @@ textarea {
   opacity: 0.5;
 }
 
-/* sélection */
+/* sélection : combattants en pied de chaque côté, grille de visages collés au centre */
 .selWrap {
   flex: 1;
   min-height: 0;
+  width: 100%;
   display: flex;
   align-items: stretch;
-  justify-content: center;
-  gap: 1.5vw;
-  width: 100%;
-  max-width: 1100px;
+  justify-content: space-between;
 }
 .side {
-  flex: 1 1 0;
+  flex: 0 1 36%;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
   position: relative;
-  opacity: 0.55;
-  transition: opacity 0.15s;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0.45;
 }
 .side.active,
 .side:has(.pname:not(:empty)) {
   opacity: 1;
 }
 .side canvas {
+  height: 100%;
+  width: auto;
   max-width: 100%;
-  max-height: calc(100% - 46px);
-  min-height: 0;
   object-fit: contain;
-  flex: 0 1 auto;
+  object-position: bottom;
+  image-rendering: pixelated;
 }
 .pname {
+  position: absolute;
+  bottom: 3%;
+  left: 3%;
+  right: 3%;
   font-family: var(--f);
   font-style: italic;
-  font-size: clamp(18px, 4.6vmin, 36px);
+  font-weight: 900;
+  font-size: clamp(24px, 8vmin, 64px);
   line-height: 1;
   color: #fff;
   text-shadow:
-    0 3px 0 #000,
-    0 0 14px var(--c, #fff);
-  min-height: 1em;
-  transform: skewX(-8deg);
+    4px 4px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 var(--c, #000);
+  transform: skewX(-12deg);
+}
+#side1 .pname {
+  text-align: right;
 }
 .ptag {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  opacity: 0.7;
+  position: absolute;
+  top: 3%;
+  left: 4%;
+  font-family: var(--f);
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(18px, 6vmin, 44px);
+  color: #ff3d3d;
+  text-shadow: 3px 3px 0 #000;
+}
+#side1 .ptag {
+  left: auto;
+  right: 4%;
+  color: #3d9bff;
 }
 .mid {
-  flex: 1.5 1 0;
+  flex: 1 1 28%;
   min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(4px, 1.6vmin, 12px);
+  gap: clamp(8px, 4vmin, 28px);
 }
 #selGrid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: clamp(5px, 1.4vmin, 10px);
-  max-height: 52%;
-  overflow: auto;
-  padding: 5px;
+  --tile: clamp(52px, 15vmin, 110px);
+  display: grid;
+  gap: 0;
+  border: 4px solid #000;
+  background: #000;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.6);
 }
 .tile {
-  width: clamp(48px, 13vmin, 84px);
-  aspect-ratio: 1;
+  width: var(--tile);
+  height: var(--tile);
+  padding: 0;
+  border: 2px solid #000;
   background: #140a1e;
-  border: 3px solid #6a5a9a;
-  border-radius: 8px;
-  overflow: hidden;
   position: relative;
-  transform: none;
-  box-shadow: 0 3px 0 #000;
   color: #fff;
-  font-size: clamp(26px, 7vmin, 48px);
-}
-.tile:active {
-  transform: translateY(2px);
+  font-family: var(--f);
+  font-size: calc(var(--tile) * 0.6);
+  cursor: pointer;
+  outline: none;
 }
 .tile canvas {
   width: 100%;
   height: 100%;
   display: block;
+  image-rendering: pixelated;
+  filter: brightness(0.7) saturate(0.8);
+}
+.tile.c0 canvas,
+.tile.c1 canvas {
+  filter: none;
 }
 .tile.c0 {
-  border-color: #ffd23a;
-  box-shadow:
-    0 0 0 3px #ffd23a,
-    0 0 20px #ffd23a;
-  transform: scale(1.08);
+  outline: 4px solid #ff3d3d;
+  outline-offset: -4px;
   z-index: 1;
 }
 .tile.c1 {
-  border-color: #3d9bff;
-  box-shadow:
-    0 0 0 3px #3d9bff,
-    0 0 20px #3d9bff;
-  transform: scale(1.08);
+  outline: 4px solid #3d9bff;
+  outline-offset: -4px;
   z-index: 1;
 }
 .tile.c0.c1 {
-  box-shadow:
-    0 0 0 3px #ffd23a,
-    0 0 0 6px #3d9bff;
+  outline-color: #c86bff;
 }
 .tile.c0::after,
 .tile.c1::after {
-  content: 'J1';
+  content: '1P';
   position: absolute;
-  left: 2px;
-  top: 1px;
-  font: 900 10px system-ui;
-  color: #000;
-  background: #ffd23a;
-  padding: 1px 3px;
-  border-radius: 3px;
-  font-style: normal;
+  left: 0;
+  top: 0;
+  font: italic 900 calc(var(--tile) * 0.2) var(--f);
+  color: #fff;
+  background: #ff3d3d;
+  padding: 0 4px;
+  animation: bl 0.5s steps(2) infinite;
 }
 .tile.c1::after {
-  content: 'J2';
+  content: '2P';
   background: #3d9bff;
   left: auto;
-  right: 2px;
-  color: #fff;
-}
-#selInfo {
-  text-align: center;
-  width: 100%;
-  max-width: 340px;
-}
-.iname {
-  font-family: var(--f);
-  font-style: italic;
-  font-size: clamp(18px, 4.4vmin, 30px);
-  line-height: 1;
-}
-.ititle,
-.ihint {
-  font-size: clamp(10px, 2.1vmin, 13px);
-  opacity: 0.8;
-}
-.stats {
-  margin: 4px auto;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.stat {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: clamp(9px, 2vmin, 12px);
-  font-weight: 700;
-}
-.stat span {
-  width: 70px;
-  text-align: right;
-  opacity: 0.8;
-}
-.stat i {
-  flex: 1;
-  height: clamp(6px, 1.5vmin, 9px);
-  background: #241a40;
-  border-radius: 5px;
-  overflow: hidden;
-  transform: skewX(-20deg);
-}
-.stat b {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, #ff5a1f, #ffd23a);
+  right: 0;
 }
 .foot {
   display: flex;
-  gap: 14px;
+  gap: 18px;
   justify-content: center;
-  padding-top: 6px;
-}
-body.portrait .selWrap {
-  flex-wrap: wrap;
-}
-body.portrait .side {
-  flex: 1 1 40%;
-  height: 34%;
-  order: 0;
-}
-body.portrait .mid {
-  flex: 1 1 100%;
-  order: 1;
-  height: 58%;
 }
 
 /* panneaux */
@@ -1138,10 +1091,6 @@ i.b {
   color: #ffb84a;
   font-weight: 700;
 }
-.itags {
-  margin-top: 3px;
-  font-size: clamp(9px, 2vmin, 12px);
-}
 
 /* changements faits sur l'appareil à un personnage livré avec le jeu */
 .card.changed {
@@ -1167,4 +1116,13 @@ i.b {
 }
 #mAdjReset {
   margin-top: 6px;
+}
+
+/* direction artistique : angles droits partout dans les menus (les commandes tactiles restent rondes) */
+#ui *,
+#rotate .nav,
+#toast,
+#update,
+#update button {
+  border-radius: 0 !important;
 }

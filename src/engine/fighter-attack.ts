@@ -3,7 +3,7 @@
 import { GROUND_Y, STAGE_W, WALL_MARGIN } from '../core/constants';
 import { clamp } from '../core/math';
 import { NEUTRAL_POSES } from '../data/poses';
-import type { MoveDef, MoveId } from '../data/types';
+import { BUTTONS, type Button, type MoveDef, type MoveId } from '../data/types';
 import { JUMPSQUAT_FRAMES, type Fighter } from './fighter';
 
 export function startMove(f: Fighter, id: MoveId): void {
@@ -26,6 +26,7 @@ export function startMoveDef(f: Fighter, move: MoveDef): void {
   f.connected = false;
   f.visible = true;
   f.armorLeft = move.armor ? 1 : 0;
+  f.holdFrames = 0;
   f.crouching = !!move.low;
   if (move.cost) f.meter -= move.cost;
   if (move.air) f.airAttacks++;
@@ -68,6 +69,28 @@ function teleport(f: Fighter, mode: NonNullable<MoveDef['tele']>['mode']): void 
   f.x = clamp(f.x, WALL_MARGIN, STAGE_W - WALL_MARGIN);
   emit({ type: 'dust', x: f.x, y: GROUND_Y + f.y, dir: 0, count: 8 });
   emit({ type: 'sfx', name: 'slash' });
+}
+
+/** Durée maximale pendant laquelle un coup normal reste tendu, bouton maintenu. */
+export const HOLD_MAX = 30;
+
+/** Bouton d'un coup normal (lp, clp, jlp, fhp → lp / hp…) ; null pour les spéciaux et supers. */
+function normalButton(move: MoveDef): Button | null {
+  if (move.rank >= 10) return null;
+  const button = move.id.replace(/^[cjf]/, '');
+  return (BUTTONS as readonly string[]).includes(button) ? (button as Button) : null;
+}
+
+/** Frame où le coup est à son extension maximale : la fin de sa dernière frappe. */
+const peakFrame = (move: MoveDef) => Math.max(0, ...(move.hits ?? []).map((h) => h.t + h.d));
+
+/**
+ * Tant que le bouton d'un coup normal reste enfoncé, le coup reste à son extension maximale (au plus
+ * HOLD_MAX frames) : on profite de la pose. Le prix : le combattant reste exposé plus longtemps.
+ */
+function holdsPose(f: Fighter, move: MoveDef, t: number): boolean {
+  const button = normalButton(move);
+  return !!button && t === peakFrame(move) && !!f.ctrl.held[button] && f.holdFrames < HOLD_MAX;
 }
 
 /** Une frame de l'état « attack ». */
@@ -124,6 +147,12 @@ export function runAttack(f: Fighter): void {
     return;
   }
   if (f.tryAttack()) return;
+  if (holdsPose(f, move, t)) {
+    // bouton toujours enfoncé : le coup reste « tendu » (le temps ne s'écoule plus pour lui)
+    f.holdFrames++;
+    f.t--;
+    return;
+  }
   if (t >= move.total) {
     if (f.grounded) f.setState('neutral');
     else {

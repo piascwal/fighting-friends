@@ -4,7 +4,7 @@ import { clamp } from '../core/math';
 import type { FightSim } from '../engine/fight';
 import type { Fighter } from '../engine/fighter';
 import { drawPortrait } from './character-draw';
-import { BLUE, GREY, RED, WHITE, arcadeText, arcadeTextWidth, type Gradient } from './text';
+import { BLUE, GREY, RED, WHITE, arcadeText, arcadeTextWidth, bands, type Gradient } from './text';
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -47,21 +47,30 @@ function drawHealth(ctx: Ctx, f: Fighter, delayedHp: number): void {
   slanted(ctx, BAR_W, '#4a0f1e');
   // en rouge : les dégâts tout juste reçus, qui disparaissent avec un temps de retard
   slanted(ctx, BAR_W * clamp(delayedHp / f.maxHp, 0, 1), '#ff3d3d');
-  const fill = ctx.createLinearGradient(0, 0, 0, BAR_H);
-  fill.addColorStop(0, danger ? '#ffb02e' : '#fff7a0');
-  fill.addColorStop(0.5, danger ? '#ff5a1f' : '#ffd23a');
-  fill.addColorStop(1, danger ? '#c8001e' : '#7dff6a');
+  const fill = bands(
+    ctx,
+    0,
+    BAR_H,
+    danger ? ['#ffb02e', '#ff5a1f', '#e8200e', '#c8001e'] : ['#fff7a0', '#ffd23a', '#f2b200', '#c88a00'],
+  );
   slanted(ctx, BAR_W * ratio, fill);
-  slanted(ctx, BAR_W * ratio, 'rgba(255,255,255,.35)', 3, 5);
+  slanted(ctx, BAR_W * ratio, '#ffffff', 2, 2);
 }
 
+/** Manches gagnées : losanges pleins ou vides. */
 function drawRoundPips(ctx: Ctx, f: Fighter, rounds: number): void {
   for (let i = 0; i < rounds; i++) {
+    const x = BAR_X + BAR_W - 12 - i * 24;
+    const y = BAR_H + 20;
     ctx.beginPath();
-    ctx.arc(BAR_X + BAR_W - 12 - i * 24, BAR_H + 20, 8, 0, 7);
+    ctx.moveTo(x, y - 9);
+    ctx.lineTo(x + 9, y);
+    ctx.lineTo(x, y + 9);
+    ctx.lineTo(x - 9, y);
+    ctx.closePath();
     ctx.fillStyle = i < f.wins ? '#ffd23a' : DARK;
     ctx.fill();
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 3;
     ctx.strokeStyle = '#fff';
     ctx.stroke();
   }
@@ -78,8 +87,11 @@ function drawMeter(ctx: Ctx, f: Fighter, tick: number): void {
   // pleine : la jauge clignote
   ctx.fillStyle = full && tick % 10 < 5 ? '#fff' : f.char.color;
   ctx.fillRect(left, METER_Y, METER_W * k, 12);
-  ctx.fillStyle = 'rgba(255,255,255,.3)';
-  ctx.fillRect(left, METER_Y + 2, METER_W * k, 3);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(left, METER_Y + 2, METER_W * k, 2);
+  // graduations : la jauge se lit par segments, comme en arcade
+  ctx.fillStyle = DARK;
+  for (let i = 1; i < 4; i++) ctx.fillRect(METER_X + (METER_W * i) / 4 - 1, METER_Y, 2, 12);
 }
 
 /** Tout ce qui se dessine pareil des deux côtés, dans un repère en miroir pour le joueur 2. */

@@ -1,30 +1,66 @@
 /* Dessin de chaque type de particule. */
-import { rgba } from '../core/color';
 import { GROUND_Y } from '../core/constants';
 import { easeOut } from '../core/math';
 import type { Particle } from './fx';
 
 type Of<T extends Particle['type']> = Extract<Particle, { type: T }>;
 
-/** Étoile d'impact à trois couches, du bord vers le cœur. */
+/** Taille d'un pixel de la couche des effets, en pixels monde (voir fight-view.ts). */
+const PX = 3;
+
+/* Tramage : un pixel sur deux en damier. Remplit une zone « à moitié » sans transparence lisse,
+   comme les halos des jeux en pixel art. Un motif par couleur, créé à la demande. */
+const ditherCache = new Map<string, CanvasPattern>();
+function dither(ctx: CanvasRenderingContext2D, color: string): CanvasPattern | string {
+  let pattern = ditherCache.get(color);
+  if (!pattern) {
+    const tile = document.createElement('canvas');
+    tile.width = tile.height = PX * 2;
+    const t = tile.getContext('2d')!;
+    t.fillStyle = color;
+    t.fillRect(0, 0, PX, PX);
+    t.fillRect(PX, PX, PX, PX);
+    const made = ctx.createPattern(tile, 'repeat');
+    if (!made) return color;
+    pattern = made;
+    ditherCache.set(color, pattern);
+  }
+  return pattern;
+}
+
+/**
+ * Éclat d'impact : un halo tramé (on voit le personnage au travers), des rayons fins de longueurs
+ * variées, et un petit cœur blanc qui ne dure que les toutes premières images.
+ */
 function drawBurst(ctx: CanvasRenderingContext2D, p: Of<'burst'>, k: number): void {
-  const radius = p.size * (0.4 + 0.6 * easeOut(k * 1.6));
+  const radius = p.size * (0.45 + 0.55 * easeOut(k * 1.6));
   ctx.translate(p.x, p.y);
   ctx.rotate(p.rot);
-  ctx.globalAlpha = Math.min(1, (1 - k) * 1.6);
-  [1, 0.72, 0.42].forEach((ratio, layer) => {
-    const r = radius * ratio;
-    ctx.fillStyle = p.pal[2 - layer]!;
+  ctx.globalAlpha = Math.ceil((1 - k) * 3) / 3;
+  if (k < 0.5) {
+    ctx.fillStyle = dither(ctx, p.pal[1]);
     ctx.beginPath();
-    for (let i = 0; i < 16; i++) {
-      const angle = (i / 16) * Math.PI * 2;
-      // pointes longues et courtes en alternance
-      const reach = i % 2 ? r * 0.42 : r * (i % 4 === 0 ? 1 : 0.74);
-      ctx.lineTo(Math.cos(angle) * reach, Math.sin(angle) * reach);
-    }
-    ctx.closePath();
+    ctx.arc(0, 0, radius * 0.55, 0, 7);
     ctx.fill();
-  });
+  }
+  ctx.lineCap = 'square';
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const long = i % 3 === 0;
+    const from = radius * (long ? 0.25 : 0.45);
+    const to = radius * (long ? 1.1 : 0.75);
+    ctx.strokeStyle = i % 2 ? p.pal[2] : p.pal[1];
+    ctx.lineWidth = PX * (long ? 2 : 1);
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(angle) * from, Math.sin(angle) * from);
+    ctx.lineTo(Math.cos(angle) * to, Math.sin(angle) * to);
+    ctx.stroke();
+  }
+  if (k < 0.25) {
+    ctx.fillStyle = p.pal[0];
+    const core = radius * 0.16;
+    ctx.fillRect(-core, -core, core * 2, core * 2);
+  }
 }
 
 function drawBolt(ctx: CanvasRenderingContext2D, p: Of<'bolt'>): void {
@@ -39,23 +75,21 @@ function drawBolt(ctx: CanvasRenderingContext2D, p: Of<'bolt'>): void {
   ctx.stroke();
 }
 
-/** Entaille : un fuseau coloré avec un cœur blanc. */
+/** Entaille : un trait blanc fin bordé de sa couleur, sans remplissage. */
 function drawCut(ctx: CanvasRenderingContext2D, p: Of<'cut'>, k: number): void {
-  const fade = 1 - k;
   const length = p.size * easeOut(k * 2);
-  const spindle = (len: number, thickness: number) => {
-    ctx.beginPath();
-    ctx.moveTo(-len, 0);
-    ctx.quadraticCurveTo(0, -thickness, len, 0);
-    ctx.quadraticCurveTo(0, thickness, -len, 0);
-    ctx.fill();
-  };
   ctx.translate(p.x, p.y);
   ctx.rotate(p.rot);
-  ctx.fillStyle = p.col;
-  spindle(length, 12 * fade);
-  ctx.fillStyle = '#fff';
-  spindle(length * 0.9, 4 * fade);
+  ctx.lineCap = 'square';
+  ctx.strokeStyle = p.col;
+  ctx.lineWidth = PX * 3;
+  ctx.beginPath();
+  ctx.moveTo(-length, 0);
+  ctx.lineTo(length, 0);
+  ctx.stroke();
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = PX;
+  ctx.stroke();
 }
 
 /** Traînée d'un coup, dessinée dans le repère du combattant, à l'emplacement de sa zone de frappe. */
@@ -72,12 +106,9 @@ function drawSwoosh(ctx: CanvasRenderingContext2D, p: Of<'swoosh'>, k: number): 
 
   ctx.translate(f.x, GROUND_Y + f.y);
   ctx.scale(f.facing, 1);
-  ctx.globalAlpha = (1 - k) * 0.85;
-  const fill = ctx.createLinearGradient(x0 - 20, 0, tip, 0);
-  fill.addColorStop(0, 'rgba(255,255,255,0)');
-  fill.addColorStop(0.6, rgba(p.col, 0.55));
-  fill.addColorStop(1, '#fff');
-  ctx.fillStyle = fill;
+  // traînée tramée, jamais pleine : le geste du sprite reste visible au travers
+  ctx.globalAlpha = k < 0.5 ? 1 : 0.5;
+  ctx.fillStyle = dither(ctx, k < 0.34 ? '#ffffff' : p.col);
   ctx.beginPath();
   switch (p.kind) {
     case 'thrust': // coup droit : fuseau horizontal
@@ -122,7 +153,7 @@ export function drawParticle(ctx: CanvasRenderingContext2D, p: Particle): void {
     case 'ring':
       ctx.globalAlpha = fade;
       ctx.strokeStyle = p.col;
-      ctx.lineWidth = 7 * fade + 1;
+      ctx.lineWidth = PX * (fade > 0.5 ? 2 : 1);
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size * easeOut(k), 0, 7);
       ctx.stroke();
@@ -130,16 +161,17 @@ export function drawParticle(ctx: CanvasRenderingContext2D, p: Particle): void {
     case 'spark':
       ctx.globalAlpha = Math.min(1, fade * 2);
       ctx.strokeStyle = p.col;
-      ctx.lineWidth = p.size;
-      ctx.lineCap = 'round';
+      ctx.lineWidth = Math.max(PX, Math.round(p.size / PX) * PX);
+      ctx.lineCap = 'square';
       ctx.beginPath();
       ctx.moveTo(p.x, p.y);
       ctx.lineTo(p.x - p.vx * 2.2, p.y - p.vy * 2.2);
       ctx.stroke();
       break;
     case 'smoke':
-      ctx.globalAlpha = fade * 0.7;
-      ctx.fillStyle = p.col;
+      // fumée tramée : grain de pixel art au lieu d'une transparence lisse
+      ctx.globalAlpha = fade > 0.5 ? 1 : 0.6;
+      ctx.fillStyle = dither(ctx, p.col);
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.size * (0.6 + k), 0, 7);
       ctx.fill();
