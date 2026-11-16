@@ -37,6 +37,7 @@ export function drawCharacter(
       sy: 1 + breathing * 0.012,
       flash: opt.flash,
       alpha: opt.alpha,
+      silhouette: opt.silhouette,
     });
     return;
   }

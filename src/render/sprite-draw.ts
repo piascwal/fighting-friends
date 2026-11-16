@@ -9,6 +9,8 @@ export interface SpriteOptions {
   /** Silhouette blanche : flash d'impact. */
   flash?: boolean;
   alpha?: number;
+  /** Silhouette unie de cette couleur (ombres, échos de mouvement). */
+  silhouette?: string;
   /** Étirement horizontal / vertical : donne de la vie à une image fixe. */
   sx?: number;
   sy?: number;
@@ -32,6 +34,27 @@ function whiteSilhouette(entry: SpriteEntry): HTMLCanvasElement {
     entry.white = canvas;
   }
   return entry.white;
+}
+
+/** Silhouettes colorées déjà préparées, par image puis par couleur. */
+const tints = new WeakMap<SpriteEntry, Map<string, HTMLCanvasElement>>();
+
+function tinted(entry: SpriteEntry, color: string): HTMLCanvasElement {
+  let byColor = tints.get(entry);
+  if (!byColor) tints.set(entry, (byColor = new Map()));
+  let canvas = byColor.get(color);
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.width = entry.w;
+    canvas.height = entry.h;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(entry.img, 0, 0);
+    ctx.globalCompositeOperation = 'source-in';
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, entry.w, entry.h);
+    byColor.set(color, canvas);
+  }
+  return canvas;
 }
 
 /**
@@ -88,7 +111,11 @@ export function drawSprite(
   const onScreen = k * Math.hypot(ctx.getTransform().a, ctx.getTransform().b);
   ctx.imageSmoothingEnabled = onScreen < 1;
   ctx.imageSmoothingQuality = 'high';
-  const image = opt.flash ? whiteSilhouette(entry) : entry.img;
+  const image = opt.silhouette
+    ? tinted(entry, opt.silhouette)
+    : opt.flash
+      ? whiteSilhouette(entry)
+      : entry.img;
   ctx.drawImage(image, lying ? -w / 2 : -(spec.ax ?? 0.5) * w, -h, w, h);
   ctx.restore();
   return true;

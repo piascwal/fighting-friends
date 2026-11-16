@@ -1,25 +1,49 @@
-/* Animation de rencontre : les deux combattants entrent de chaque côté, « VS » claque au centre. */
+/* Animation de rencontre. Chaque camp arrive en trois temps : son panneau de couleur claque depuis le bord,
+   sa silhouette noire glisse dessus, puis un flash la révèle. Les noms tombent lettre par lettre,
+   « VS » s'écrase au centre, et des volets referment l'écran avant le combat.
+   Tout vient de la couleur, du nom et des images du personnage : rien n'est propre à l'un d'eux. */
 import { playSfx } from '../audio/audio';
 import { shade } from '../core/color';
 import { VIEW_H, VIEW_W } from '../core/constants';
-import { easeBack, easeOut, rand } from '../core/math';
+import { easeOut, rand } from '../core/math';
 import type { Character } from '../data/types';
 import { drawCharacter } from '../render/character-draw';
-import { GREY, arcadeText } from '../render/text';
+import {
+  PixelLayer,
+  blinds,
+  burstLines,
+  colorPanel,
+  halftone,
+  slamLetters,
+  slamText,
+  slantPath,
+  speedLines,
+  tones,
+} from '../render/motion';
+import { GREY, arcadeText, arcadeTextWidth } from '../render/text';
 import type { Scene } from './scene';
 
-const VS_FRAME = 46;
-const FADE_FRAME = 172;
-const END_FRAME = 190;
+type Ctx = CanvasRenderingContext2D;
+
+/** Déroulé, en frames. Le camp droit suit le gauche avec SIDE_DELAY de retard. */
+const SIDE_DELAY = 20;
+const REVEAL = 24;
+const NAME = 30;
+const VS_FRAME = 74;
+const FADE_FRAME = 190;
+const END_FRAME = 206;
 const CHAR_SCALE = 2.05;
-/** Décalage de la diagonale qui sépare l'écran en deux. */
+/** Demi-décalage de la diagonale qui sépare l'écran en deux. */
 const SLANT = 90;
+const MID = VIEW_W / 2;
 
 export class Versus implements Scene {
   private t = 0;
   private shake = 0;
   private flash = 0;
   private done = false;
+  private readonly back = new PixelLayer();
+  private readonly front = new PixelLayer();
 
   /** @param label texte en haut de l'écran (ex. « COMBAT 2 / 3 ») */
   constructor(
@@ -30,110 +54,139 @@ export class Versus implements Scene {
   ) {}
 
   skip(): void {
-    if (this.t > 50 && this.t < 150) this.t = 150;
+    if (this.t > VS_FRAME + 6 && this.t < FADE_FRAME - 10) this.t = FADE_FRAME - 10;
   }
 
   update(): void {
-    this.t++;
-    this.shake *= 0.85;
-    this.flash *= 0.85;
-    if (this.t === 4) playSfx('special');
-    if (this.t === VS_FRAME) {
-      this.shake = 22;
+    const t = ++this.t;
+    this.shake *= 0.82;
+    this.flash *= 0.8;
+    if (t === 4 || t === 4 + SIDE_DELAY) playSfx('whoosh');
+    if (t === 4 + REVEAL || t === 4 + SIDE_DELAY + REVEAL) {
+      this.shake = 10;
+      playSfx('hitH');
+    }
+    if (t === VS_FRAME) {
+      this.shake = 24;
       this.flash = 1;
       playSfx('vs');
     }
-    if (this.t >= END_FRAME && !this.done) {
+    if (t >= END_FRAME && !this.done) {
       this.done = true;
       this.onDone();
     }
   }
 
-  private drawSide(ctx: CanvasRenderingContext2D, char: Character, isLeft: boolean): void {
-    const { t } = this;
-    const mid = VIEW_W / 2;
-    const facing = isLeft ? 1 : -1;
-    ctx.save();
-    // moitié d'écran délimitée par la diagonale
-    ctx.beginPath();
-    if (isLeft) {
-      ctx.moveTo(-40, -40);
-      ctx.lineTo(mid + SLANT, -40);
-      ctx.lineTo(mid - SLANT, VIEW_H + 40);
-      ctx.lineTo(-40, VIEW_H + 40);
-    } else {
-      ctx.moveTo(mid + SLANT, -40);
-      ctx.lineTo(VIEW_W + 40, -40);
-      ctx.lineTo(VIEW_W + 40, VIEW_H + 40);
-      ctx.lineTo(mid - SLANT, VIEW_H + 40);
-    }
-    ctx.clip();
-    const bg = ctx.createLinearGradient(0, 0, 0, VIEW_H);
-    bg.addColorStop(0, shade(char.color, -0.2));
-    bg.addColorStop(1, shade(char.color, -0.75));
-    ctx.fillStyle = bg;
-    ctx.fillRect(-40, -40, VIEW_W + 80, VIEW_H + 80);
-    // bandes obliques qui défilent
-    ctx.strokeStyle = 'rgba(255,255,255,.1)';
-    ctx.lineWidth = 26;
-    for (let i = -6; i < 24; i++) {
-      const x = i * 80 + ((t * 5 * facing) % 80);
-      ctx.beginPath();
-      ctx.moveTo(x, VIEW_H + 40);
-      ctx.lineTo(x + 180, -40);
-      ctx.stroke();
-    }
-    // le personnage glisse depuis le bord, précédé de son ombre
-    const slide = easeOut((t - (isLeft ? 6 : 16)) / 26);
-    const x = isLeft ? -320 + slide * 560 : VIEW_W + 320 - slide * 560;
-    drawCharacter(ctx, char, 'idle', x - facing * 14, 530, facing, CHAR_SCALE, t, {
-      silhouette: '#000',
-      alpha: 0.3,
-    });
-    drawCharacter(ctx, char, t > VS_FRAME ? 'idle' : 'intro', x, 520, facing, CHAR_SCALE, t);
-    ctx.restore();
-
-    const nameSlide = easeOut((t - 30) / 20);
-    const nameX = isLeft ? -300 + nameSlide * 330 : VIEW_W + 300 - nameSlide * 330;
-    const align = isLeft ? 'left' : 'right';
-    arcadeText(ctx, char.name, nameX, 468, 74, {
-      align,
-      colors: ['#fff', '#fff', shade(char.color, 0.5)],
-      glow: char.color,
-    });
-    arcadeText(ctx, char.title, nameX + facing * 4, 516, 24, { align, colors: GREY });
+  /** Temps local d'un camp (le droit démarre plus tard). */
+  private local(isLeft: boolean): number {
+    return this.t - 4 - (isLeft ? 0 : SIDE_DELAY);
   }
 
-  render(ctx: CanvasRenderingContext2D): void {
-    const { t } = this;
-    const mid = VIEW_W / 2;
+  /** Contour de la moitié d'écran d'un camp, glissée depuis son bord pendant l'entrée. */
+  private panelPath(ctx: Ctx, isLeft: boolean): void {
+    const slide = (1 - easeOut(this.local(isLeft) / 10)) * 640;
+    if (isLeft) slantPath(ctx, -400 - slide, -20, MID - SLANT + 400, VIEW_H + 40, SLANT * 2 + 14);
+    else slantPath(ctx, MID - SLANT - 7 + slide, -20, 900, VIEW_H + 40, SLANT * 2 + 14);
+  }
+
+  private drawPanel(ctx: Ctx, char: Character, isLeft: boolean): void {
+    const t = this.local(isLeft);
+    if (t < 0) return;
+    const dir = isLeft ? 1 : -1;
+    const zone = { x: isLeft ? -20 : MID - SLANT, y: 0, w: MID + SLANT + 20, h: VIEW_H };
     ctx.save();
-    ctx.translate(rand(-1, 1) * this.shake, rand(-1, 1) * this.shake);
-    this.drawSide(ctx, this.left, true);
-    this.drawSide(ctx, this.right, false);
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 10;
-    ctx.beginPath();
-    ctx.moveTo(mid + SLANT, -40);
-    ctx.lineTo(mid - SLANT, VIEW_H + 40);
-    ctx.stroke();
-    if (t >= VS_FRAME) {
-      const pop = easeBack((t - VS_FRAME) / 12);
-      arcadeText(ctx, 'VS', mid, VIEW_H / 2 - 20, 190, {
-        scale: 2.4 - 1.4 * pop,
-        colors: ['#fff', '#ffd23a', '#ff2a2a'],
-        glow: '#ff5a1f',
-      });
+    this.panelPath(ctx, isLeft);
+    ctx.clip();
+    colorPanel(ctx, char.color, -500, -20, VIEW_W + 1000, VIEW_H + 40, 0);
+    halftone(ctx, zone, shade(char.color, -0.7), -dir);
+    speedLines(ctx, this.t, dir, tones(char.color)[0]!, zone, 16);
+    speedLines(ctx, this.t + 40, dir, '#ffffff', zone, 6);
+    ctx.restore();
+  }
+
+  private drawFighter(ctx: Ctx, char: Character, isLeft: boolean): void {
+    const t = this.local(isLeft);
+    if (t < 4) return;
+    const facing = isLeft ? 1 : -1;
+    const slide = easeOut((t - 4) / 16);
+    const x = isLeft ? -340 + slide * 580 : VIEW_W + 340 - slide * 580;
+    const pose = this.t > VS_FRAME ? 'idle' : 'intro';
+    ctx.save();
+    this.panelPath(ctx, isLeft);
+    ctx.clip();
+    // échos colorés : ils traînent derrière pendant la glissade, puis s'écartent à la révélation
+    const spread = t < REVEAL ? (1 - slide) * 90 + 10 : (1 - easeOut((t - REVEAL) / 14)) * 70;
+    const colors = tones(char.color);
+    if (spread > 2) {
+      for (let i = 3; i >= 1; i--) {
+        drawCharacter(ctx, char, pose, x - facing * spread * i, 520, facing, CHAR_SCALE, 0, {
+          silhouette: colors[i]!,
+        });
+      }
     }
-    if (this.label && t > 20) arcadeText(ctx, this.label, mid, 44, 34, { alpha: Math.min(1, (t - 20) / 15) });
+    if (t < REVEAL) drawCharacter(ctx, char, pose, x, 520, facing, CHAR_SCALE, 0, { silhouette: '#000' });
+    else drawCharacter(ctx, char, pose, x, 520, facing, CHAR_SCALE, this.t, { flash: t < REVEAL + 3 });
+    ctx.restore();
+  }
+
+  private drawName(ctx: Ctx, char: Character, isLeft: boolean): void {
+    const t = this.local(isLeft) - NAME;
+    if (t < 0) return;
+    const align = isLeft ? 'left' : 'right';
+    const edge = isLeft ? 34 : VIEW_W - 34;
+    const width = Math.max(arcadeTextWidth(ctx, char.name, 78), arcadeTextWidth(ctx, char.title, 24)) + 70;
+    const bar = easeOut(t / 8) * width;
+    // bandeau noir qui se déroule depuis le bord, souligné de la couleur du personnage
+    slantPath(ctx, isLeft ? -20 : VIEW_W + 20 - bar, 424, bar, 78, 16);
+    ctx.fillStyle = '#000';
+    ctx.fill();
+    slantPath(ctx, isLeft ? -20 : VIEW_W + 20 - bar, 502, bar * 0.8, 8, 2);
+    ctx.fillStyle = char.color;
+    ctx.fill();
+    slamLetters(ctx, char.name, edge, 462, 78, t - 4, {
+      align,
+      colors: ['#fff', '#fff', shade(char.color, 0.5)],
+    });
+    if (t > 16) arcadeText(ctx, char.title, edge, 524, 24, { align, colors: GREY, alpha: t > 20 ? 1 : 0.5 });
+  }
+
+  render(ctx: Ctx): void {
+    const { t } = this;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    ctx.save();
+    ctx.translate(Math.round(rand(-1, 1) * this.shake), Math.round(rand(-1, 1) * this.shake));
+
+    this.back.draw(ctx, (g) => {
+      this.drawPanel(g, this.left, true);
+      this.drawPanel(g, this.right, false);
+      if (t >= VS_FRAME) burstLines(g, MID, VIEW_H / 2 - 10, t, t < VS_FRAME + 14 ? '#fff' : '#ffd23a', 150);
+    });
+    this.drawFighter(ctx, this.left, true);
+    this.drawFighter(ctx, this.right, false);
+    this.front.draw(ctx, (g) => {
+      if (this.local(false) > 6) {
+        // la cicatrice blanche entre les deux camps
+        slantPath(g, MID - SLANT - 7, -20, 14, VIEW_H + 40, SLANT * 2 + 14);
+        g.fillStyle = '#fff';
+        g.fill();
+      }
+      this.drawName(g, this.left, true);
+      this.drawName(g, this.right, false);
+      slamText(g, 'VS', MID, VIEW_H / 2 - 20, 190, t - VS_FRAME, { colors: ['#fff', '#ffd23a', '#ff2a2a'] });
+      if (this.label && t > VS_FRAME + 10) {
+        slantPath(g, MID - 170, 18, 340, 46, 12);
+        g.fillStyle = '#000';
+        g.fill();
+        arcadeText(g, this.label, MID, 42, 32);
+      }
+      blinds(g, (t - FADE_FRAME) / (END_FRAME - FADE_FRAME - 2));
+    });
     ctx.restore();
 
-    if (this.flash > 0.02) {
-      ctx.fillStyle = `rgba(255,255,255,${this.flash})`;
-      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
-    }
-    if (t > FADE_FRAME) {
-      ctx.fillStyle = `rgba(0,0,0,${(t - FADE_FRAME) / (END_FRAME - FADE_FRAME)})`;
+    if (this.flash > 0.05) {
+      // flash par paliers, sans fondu
+      ctx.fillStyle = `rgba(255,255,255,${Math.ceil(this.flash * 4) / 4})`;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
     }
   }

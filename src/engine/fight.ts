@@ -40,7 +40,7 @@ export interface ComboDisplay {
 }
 
 const ROUND_SECONDS = 60;
-export const SUPER_FREEZE = 30;
+export const SUPER_FREEZE = 44;
 const START_GAP = 160;
 const PRAISE: readonly (readonly [minHits: number, text: string])[] = [
   [10, 'DÉVASTATEUR !'],

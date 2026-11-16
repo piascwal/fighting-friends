@@ -3,13 +3,15 @@
 import { settings } from '../core/settings';
 import { rgba } from '../core/color';
 import { GROUND_Y, VIEW_H, VIEW_W } from '../core/constants';
-import { clamp, easeBack, easeOut, rand } from '../core/math';
+import { clamp, easeBack, rand } from '../core/math';
 import { activeHits, hurtbox, type Rect } from '../engine/combat';
 import type { BannerTone, FightEvent } from '../engine/events';
 import { SUPER_FREEZE, type FightSim } from '../engine/fight';
 import { drawFighter, drawShadow, drawTrail } from './fighter-view';
 import { Fx } from './fx';
 import { drawHud } from './hud';
+import { PixelLayer, burstLines } from './motion';
+import { drawSuperCutIn } from './super-cutin';
 import { drawProjectile, emitProjectileTrail, projectileSprite } from './projectile-view';
 import { drawStage, type Stage } from './stages';
 import { BLUE, GOLD, RED, arcadeText, type Gradient } from './text';
@@ -30,6 +32,8 @@ const TONES: Record<BannerTone, Gradient> = { gold: GOLD, red: RED, blue: BLUE }
 const PIXEL = 3;
 /** Grain de l'interface (barres, textes) : plus fin que celui des effets, pour rester lisible. */
 const HUD_PIXEL = 2;
+/** Durée du fond de K.O., calée sur le ralenti du coup final. */
+const KO_BACKDROP = 54;
 
 export class FightView {
   readonly fx = new Fx();
@@ -44,6 +48,10 @@ export class FightView {
   private readonly pixels: CanvasRenderingContext2D;
   /** Couche de l'interface, à mi-résolution. */
   private readonly hud: CanvasRenderingContext2D;
+  /** Couche des séquences de motion design (bandeau de super, fond du K.O.). */
+  private readonly motion = new PixelLayer();
+  /** Frames restantes du fond de K.O. */
+  private koTime = 0;
 
   constructor(
     private readonly sim: FightSim,
@@ -94,6 +102,7 @@ export class FightView {
         });
         return;
       case 'sfx':
+        if (event.name === 'ko') this.koTime = KO_BACKDROP;
         return;
     }
   }
@@ -105,6 +114,7 @@ export class FightView {
     this.banners = this.banners.filter((b) => ++b.age <= b.duration);
     this.shake = this.shake < 0.4 ? 0 : this.shake * 0.86;
     this.flash *= 0.82;
+    if (this.koTime > 0) this.koTime--;
     sim.fighters.forEach((f, i) => {
       // pendant un combo la trace rouge reste, puis elle rattrape vite la vie réelle
       this.delayedHp[i]! += (f.hp - this.delayedHp[i]!) * (f.inHit ? 0.02 : 0.12);
@@ -130,6 +140,7 @@ export class FightView {
     ctx.save();
     ctx.translate(shakeX, shakeY);
     drawStage(ctx, this.stage, sim.camX, sim.tick);
+    if (this.koTime > 0) this.drawKoBackdrop(ctx);
     ctx.translate(-sim.camX, 0);
     if (sim.superFreeze > 0) this.drawSuperBackdrop(ctx);
     drawShadow(ctx, a);
@@ -146,6 +157,11 @@ export class FightView {
     ctx.restore();
     this.drawPixelLayer(ctx, shakeX - sim.camX, shakeY);
 
+    if (sim.superFreeze > 0 && sim.superBy) {
+      const by = sim.superBy;
+      const elapsed = SUPER_FREEZE - sim.superFreeze;
+      drawSuperCutIn(ctx, this.motion, by.char, by.facing, sim.superName, elapsed, SUPER_FREEZE);
+    }
     this.drawInterface(ctx);
     if (this.flash > 0.02) {
       ctx.fillStyle = `rgba(255,255,255,${this.flash})`;
@@ -167,6 +183,19 @@ export class FightView {
     ctx.restore();
   }
 
+  /** Coup final : le décor s'efface derrière des rayons d'impact centrés sur le vaincu. */
+  private drawKoBackdrop(ctx: Ctx): void {
+    const { sim } = this;
+    const loser = sim.fighters.find((f) => f.hp <= 0) ?? sim.fighters[1];
+    const age = KO_BACKDROP - this.koTime;
+    this.motion.draw(ctx, (g) => {
+      g.fillStyle = age < 3 ? '#fff' : '#12060c';
+      g.fillRect(-20, -20, VIEW_W + 40, VIEW_H + 40);
+      const color = age % 8 < 4 ? '#ff2a2a' : loser.opp.char.color;
+      burstLines(g, loser.x - sim.camX, GROUND_Y + loser.y - 110, age, color, 130);
+    });
+  }
+
   /**
    * Interface (barres, chrono, textes) : dessinée à mi-résolution puis agrandie sans lissage,
    * pour le même grain que les sprites, en restant lisible.
@@ -179,14 +208,6 @@ export class FightView {
     ui.setTransform(1 / HUD_PIXEL, 0, 0, 1 / HUD_PIXEL, 0, 0);
     ui.imageSmoothingEnabled = false;
     if (sim.mode !== 'attract') drawHud(ui, sim, this.delayedHp);
-    if (sim.superFreeze > 0 && sim.superBy) {
-      const k = easeOut((SUPER_FREEZE - sim.superFreeze) / 8);
-      const color = sim.superBy.char.color;
-      arcadeText(ui, sim.superName, VIEW_W / 2, 150, 68, {
-        scale: 0.6 + 0.4 * k,
-        colors: ['#fff', '#ffe27a', color],
-      });
-    }
     this.drawBanners(ui);
     ctx.save();
     ctx.imageSmoothingEnabled = false;

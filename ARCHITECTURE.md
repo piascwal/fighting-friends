@@ -109,6 +109,7 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
 | Changer la compression des images                                                | `assets/image-codec.ts`                                                                                                             |
 | Changer la reprise d'un personnage local par sa version du dépôt                 | `assets/repo-characters.ts`                                                                                                         |
 | Changements locaux d'un perso du jeu (« à envoyer », export du delta)            | `assets/local-changes.ts` (couches jeu / appareil des images : `assets/sprite-store.ts`)                                            |
+| Motion design (intro VS, bandeau de super, K.O., victoire)                       | briques dans `render/motion.ts` ; séquences dans `scenes/versus.ts`, `scenes/victory.ts`, `render/super-cutin.ts`                   |
 | Ajouter un écran de menu                                                         | un fichier dans `ui/`, branché dans `ui/index.ts`                                                                                   |
 | Changer l'enchaînement des écrans                                                | `game.ts`                                                                                                                           |
 
