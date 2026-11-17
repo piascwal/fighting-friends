@@ -23,6 +23,13 @@ const STANDING_FRAME = 80;
 /** En dessous de cette hauteur relative, la posture est « basse » et le prompt insiste là-dessus. */
 const LOW_POSE = 0.8;
 
+/**
+ * L'IA recopie parfois le personnage de référence à côté du nouveau (surtout pour les poses au sol,
+ * comme la balayette) : on lui dit explicitement que la référence ne doit pas apparaître.
+ */
+const SINGLE_FIGURE =
+  "L'image de référence sert UNIQUEMENT à reconnaître le personnage : ne la recopie pas, ne la place pas à côté ni derrière. L'image finale ne contient le personnage qu'UNE SEULE FOIS, uniquement dans la posture demandée (aucun deuxième personnage debout, aucun avant/après, aucune planche de plusieurs poses).";
+
 const GUIDE_IMAGE =
   'Si une image de mannequin gris est aussi jointe, elle montre la posture exacte à reproduire (position des bras et des jambes, hauteur du corps) : copie sa posture, mais PAS son apparence.';
 
@@ -104,7 +111,37 @@ export function buildPrompt(char: Character, key: SpriteKey): string {
   }
   return (
     `À partir de l'image de référence jointe du personnage « ${char.name} » (garde exactement le même visage, la même coiffure, la même corpulence, les mêmes vêtements, les mêmes accessoires et les mêmes couleurs), génère UNE SEULE image de ce personnage EN ENTIER, de la tête aux pieds, vu de côté (profil 3/4) et tourné vers la DROITE, dans la posture suivante : ${desc}. ` +
-    `Un seul personnage, une seule pose, aucun effet spécial (ni flammes, ni éclairs, ni traînées de mouvement, ni onomatopées). ${framing(spec)} ${GUIDE_IMAGE} ${STYLE} ${BACKGROUND} ${FORMAT}`
+    `Un seul personnage, une seule pose, aucun effet spécial (ni flammes, ni éclairs, ni traînées de mouvement, ni onomatopées). ${SINGLE_FIGURE} ${framing(spec)} ${GUIDE_IMAGE} ${STYLE} ${BACKGROUND} ${FORMAT}`
+  );
+}
+
+/** Ce que la taille du personnage change à sa silhouette, pour le prompt de création. */
+function sizeHint(size: number): string {
+  if (size < 0.95)
+    return ' Il est de PETITE taille : silhouette plus petite et plus ramassée, tête un peu plus grosse par rapport au corps.';
+  if (size > 1.05) return ' Il est GRAND : silhouette élancée et imposante, épaules larges.';
+  return '';
+}
+
+/**
+ * Prompt de création d'un personnage à partir d'une photo : on joint une photo de la personne (au moins
+ * son visage) et l'image « garde » d'un personnage existant, qui fixe la direction artistique.
+ * @param description tenue, corpulence, signes distinctifs… (facultatif, écrit par le joueur)
+ * @param reference nom du personnage dont l'image sert de modèle de style
+ */
+export function buildCreationPrompt(char: Character, description: string, reference: string): string {
+  const gear = char.style.gear;
+  const pose = gear?.poses?.idle ?? `${poseDescription('idle')}${gear ? `. ${gear.hold}` : ''}`;
+  const look = description.trim()
+    ? `Tenue, corpulence et style : ${description.trim()}.`
+    : "Tenue et corpulence : celles de la photo, transformées en tenue de combattant de jeu d'arcade (garde ses vêtements reconnaissables).";
+  return (
+    `Je te joins deux images : 1) une PHOTO d'une vraie personne ; 2) le sprite « ${reference} » de mon jeu de combat, en pied sur fond magenta. ` +
+    `Crée un NOUVEAU personnage de ce jeu, nommé « ${char.name} », d'après la personne de la photo : reprends fidèlement son visage (forme du visage, yeux, nez, sourcils, coupe et couleur de cheveux, barbe, lunettes, couleur de peau) pour qu'on la reconnaisse au premier coup d'œil. ` +
+    `${look}${sizeHint(char.size)} ` +
+    `Le sprite « ${reference} » sert UNIQUEMENT de modèle de direction artistique : ne reprends ni son visage, ni ses vêtements, ni ses couleurs, mais copie exactement son rendu : ${ART_DIRECTION} ; même taille de pixels, mêmes contours sombres, même niveau de détail, même éclairage et mêmes proportions tête/corps. ` +
+    `Posture : ${pose}. Personnage EN ENTIER, de la tête aux pieds, vu de côté (profil 3/4) et tourné vers la DROITE, centré, occupant environ ${STANDING_FRAME} % de la hauteur de l'image. ` +
+    `Un seul personnage, aucun effet, aucun texte, ni la photo ni le sprite de référence dans l'image. ${BACKGROUND} ${FORMAT}`
   );
 }
 

@@ -34,6 +34,7 @@ import {
   initPoseModal,
   openPoseModal,
 } from './pose-modal';
+import { CREATION_HTML, initCreation, refreshCreation } from './creation-prompt';
 import { showScreen } from './screens';
 
 const SIZE_OPTIONS = SIZES.map(
@@ -44,12 +45,18 @@ export const CHARACTERS_HTML = `
   <div class="screen panel" id="s-chars">
     <div class="bar"><button class="nav sm alt" id="chBack">◀ RETOUR</button><h2>PERSONNAGES &amp; SPRITES</h2></div>
     <div class="scroll">
-      <div class="row"><select id="chSel"></select><button class="nav sm" id="chNewBtn">＋ NOUVEAU PERSONNAGE</button></div>
-      <div class="row hidden" id="chNew">
-        <input id="newName" maxlength="16" placeholder="Nom du personnage">
-        <select id="newStyle"></select>
-        <label>Taille <select id="newSize">${SIZE_OPTIONS}</select></label>
-        <button class="nav sm" id="newOk">CRÉER</button>
+      <div class="row" id="chTop"><select id="chSel"></select><button class="nav sm" id="chNewBtn">＋ NOUVEAU PERSONNAGE</button></div>
+      <div class="hidden" id="chNew">
+        <h3>NOUVEAU PERSONNAGE</h3>
+        <div class="row">
+          <label>Nom <input id="newName" maxlength="16" placeholder="Nom du personnage"></label>
+          <label>Style de combat <select id="newStyle"></select></label>
+          <label>Taille <select id="newSize">${SIZE_OPTIONS}</select></label>
+        </div>
+        <div class="row">
+          <button class="nav sm" id="newOk">CRÉER</button>
+          <button class="nav sm alt" id="newCancel">ANNULER</button>
+        </div>
       </div>
       <div class="row" id="chEdit">
         <label>Style de combat <select id="edStyle"></select></label>
@@ -59,6 +66,7 @@ export const CHARACTERS_HTML = `
       </div>
       <div id="styleNote"></div>
       <div id="chInfo"></div>
+      ${CREATION_HTML}
       <div class="row">
         <button class="nav sm" id="chCopyAll">COPIER TOUS LES PROMPTS MANQUANTS</button>
         <button class="nav sm hidden" id="chSend">EXPORTER LES CHANGEMENTS</button>
@@ -159,6 +167,7 @@ function refresh(): void {
     `<b style="color:${char.color}">${escapeHtml(char.name)}</b> — style ${char.style.label.toLowerCase()} — ` +
     `<b>${provided} / ${poses.length}</b> sprites. ${display}${changesHtml(char)}`;
   $('#chSend').classList.toggle('hidden', !hasRepoLayer(char.id));
+  refreshCreation(char);
 
   const grid = $('#chGrid');
   grid.innerHTML = '';
@@ -245,6 +254,15 @@ function styleNote(char: Character): string {
 const sizeChoice = (size: number): number =>
   SIZES.reduce((best, s) => (Math.abs(s.value - size) < Math.abs(best - size) ? s.value : best), 1 as number);
 
+/**
+ * Mode création : seul le formulaire du nouveau personnage reste affiché. Les réglages, la liste des
+ * images et les boutons du personnage sélectionné sont masqués, pour ne pas les modifier par erreur.
+ */
+function setCreating(creating: boolean): void {
+  $('#s-chars').classList.toggle('creating', creating);
+  $('#chNew').classList.toggle('hidden', !creating);
+}
+
 function createCharacter(): void {
   const field = $<HTMLInputElement>('#newName');
   const name = field.value.trim();
@@ -265,7 +283,7 @@ function createCharacter(): void {
   saveCustomCharacters();
   selectCharacter(char.id);
   field.value = '';
-  $('#chNew').classList.add('hidden');
+  setCreating(false);
   refresh();
   toast(`${char.name} créé ! Importe d'abord la pose « Garde (repos) ».`);
 }
@@ -299,6 +317,7 @@ export function openCharacters(back?: () => void): void {
   goBack = back ?? defaultBack;
   void allowAnyOrientation();
   closePoseModal();
+  setCreating(false);
   refresh();
   showScreen('chars');
 }
@@ -315,10 +334,16 @@ export function initCharacters(onBack: () => void): void {
   on('#chSel', (e) => (selectCharacter(valueOf(e)), refresh()), 'change');
   on('#chNewBtn', () => {
     fillStyleSelect($<HTMLSelectElement>('#newStyle'));
-    $('#chNew').classList.toggle('hidden');
+    $<HTMLSelectElement>('#newSize').value = '1';
+    setCreating(true);
     $('#newName').focus();
   });
   on('#newOk', createCharacter);
+  on('#newCancel', () => {
+    playSfx('back');
+    setCreating(false);
+  });
+  initCreation();
   on(
     '#edStyle',
     (e) => {

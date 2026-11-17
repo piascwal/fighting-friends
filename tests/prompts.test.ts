@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPrompt, poseDescription, spritePosesFor } from '../src/data/prompts';
+import { buildCreationPrompt, buildPrompt, poseDescription, spritePosesFor } from '../src/data/prompts';
 import { makeCharacter, roster } from '../src/data/roster';
 import { SPRITE_BY_KEY } from '../src/data/sprite-poses';
 
@@ -26,6 +26,19 @@ describe('prompts de génération des sprites', () => {
     expect(buildPrompt(hockey, 'idle')).toContain('à deux mains');
     expect(buildPrompt(hockey, 'portrait')).not.toContain('crosse');
     expect(buildPrompt(ardan, 'idle')).not.toContain('crosse');
+  });
+
+  it('les prompts de pose interdisent de recopier le personnage de référence à côté', () => {
+    expect(buildPrompt(ardan, 'crouch_kick')).toContain('UNE SEULE FOIS');
+  });
+
+  it('prompt de création : photo + modèle de style, nom, taille et accessoire du style', () => {
+    const small = makeCharacter({ id: 'p', name: 'PUCK', style: 'hockey', color: '#fff', size: 0.8 });
+    const prompt = buildCreationPrompt(small, 'maillot rouge', 'LOLO');
+    for (const part of ['PHOTO', '« PUCK »', '« LOLO »', 'maillot rouge', 'PETITE', 'crosse', '#FF00FF']) {
+      expect(prompt).toContain(part);
+    }
+    expect(buildCreationPrompt(ardan, '', 'LOLO')).not.toContain('PETITE');
   });
 
   it("une posture basse demande un personnage plus petit dans l'image", () => {

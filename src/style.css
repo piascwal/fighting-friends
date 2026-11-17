@@ -1212,3 +1212,25 @@ i.b {
     transform: scale(1);
   }
 }
+
+/* écran des sprites, mode création : seul le formulaire du nouveau personnage reste visible */
+#s-chars.creating .scroll > :not(#chNew) {
+  display: none;
+}
+#chNew {
+  border-left: 4px solid var(--y);
+  background: #140a24;
+  padding: 8px 12px;
+  margin: 4px 0 10px;
+}
+#chNew h3 {
+  margin-top: 0.2em;
+}
+#crBox textarea {
+  width: 100%;
+  margin-top: 4px;
+  background: #0b0618;
+  border: 2px solid var(--ln);
+  color: #fff;
+  padding: 6px;
+}

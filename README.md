@@ -30,6 +30,9 @@ La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**
 
 1. Dans le jeu : **Options ▸ Personnages & sprites ▸ Nouveau personnage** (nom, style de combat et taille :
    petit, normal ou grand ; un petit est plus dur à toucher mais a moins d'allonge).
+   Pour créer son apparence à partir d'une photo : panneau **Créer son apparence à partir d'une photo**
+   (ouvert d'office tant que le personnage n'a pas d'image de garde). Il donne un prompt à copier et l'image
+   de garde d'un personnage existant sur fond magenta, qui sert de modèle de direction artistique.
 2. Toucher une pose ▸ **Copier le prompt**, le coller dans une IA d'images avec l'image de référence du personnage.
    Si l'IA ne trouve pas la posture, lui joindre aussi l'**image guide** (mannequin gris dans la posture
    exacte) : **Copier l'image guide** ou **Partager / Enregistrer**.
