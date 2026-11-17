@@ -7,32 +7,41 @@
   "title": "Nouveau challenger",
   "quote": "À qui le tour ?",
   "files": {
+    "stage": "stage.webp",
     "crouch_block": "crouch_block.webp",
     "block": "block.webp",
     "crouch_kick": "crouch_kick.webp",
-    "intro": "intro.webp",
-    "crouch": "crouch.webp",
+    "idle": "idle.webp",
     "jump": "jump.webp",
     "kick_heavy": "kick_heavy.webp",
-    "jump_kick": "jump_kick.webp",
+    "crouch": "crouch.webp",
     "jump_punch": "jump_punch.webp",
-    "idle": "idle.webp",
-    "hit": "hit.webp",
+    "pj_puck": "pj_puck.webp",
+    "jump_kick": "jump_kick.webp",
     "kick_light": "kick_light.webp",
     "portrait": "portrait.webp",
-    "pj_puck": "pj_puck.webp",
-    "punch_light": "punch_light.webp",
-    "super": "super.webp",
-    "sp_slapshot": "sp_slapshot.webp",
+    "intro": "intro.webp",
     "punch_heavy": "punch_heavy.webp",
+    "punch_light": "punch_light.webp",
     "sp_body_check": "sp_body_check.webp",
+    "sp_slapshot": "sp_slapshot.webp",
+    "hit": "hit.webp",
+    "super": "super.webp",
     "sp_hockey_fight": "sp_hockey_fight.webp",
     "walk1": "walk1.webp",
     "walk2": "walk2.webp",
-    "stage": "stage.webp",
-    "win": "win.webp"
+    "win": "win.webp",
+    "crouch_punch": "crouch_punch.webp",
+    "down": "down.webp",
+    "uppercut": "uppercut.webp",
+    "fall": "fall.webp"
   },
   "adjust": {
+    "stage": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
     "crouch_block": {
       "s": 1.08,
       "dx": 34,
@@ -48,14 +57,9 @@
       "dx": -31,
       "dy": 0
     },
-    "intro": {
-      "s": 1,
-      "dx": 0,
-      "dy": 0
-    },
-    "crouch": {
-      "s": 1.45,
-      "dx": 48,
+    "idle": {
+      "s": 0.97,
+      "dx": 17,
       "dy": 0
     },
     "jump": {
@@ -68,9 +72,9 @@
       "dx": 0,
       "dy": 0
     },
-    "jump_kick": {
-      "s": 1,
-      "dx": 0,
+    "crouch": {
+      "s": 1.45,
+      "dx": 48,
       "dy": 0
     },
     "jump_punch": {
@@ -78,12 +82,12 @@
       "dx": 0,
       "dy": 0
     },
-    "idle": {
-      "s": 0.97,
-      "dx": 17,
+    "pj_puck": {
+      "s": 1,
+      "dx": 0,
       "dy": 0
     },
-    "hit": {
+    "jump_kick": {
       "s": 1,
       "dx": 0,
       "dy": 0
@@ -98,22 +102,7 @@
       "dx": 0,
       "dy": 0
     },
-    "pj_puck": {
-      "s": 1,
-      "dx": 0,
-      "dy": 0
-    },
-    "punch_light": {
-      "s": 1,
-      "dx": 0,
-      "dy": 0
-    },
-    "super": {
-      "s": 1,
-      "dx": 0,
-      "dy": 0
-    },
-    "sp_slapshot": {
+    "intro": {
       "s": 1,
       "dx": 0,
       "dy": 0
@@ -123,9 +112,29 @@
       "dx": 0,
       "dy": 0
     },
+    "punch_light": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
     "sp_body_check": {
       "s": 1,
       "dx": 8,
+      "dy": 0
+    },
+    "sp_slapshot": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "hit": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "super": {
+      "s": 1,
+      "dx": 0,
       "dy": 0
     },
     "sp_hockey_fight": {
@@ -143,16 +152,31 @@
       "dx": 8,
       "dy": 0
     },
-    "stage": {
-      "s": 1,
-      "dx": 0,
-      "dy": 0
-    },
     "win": {
       "s": 1.06,
       "dx": -10,
       "dy": 0
+    },
+    "crouch_punch": {
+      "s": 1.16,
+      "dx": 50,
+      "dy": 11
+    },
+    "down": {
+      "s": 1,
+      "dx": 2,
+      "dy": 21
+    },
+    "uppercut": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "fall": {
+      "s": 1,
+      "dx": 10,
+      "dy": 33
     }
   },
-  "updated": 1794807909396
+  "updated": 1794898406326
 }
