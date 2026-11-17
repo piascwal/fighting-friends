@@ -1234,3 +1234,33 @@ i.b {
   color: #fff;
   padding: 6px;
 }
+
+/* démarrage : tant que le jeu charge (personnages, images), le canvas encore vide est masqué et un
+   message s'affiche. À la verticale sur téléphone, on demande tout de suite de tourner l'écran. */
+html:not([data-started]) #cv {
+  visibility: hidden;
+}
+html:not([data-started]) #app::after {
+  content: 'CHARGEMENT…';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--f);
+  font-style: italic;
+  font-size: 28px;
+  letter-spacing: 0.08em;
+  color: var(--y);
+  text-shadow: 3px 3px 0 #000;
+  animation: bl 0.8s steps(2) infinite;
+}
+@media (orientation: portrait) and (pointer: coarse) {
+  html:not([data-started]) #rotate {
+    display: flex;
+  }
+  /* le raccourci vers les sprites n'est utilisable qu'une fois le jeu chargé */
+  html:not([data-started]) #rotateChars {
+    visibility: hidden;
+  }
+}
