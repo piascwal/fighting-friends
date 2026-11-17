@@ -9,17 +9,25 @@
   "files": {
     "idle": "idle.webp",
     "block": "block.webp",
-    "crouch": "crouch.webp",
     "intro": "intro.webp",
-    "hit": "hit.webp",
-    "jump": "jump.webp",
     "kick_light": "kick_light.webp",
-    "kick_heavy": "kick_heavy.webp",
-    "punch_heavy": "punch_heavy.webp",
-    "win": "win.webp",
+    "hit": "hit.webp",
+    "crouch": "crouch.webp",
     "punch_light": "punch_light.webp",
+    "jump": "jump.webp",
+    "win": "win.webp",
+    "punch_heavy": "punch_heavy.webp",
+    "kick_heavy": "kick_heavy.webp",
     "super": "super.webp",
-    "portrait": "portrait.webp"
+    "portrait": "portrait.webp",
+    "uppercut": "uppercut.webp",
+    "walk1": "walk1.webp",
+    "crouch_kick": "crouch_kick.webp",
+    "jump_kick": "jump_kick.webp",
+    "stage": "stage.webp",
+    "crouch_block": "crouch_block.webp",
+    "jump_punch": "jump_punch.webp",
+    "walk2": "walk2.webp"
   },
   "adjust": {
     "idle": {
@@ -28,13 +36,8 @@
       "dy": 0
     },
     "block": {
-      "s": 1,
+      "s": 1.03,
       "dx": 0,
-      "dy": 0
-    },
-    "crouch": {
-      "s": 1.09,
-      "dx": 33,
       "dy": 0
     },
     "intro": {
@@ -42,22 +45,32 @@
       "dx": 7,
       "dy": 0
     },
-    "hit": {
-      "s": 1.03,
-      "dx": 3,
-      "dy": 0
-    },
-    "jump": {
-      "s": 1.06,
-      "dx": 18,
-      "dy": 0
-    },
     "kick_light": {
       "s": 1.03,
       "dx": 0,
       "dy": 0
     },
-    "kick_heavy": {
+    "hit": {
+      "s": 1.03,
+      "dx": 3,
+      "dy": 0
+    },
+    "crouch": {
+      "s": 1.09,
+      "dx": 33,
+      "dy": 0
+    },
+    "punch_light": {
+      "s": 1,
+      "dx": 10,
+      "dy": 0
+    },
+    "jump": {
+      "s": 1.14,
+      "dx": 11,
+      "dy": 0
+    },
+    "win": {
       "s": 1,
       "dx": 0,
       "dy": 0
@@ -67,14 +80,9 @@
       "dx": 0,
       "dy": 0
     },
-    "win": {
+    "kick_heavy": {
       "s": 1,
       "dx": 0,
-      "dy": 0
-    },
-    "punch_light": {
-      "s": 1,
-      "dx": 10,
       "dy": 0
     },
     "super": {
@@ -86,7 +94,47 @@
       "s": 1,
       "dx": 0,
       "dy": 0
+    },
+    "uppercut": {
+      "s": 1.01,
+      "dx": -19,
+      "dy": 0
+    },
+    "walk1": {
+      "s": 0.99,
+      "dx": 0,
+      "dy": -3
+    },
+    "crouch_kick": {
+      "s": 1.35,
+      "dx": -33,
+      "dy": 0
+    },
+    "jump_kick": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "stage": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "crouch_block": {
+      "s": 1.07,
+      "dx": 27,
+      "dy": 0
+    },
+    "jump_punch": {
+      "s": 1,
+      "dx": 11,
+      "dy": 0
+    },
+    "walk2": {
+      "s": 1.01,
+      "dx": 9,
+      "dy": 0
     }
   },
-  "updated": 1794920736175
+  "updated": 1794937886830
 }
