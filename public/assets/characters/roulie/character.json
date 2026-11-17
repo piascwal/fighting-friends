@@ -1,0 +1,62 @@
+{
+  "id": "roulie",
+  "name": "ROULIE",
+  "style": "ice",
+  "color": "#c56bff",
+  "size": 1,
+  "title": "Nouveau challenger",
+  "quote": "À qui le tour ?",
+  "files": {
+    "block": "block.webp",
+    "kick_heavy": "kick_heavy.webp",
+    "idle": "idle.webp",
+    "crouch": "crouch.webp",
+    "portrait": "portrait.webp",
+    "jump": "jump.webp",
+    "punch_heavy": "punch_heavy.webp",
+    "super": "super.webp"
+  },
+  "adjust": {
+    "block": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "kick_heavy": {
+      "s": 1,
+      "dx": -17,
+      "dy": 0
+    },
+    "idle": {
+      "s": 1.04,
+      "dx": 8,
+      "dy": 0
+    },
+    "crouch": {
+      "s": 1.17,
+      "dx": 27,
+      "dy": 0
+    },
+    "portrait": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "jump": {
+      "s": 1.01,
+      "dx": 9,
+      "dy": 0
+    },
+    "punch_heavy": {
+      "s": 1,
+      "dx": -19,
+      "dy": 0
+    },
+    "super": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    }
+  },
+  "updated": 1794953290589
+}
