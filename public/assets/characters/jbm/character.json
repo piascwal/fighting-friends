@@ -1,0 +1,92 @@
+{
+  "id": "jbm",
+  "name": "JBM",
+  "style": "counter",
+  "color": "#b55b00",
+  "size": 1.12,
+  "title": "Nouveau challenger",
+  "quote": "À qui le tour ?",
+  "files": {
+    "idle": "idle.webp",
+    "block": "block.webp",
+    "crouch": "crouch.webp",
+    "intro": "intro.webp",
+    "hit": "hit.webp",
+    "jump": "jump.webp",
+    "kick_light": "kick_light.webp",
+    "kick_heavy": "kick_heavy.webp",
+    "punch_heavy": "punch_heavy.webp",
+    "win": "win.webp",
+    "punch_light": "punch_light.webp",
+    "super": "super.webp",
+    "portrait": "portrait.webp"
+  },
+  "adjust": {
+    "idle": {
+      "s": 1,
+      "dx": 14,
+      "dy": 0
+    },
+    "block": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "crouch": {
+      "s": 1.09,
+      "dx": 33,
+      "dy": 0
+    },
+    "intro": {
+      "s": 1.01,
+      "dx": 7,
+      "dy": 0
+    },
+    "hit": {
+      "s": 1.03,
+      "dx": 3,
+      "dy": 0
+    },
+    "jump": {
+      "s": 1.06,
+      "dx": 18,
+      "dy": 0
+    },
+    "kick_light": {
+      "s": 1.03,
+      "dx": 0,
+      "dy": 0
+    },
+    "kick_heavy": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "punch_heavy": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "win": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "punch_light": {
+      "s": 1,
+      "dx": 10,
+      "dy": 0
+    },
+    "super": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "portrait": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    }
+  },
+  "updated": 1794920736175
+}

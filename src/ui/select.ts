@@ -42,8 +42,11 @@ interface Selection {
 
 const PREVIEW_W = 360;
 const PREVIEW_H = 600;
-/** Zoom de l'aperçu : un personnage de taille normale occupe presque toute la hauteur. */
-const PREVIEW_SCALE = (PREVIEW_H * 0.9) / 200;
+/**
+ * Zoom de l'aperçu : un personnage de taille normale occupe presque toute la hauteur, et un « grand »
+ * (taille 1,12) tient encore en entier, bras levé compris pour la pose de victoire.
+ */
+const PREVIEW_SCALE = (PREVIEW_H * 0.76) / 200;
 /** Délai avant de lancer le combat, le temps de voir la pose de victoire. */
 const CONFIRM_DELAY_MS = 650;
 
