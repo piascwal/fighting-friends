@@ -58,6 +58,19 @@ function tinted(entry: SpriteEntry, color: string): HTMLCanvasElement {
 }
 
 /**
+ * Hauteur occupée au-dessus des pieds par l'image d'une pose, au zoom 1 (réglages compris).
+ * Sert à cadrer un personnage pour qu'il tienne en entier. 0 si aucune image.
+ */
+export function spriteTop(char: Character, pose: SpriteKey): number {
+  const found = resolveSprite(char.id, pose);
+  if (!found) return 0;
+  const { entry } = found;
+  const spec = SPRITE_BY_KEY[found.key];
+  const fit = spec.w ? (spec.w * STANDING_HEIGHT) / entry.w : ((spec.h ?? 1) * STANDING_HEIGHT) / entry.h;
+  return (entry.h * fit * entry.adj.s - entry.adj.dy) * char.size;
+}
+
+/**
  * Dessine le sprite d'une pose, pieds posés en (x, y).
  * @returns false si le personnage n'a aucune image utilisable
  */

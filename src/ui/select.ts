@@ -5,6 +5,7 @@ import { pick } from '../core/math';
 import { roster } from '../data/roster';
 import type { Character } from '../data/types';
 import { drawCharacter, drawPortrait } from '../render/character-draw';
+import { spriteTop } from '../render/sprite-draw';
 import { burstLines, tones } from '../render/motion';
 import { arcadeText, bands } from '../render/text';
 import { game, type GameMode } from './actions';
@@ -42,11 +43,21 @@ interface Selection {
 
 const PREVIEW_W = 360;
 const PREVIEW_H = 600;
+/** Zoom maximal de l'aperçu : un personnage debout occupe presque toute la hauteur. */
+const PREVIEW_SCALE = (PREVIEW_H * 0.9) / 200;
+/** Marge gardée au-dessus du personnage, en pixels de l'aperçu. */
+const PREVIEW_HEADROOM = 18;
+
 /**
- * Zoom de l'aperçu : un personnage de taille normale occupe presque toute la hauteur, et un « grand »
- * (taille 1,12) tient encore en entier, bras levé compris pour la pose de victoire.
+ * Zoom de l'aperçu d'un personnage : le plus grand possible, mais réduit s'il le faut pour que sa pose
+ * de garde ET sa pose de victoire (bras levé) tiennent en entier, quelle que soit sa taille.
  */
-const PREVIEW_SCALE = (PREVIEW_H * 0.76) / 200;
+function previewScale(char: Character): number {
+  // sans images, le pantin : sa hauteur debout, plus le bras levé de la victoire
+  const top =
+    Math.max(spriteTop(char, 'idle'), spriteTop(char, 'win')) || 200 * 1.15 * char.look.h * char.size;
+  return Math.min(PREVIEW_SCALE, (PREVIEW_H - 8 - PREVIEW_HEADROOM) / top);
+}
 /** Délai avant de lancer le combat, le temps de voir la pose de victoire. */
 const CONFIRM_DELAY_MS = 650;
 
@@ -183,16 +194,17 @@ function drawPreview(side: 0 | 1): void {
   } else if (who) {
     const facing = side ? -1 : 1;
     const pose = s.picks[side] ? 'win' : 'idle';
+    const scale = previewScale(who);
     if (s.picks[side]) {
       // choix validé : rayons derrière lui, et ses échos colorés qui s'écartent le temps du flash
       const colors = tones(who.color);
       burstLines(ctx, PREVIEW_W / 2, PREVIEW_H * 0.45, time, colors[0]!, 150);
       for (let i = 3; i >= 1 && s.flash[side] > 0; i--) {
         const x = PREVIEW_W / 2 - facing * s.flash[side] * 5 * i;
-        drawCharacter(ctx, who, pose, x, PREVIEW_H - 8, facing, PREVIEW_SCALE, 0, { silhouette: colors[i]! });
+        drawCharacter(ctx, who, pose, x, PREVIEW_H - 8, facing, scale, 0, { silhouette: colors[i]! });
       }
     }
-    drawCharacter(ctx, who, pose, PREVIEW_W / 2, PREVIEW_H - 8, facing, PREVIEW_SCALE, time, {
+    drawCharacter(ctx, who, pose, PREVIEW_W / 2, PREVIEW_H - 8, facing, scale, time, {
       flash: s.flash[side] > 8,
     });
   }
