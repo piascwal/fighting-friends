@@ -154,6 +154,19 @@ function drawDisc(ctx: Ctx, w: number, h: number, age: number): void {
   ctx.fillRect(-w * 0.35, -1.5, w * 0.7, 3);
 }
 
+/** Balle de padel : ronde, jaune fluo, avec sa couture. */
+function drawBall(ctx: Ctx, w: number, h: number): void {
+  ctx.fillStyle = '#d8ff3a';
+  ctx.beginPath();
+  ctx.arc(0, 0, Math.min(w, h) / 2, 0, 7);
+  ctx.fill();
+  ctx.strokeStyle = '#f2fff0';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(-w * 0.4, 0, w * 0.4, -1, 1);
+  ctx.stroke();
+}
+
 /** Animal de compagnie (en attendant ses images) : silhouette de chien qui galope. */
 function drawCompanion(ctx: Ctx, w: number, h: number, age: number): void {
   const stride = Math.floor(age / 5) % 2 ? 0.18 : -0.18;
@@ -264,5 +277,7 @@ export function drawProjectileShape(ctx: Ctx, look: ProjectileLook, w: number, h
       return drawPuck(ctx, w, h, age);
     case 'companion':
       return drawCompanion(ctx, w, h, age);
+    case 'ball':
+      return drawBall(ctx, w, h);
   }
 }

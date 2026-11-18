@@ -257,6 +257,48 @@ export const SPECIAL_POSES = {
     { h: 1, ax: 0.45, fb: ['win', 'idle'] },
   ),
 
+  // ---------- padel ----------
+  sp_racket_drive: pose(
+    'Frappe de raquette',
+    'racketDrive',
+    "frappe un coup droit avec une raquette de padel (raquette pleine et perforée, sans cordage) tenue d'une main : bras tendu vers l'avant à hauteur de taille, raquette à l'horizontale qui vient de frapper, l'autre bras tiré en arrière pour l'équilibre, jambes en fente (ne dessine PAS la balle)",
+    { h: 0.95, ax: 0.4, fb: ['punch_heavy', 'idle'] },
+  ),
+  sp_racket_smash: pose(
+    'Smash',
+    'racketSmash',
+    "smash de padel en plein saut (aucun sol visible) : corps cambré, raquette de padel (pleine et perforée, sans cordage) levée bien au-dessus de la tête et qui s'abat vers l'avant, l'autre bras tendu vers le haut pour viser, genoux repliés",
+    { h: 1.1, ax: 0.45, fb: ['jump_punch', 'uppercut', 'idle'] },
+  ),
+
+  // ---------- yogi mystique ----------
+  sp_mudra: pose(
+    'Mudra',
+    'mudra',
+    "en équilibre sur une jambe, l'autre pied posé contre l'intérieur du genou (posture de l'arbre), les deux mains jointes devant lui puis ouvertes vers l'avant en mudra, doigts en position rituelle, yeux mi-clos, expression sereine et concentrée (ne dessine PAS l'énergie)",
+    { h: 1, ax: 0.45, fb: ['punch_light', 'idle'] },
+  ),
+  sp_levitate: pose(
+    'Lévitation',
+    'levitate',
+    'en lévitation au-dessus du sol (aucun sol visible) : assis en tailleur en position du lotus, dos droit, les deux bras écartés paumes ouvertes vers le bas, yeux fermés, cheveux et vêtements soulevés par une force invisible',
+    { h: 0.65, ax: 0.5, fb: ['crouch', 'idle'] },
+  ),
+
+  // ---------- danseuse de boîte de nuit ----------
+  sp_pirouette: pose(
+    'Pirouette',
+    'pirouette',
+    "pirouette de danse en tournant sur la pointe d'un pied : l'autre jambe tendue en arrière et levée haut, les deux bras levés au-dessus de la tête, robe à paillettes qui s'évase et tourne autour d'elle, cheveux qui volent",
+    { h: 1.05, ax: 0.5, fb: ['kick_heavy', 'idle'] },
+  ),
+  sp_pole_spin: pose(
+    'Pole dance',
+    'poleSpin',
+    "figure de pole dance : agrippée d'une main en haut à une barre verticale chromée qui va du sol jusqu'en haut de l'image (la barre fait partie du dessin), corps en l'air presque à l'horizontale, jambes tendues qui fouettent vers l'avant comme un coup de pied circulaire, robe à paillettes, cheveux qui volent",
+    { h: 1.15, ax: 0.4, fb: ['kick_heavy', 'idle'] },
+  ),
+
   // ---------- animal de compagnie (style Dresseur) ----------
   pj_pet_idle: pet(
     'Animal au repos',
@@ -320,6 +362,22 @@ export const SPECIAL_POSES = {
   pj_light: projectile(
     'Éclat de lumière',
     'un éclat de lumière blanche et dorée en forme de losange, avec une courte traînée vers la gauche',
+  ),
+  pj_padel_ball: projectile(
+    'Balle de padel',
+    'une balle de padel jaune fluo vue de côté, lancée à toute vitesse, avec une courte traînée de vent et de vitesse vers la gauche',
+  ),
+  pj_mandala: projectile(
+    'Mandala',
+    "un mandala d'énergie spirituelle rond et lumineux, motifs sacrés dorés et violets qui tournent, avec un léger halo",
+  ),
+  pj_spirit: projectile(
+    'Esprit totem',
+    "l'esprit d'un animal totem (un grand aigle aux ailes déployées) fait de lumière spirituelle translucide bleue et dorée, qui fonce vers la droite",
+  ),
+  pj_spotlight: projectile(
+    'Projecteur',
+    "un faisceau de projecteur de boîte de nuit, colonne de lumière verticale rose et violette qui tombe du plafond jusqu'au sol, pailletée d'éclats de boule à facettes, très haute et étroite",
   ),
   pj_beam: projectile(
     'Rayon',

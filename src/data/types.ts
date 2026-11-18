@@ -58,7 +58,8 @@ export type ProjectileLook =
   | 'light'
   | 'beam'
   | 'puck'
-  | 'companion';
+  | 'companion'
+  | 'ball';
 
 export interface ProjectileDef {
   /** Frame d'apparition. */
@@ -200,7 +201,10 @@ export type StyleId =
   | 'beam'
   | 'monk'
   | 'hockey'
-  | 'trainer';
+  | 'trainer'
+  | 'padel'
+  | 'yogi'
+  | 'dancer';
 
 /** Capacités d'un style, affichées pour aider à choisir. */
 export type StyleTag =

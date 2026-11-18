@@ -22,6 +22,9 @@ import { storm } from './storm';
 import { tech } from './tech';
 import { tiger } from './tiger';
 import { trainer } from './trainer';
+import { dancer } from './dancer';
+import { padel } from './padel';
+import { yogi } from './yogi';
 import { trapper } from './trapper';
 
 export { DEFAULT_LOOKS } from './looks';
@@ -49,5 +52,8 @@ export const STYLES: Record<StyleId, StyleDef> = {
   monk,
   hockey,
   trainer,
+  padel,
+  yogi,
+  dancer,
 };
 export const STYLE_LIST: readonly StyleDef[] = Object.values(STYLES);
