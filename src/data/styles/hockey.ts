@@ -3,6 +3,7 @@
    le maillot et cogne. */
 import { hit, moveSet, special, superMove } from '../move-builders';
 import { NORMALS } from '../normals';
+import { SQUAT } from '../sprite-poses';
 import type { AnimKey, HitDef, StyleDef, StyleGear } from '../types';
 
 /** Lancer frappé : crosse armée haut derrière, frappe, le palet part au ras de la glace. */
@@ -88,12 +89,10 @@ const STICK: StyleGear = {
       "en train d'avancer, sa crosse de hockey tenue à deux mains devant lui, lame au ras du sol : grand pas en avant, jambe avant loin devant, jambe arrière tendue derrière",
     walk2:
       "en train d'avancer, sa crosse de hockey tenue à deux mains devant lui, lame au ras du sol : jambes croisées en plein milieu d'un pas (la jambe arrière passe devant)",
-    crouch:
-      "accroupi TRÈS bas, comme un combattant qui esquive en se baissant : genoux complètement fléchis, fesses presque posées sur les talons, genou de la jambe arrière quasiment au sol, buste penché vers l'avant, sa crosse de hockey tenue à deux mains devant lui, lame posée au sol",
+    crouch: `${SQUAT}, buste penché vers l'avant, sa crosse de hockey tenue à deux mains devant lui, lame posée au sol`,
     block:
       "en train de bloquer un coup : debout, sa crosse de hockey tenue à deux mains à l'horizontale devant le visage, comme une barrière, buste légèrement en retrait",
-    crouch_block:
-      "accroupi TRÈS bas en train de bloquer (fesses presque posées sur les talons, genou arrière quasiment au sol) : sa crosse de hockey tenue à deux mains à l'horizontale devant le visage, comme une barrière, tête rentrée",
+    crouch_block: `${SQUAT}, en train de bloquer : sa crosse de hockey tenue à deux mains à l'horizontale devant le visage, comme une barrière, tête rentrée`,
     super:
       'il se prépare à la bagarre : il vient de jeter sa crosse et ses gants, qui tombent à ses pieds ; jambes écartées, poings nus serrés et levés, il hurle',
     win: "pose de victoire : debout bien droit, il brandit sa crosse de hockey à bout de bras au-dessus de la tête, l'autre poing serré, grand sourire triomphant",

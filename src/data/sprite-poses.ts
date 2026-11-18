@@ -59,6 +59,14 @@ export interface SpritePoseSpec {
 }
 
 /** Poses communes, dans l'ordre d'affichage. */
+/**
+ * Accroupi : les IA d'images ont tendance à ne faire qu'un demi-accroupi (genoux à peine pliés). On décrit
+ * donc la posture par des repères qu'elles ne peuvent pas contourner : cuisses contre les mollets,
+ * genoux au niveau de la poitrine, silhouette presque aussi large que haute.
+ */
+export const SQUAT =
+  'accroupi au maximum, en squat complet comme un receveur de baseball : fesses posées sur les talons, cuisses plaquées contre les mollets, genoux remontés à hauteur de la poitrine, genou de la jambe arrière qui touche presque le sol ; sa tête arrive plus bas que sa ceinture quand il est debout, et sa silhouette est presque aussi large que haute (PAS un demi-accroupi, PAS les jambes à moitié pliées, PAS le buste droit)';
+
 export const SPRITE_POSES: readonly (SpritePoseSpec & { key: CommonSpriteKey })[] = [
   {
     key: 'idle',
@@ -103,7 +111,7 @@ export const SPRITE_POSES: readonly (SpritePoseSpec & { key: CommonSpriteKey })[
     h: 0.62,
     ax: 0.5,
     fb: ['idle'],
-    desc: "accroupi TRÈS bas en garde de combat, comme un combattant qui esquive en se baissant : genoux complètement fléchis, fesses presque posées sur les talons, genou de la jambe arrière quasiment au sol, buste penché vers l'avant, tête rentrée dans les épaules, poings en garde devant le visage",
+    desc: `${SQUAT}, en garde de combat comme un combattant qui esquive en se baissant : buste penché vers l'avant, tête rentrée dans les épaules, poings en garde devant le visage`,
   },
   {
     key: 'jump',
@@ -130,7 +138,7 @@ export const SPRITE_POSES: readonly (SpritePoseSpec & { key: CommonSpriteKey })[
     h: 0.64,
     ax: 0.5,
     fb: ['crouch', 'block', 'idle'],
-    desc: 'accroupi TRÈS bas en train de bloquer (fesses presque posées sur les talons, genou arrière quasiment au sol) : les deux avant-bras relevés à la verticale devant le visage, tête rentrée',
+    desc: `${SQUAT}, en train de bloquer : les deux avant-bras relevés à la verticale devant le visage, tête rentrée dans les épaules`,
   },
   {
     key: 'punch_light',
@@ -175,7 +183,7 @@ export const SPRITE_POSES: readonly (SpritePoseSpec & { key: CommonSpriteKey })[
     h: 0.61,
     ax: 0.38,
     fb: ['crouch', 'punch_light', 'idle'],
-    desc: "accroupi TRÈS bas (fesses presque posées sur les talons, genou arrière quasiment au sol) en donnant un coup de poing : bras avant complètement tendu à l'horizontale devant lui, à hauteur de ses épaules, l'autre poing en garde",
+    desc: `${SQUAT}, en donnant un coup de poing : bras avant complètement tendu à l'horizontale devant lui, à hauteur de ses épaules, l'autre poing en garde`,
   },
   {
     key: 'crouch_kick',

@@ -57,6 +57,11 @@ describe('prompts de génération des sprites', () => {
       expect(SPRITE_BY_KEY[key].h, key).toBeLessThan(0.8);
       expect(buildPrompt(ardan, key), key).toContain('POSTURE BASSE');
     }
+    // les trois postures accroupies imposent le squat complet, repères à l'appui
+    for (const key of ['crouch', 'crouch_block', 'crouch_punch'] as const) {
+      expect(buildPrompt(ardan, key), key).toContain('squat complet');
+      expect(buildPrompt(ardan, key), key).toContain('PAS un demi-accroupi');
+    }
   });
 
   it('une posture allongée se cadre en largeur', () => {
