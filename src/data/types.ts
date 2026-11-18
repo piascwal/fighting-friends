@@ -233,6 +233,16 @@ export interface StyleGear {
   poses?: Partial<Record<SpriteKey, string>>;
 }
 
+/** Animal de compagnie d'un style (Dresseur). */
+export interface Companion {
+  /** L'animal au repos (à côté de son maître à la sélection). */
+  idle: SpriteKey;
+  /** Images de course, jouées en boucle. */
+  run: readonly SpriteKey[];
+  /** Pose de victoire du personnage, l'animal dans les bras : remplace la pose « win » commune. */
+  win: SpriteKey;
+}
+
 /** Un style de combat : statistiques + jeu de coups. Plusieurs personnages peuvent partager un style. */
 export interface StyleDef {
   id: StyleId;
@@ -248,6 +258,8 @@ export interface StyleDef {
   moves: MoveSet;
   /** Accessoire porté en permanence (crosse…) : les prompts des poses communes en tiennent compte. */
   gear?: StyleGear;
+  /** Animal de compagnie : présent à la sélection et à la victoire, et ses images (voir Companion). */
+  companion?: Companion;
   /** Préférences de la console quand elle joue ce style. */
   ai: { zoner: number; antiAir: MoveId; ender: MoveId };
 }

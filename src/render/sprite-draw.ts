@@ -83,6 +83,8 @@ export function drawSprite(
   facing: number,
   opt: SpriteOptions = {},
 ): boolean {
+  // style à animal de compagnie : sa victoire se fait l'animal dans les bras
+  if (pose === 'win' && char.style.companion) pose = char.style.companion.win;
   const found = resolveSprite(char.id, pose);
   if (!found) return false;
   const { entry } = found;

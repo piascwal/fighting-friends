@@ -104,8 +104,12 @@ export function buildPrompt(char: Character, key: SpriteKey): string {
   const desc = styledDescription(char.style, key);
   if (spec.stage) return buildStagePrompt(char, '');
   if (spec.pet) {
+    const reference =
+      key === 'pj_pet_idle'
+        ? `Je te joins une ou plusieurs PHOTOS de l'animal de compagnie du personnage « ${char.name} », et l'image de référence de « ${char.name} » : elle sert UNIQUEMENT de modèle de style (ne dessine pas le personnage). L'animal doit avoir la taille réaliste qu'il aurait à côté de ce personnage. `
+        : `Je te joins l'image « Animal au repos » de l'animal de compagnie du personnage « ${char.name} » (ou à défaut une photo de l'animal) et l'image de référence de « ${char.name} » pour le style. L'animal doit être exactement le même. `;
     return (
-      `Je te joins une PHOTO de l'animal de compagnie du personnage « ${char.name} », et l'image de référence de « ${char.name} » pour le style. ` +
+      reference +
       `Génère UNE SEULE image de cet animal, EN ENTIER, vu de profil et tourné vers la DROITE, ${desc}. ` +
       `Reprends fidèlement l'animal de la photo (race, taille, pelage, couleurs, taches, collier) pour qu'on le reconnaisse. Il n'est jamais menaçant : c'est un compagnon joyeux qui vient jouer. ` +
       `Aucun personnage, aucun humain, aucun effet, aucun texte. L'animal est centré et occupe environ 80 % de la largeur de l'image. ${STYLE} ${BACKGROUND} ${FORMAT}`
@@ -176,7 +180,8 @@ export function moveSprites(move: MoveDef): SpriteKey[] {
 /** Images propres à un style : celles de ses coups spéciaux et de ses projectiles, dans l'ordre des coups. */
 export function styleSprites(style: StyleDef): SpriteKey[] {
   const ids = ['s1l', 's1h', 's2l', 's2h', 'super'] as const;
-  return [...new Set(ids.flatMap((id) => moveSprites(style.moves[id])))];
+  const pet = style.companion ? [style.companion.idle, style.companion.win] : [];
+  return [...new Set([...pet, ...ids.flatMap((id) => moveSprites(style.moves[id]))])];
 }
 
 /** Les images demandées pour ce personnage : poses communes (décor compris), puis celles de son style. */

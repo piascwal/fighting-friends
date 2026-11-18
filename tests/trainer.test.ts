@@ -1,5 +1,8 @@
 /* Style Dresseur : l'animal de compagnie arrive, frappe, puis repart sans disparaître d'un coup. */
 import { describe, expect, it } from 'vitest';
+import { buildPrompt, styleSprites } from '../src/data/prompts';
+import { makeCharacter } from '../src/data/roster';
+import { STYLES } from '../src/data/styles';
 import type { MoveId } from '../src/data/types';
 import { createTraining } from './harness';
 
@@ -42,5 +45,16 @@ describe('dresseur', () => {
   it("le super : l'animal frappe plusieurs fois", () => {
     const { hits } = follow('super', 220);
     expect(hits).toBeGreaterThanOrEqual(3);
+  });
+
+  it("demande l'animal au repos et la victoire l'animal dans les bras", () => {
+    const sprites = styleSprites(STYLES.trainer);
+    for (const key of ['pj_pet_idle', 'sp_win_pet', 'pj_pet_run1', 'pj_pet_run2', 'pj_pet_leap'] as const) {
+      expect(sprites).toContain(key);
+    }
+    const clem = makeCharacter({ id: 'clem', name: 'CLEM', style: 'trainer', color: '#fff' });
+    expect(buildPrompt(clem, 'pj_pet_idle')).toContain('PHOTOS');
+    expect(buildPrompt(clem, 'pj_pet_leap')).toContain('Animal au repos');
+    expect(buildPrompt(clem, 'sp_win_pet')).toContain('dans ses bras');
   });
 });

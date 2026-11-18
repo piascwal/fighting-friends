@@ -118,5 +118,6 @@ export const trainer: StyleDef = {
     s2h: leap(true),
     super: bestFriends(),
   }),
+  companion: { idle: 'pj_pet_idle', run: ['pj_pet_run1', 'pj_pet_run2'], win: 'sp_win_pet' },
   ai: { zoner: 0.55, antiAir: 'chp', ender: 's1h' },
 };

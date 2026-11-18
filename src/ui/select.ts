@@ -5,6 +5,7 @@ import { pick } from '../core/math';
 import { roster } from '../data/roster';
 import type { Character } from '../data/types';
 import { drawCharacter, drawPortrait } from '../render/character-draw';
+import { drawCompanion, holdsCompanion } from '../render/companion-draw';
 import { spriteTop } from '../render/sprite-draw';
 import { burstLines, tones } from '../render/motion';
 import { arcadeText, bands } from '../render/text';
@@ -207,6 +208,20 @@ function drawPreview(side: 0 | 1): void {
     drawCharacter(ctx, who, pose, PREVIEW_W / 2, PREVIEW_H - 8, facing, scale, time, {
       flash: s.flash[side] > 8,
     });
+    // animal de compagnie : assis à ses pieds (une fois choisi, il est dans ses bras s'il en a l'image)
+    if (who.style.companion && !(s.picks[side] && holdsCompanion(who))) {
+      const companion = who.style.companion;
+      drawCompanion(
+        ctx,
+        who,
+        companion.idle,
+        PREVIEW_W / 2 + facing * 70,
+        PREVIEW_H - 8,
+        facing,
+        scale * 0.8,
+        time,
+      );
+    }
   }
   if (s.flash[side] > 0) {
     ctx.fillStyle = `rgba(255,255,255,${s.flash[side] / 20})`;

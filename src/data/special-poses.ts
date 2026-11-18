@@ -250,7 +250,18 @@ export const SPECIAL_POSES = {
     { h: 1.1, ax: 0.45, fb: ['uppercut', 'idle'] },
   ),
 
+  sp_win_pet: pose(
+    "Victoire avec l'animal",
+    'win',
+    "pose de victoire en tenant son animal de compagnie dans ses bras, serré contre sa poitrine (joins aussi l'image « Animal au repos » : l'animal doit être exactement le même) : debout, grand sourire, la tête penchée vers l'animal, qui a l'air ravi, langue sortie",
+    { h: 1, ax: 0.45, fb: ['win', 'idle'] },
+  ),
+
   // ---------- animal de compagnie (style Dresseur) ----------
+  pj_pet_idle: pet(
+    'Animal au repos',
+    "debout sur ses quatre pattes, tête levée, oreilles dressées, gueule entrouverte et langue légèrement sortie, queue relevée qui remue : l'air joyeux et joueur",
+  ),
   pj_pet_run1: pet(
     'Animal qui court (1)',
     "en pleine course au galop : pattes avant tendues loin devant, pattes arrière tendues loin derrière, corps allongé, oreilles au vent, langue pendante, l'air joueur et joyeux",

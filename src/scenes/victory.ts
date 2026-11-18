@@ -6,6 +6,7 @@ import { VIEW_H, VIEW_W } from '../core/constants';
 import { easeOut, rand } from '../core/math';
 import type { Character } from '../data/types';
 import { drawCharacter } from '../render/character-draw';
+import { companionRunKey, drawCompanion, holdsCompanion } from '../render/companion-draw';
 import { Fx } from '../render/fx';
 import {
   PixelLayer,
@@ -25,6 +26,8 @@ type Ctx = CanvasRenderingContext2D;
 /** Frame où le vainqueur se pose (flash, secousse). */
 const LAND = 22;
 const QUOTE_START = 40;
+/** Frame où l'animal de compagnie rejoint son maître. */
+const COMPANION_JOIN = 52;
 const HERO_X = 300;
 const TEXT_X = 668;
 
@@ -72,19 +75,42 @@ export class Victory implements Scene {
     g.fill();
   }
 
+  /**
+   * Animal de compagnie : il accourt depuis le bord de l'écran et rejoint son maître, qui le prend dans
+   * ses bras (pose de victoire). Sans cette image, il s'assoit à ses pieds.
+   * @returns la pose à donner au vainqueur à cet instant
+   */
+  private drawCompanionRun(ctx: Ctx): 'idle' | 'win' {
+    const { t, winner } = this;
+    if (!winner.style.companion) return 'win';
+    const joined = t >= COMPANION_JOIN;
+    if (!joined) {
+      const k = Math.max(0, (t - LAND) / (COMPANION_JOIN - LAND));
+      const x = -200 + k * (HERO_X + 160);
+      drawCompanion(ctx, winner, companionRunKey(winner, t), x, 514, 1, 2, t);
+    } else if (!holdsCompanion(winner)) {
+      drawCompanion(ctx, winner, winner.style.companion.idle, HERO_X + 110, 514, 1, 2, t);
+    }
+    return joined ? 'win' : 'idle';
+  }
+
   private drawHero(ctx: Ctx): void {
     const { t, winner } = this;
     const arrive = easeOut(t / LAND);
     const x = -260 + arrive * (HERO_X + 260);
     const colors = tones(winner.color);
+    const pose = this.drawCompanionRun(ctx);
+    // l'animal saute dans ses bras : petit flash à ce moment-là
+    const caught = winner.style.companion && t >= COMPANION_JOIN && t < COMPANION_JOIN + 3;
     // échos : en file derrière lui à l'arrivée, puis projetés vers l'avant quand il se pose
     const spread = t < LAND ? (1 - arrive) * 120 + 14 : (1 - easeOut((t - LAND) / 16)) * -60;
     if (Math.abs(spread) > 2) {
       for (let i = 3; i >= 1; i--) {
-        drawCharacter(ctx, winner, 'win', x - spread * i, 514, 1, 2, 0, { silhouette: colors[i]! });
+        drawCharacter(ctx, winner, pose, x - spread * i, 514, 1, 2, 0, { silhouette: colors[i]! });
       }
     }
-    drawCharacter(ctx, winner, 'win', x, 514, 1, 2, t, { flash: t >= LAND && t < LAND + 3 });
+    const flash = (t >= LAND && t < LAND + 3) || !!caught;
+    drawCharacter(ctx, winner, pose, x, 514, 1, 2, t, { flash });
   }
 
   private drawTitles(g: Ctx): void {
