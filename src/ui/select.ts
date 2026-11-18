@@ -38,6 +38,8 @@ interface Selection {
   picks: [Character | null, Character | null];
   /** Case survolée par chaque côté ; la dernière case (index = roster.length) est « au hasard ». */
   cursor: [number, number];
+  /** En réseau : l'adversaire survole une case (son curseur est cursor[1]). */
+  remoteHover?: boolean;
   /** Frames de flash restantes après une validation. */
   flash: [number, number];
 }
@@ -69,6 +71,8 @@ let time = 0;
 function shown(side: 0 | 1): Character | 'random' | null {
   const s = sel!;
   if (s.picks[side]) return s.picks[side];
+  // en réseau, l'adversaire est montré sur la case qu'il survole, avant même qu'il ait choisi
+  if (s.mode === 'lan' && side === 1) return s.remoteHover ? (roster[s.cursor[1]] ?? 'random') : null;
   if (s.step !== side) return null;
   return roster[s.cursor[side]] ?? 'random';
 }
@@ -78,9 +82,11 @@ function refresh(): void {
   const duo = s.mode === 'duo';
   $('#selTitle').textContent =
     s.mode === 'lan'
-      ? s.picks[0] && !s.picks[1]
-        ? "EN ATTENTE DE L'ADVERSAIRE…"
-        : 'CHOISIS TON COMBATTANT'
+      ? s.picks[0] && s.picks[1]
+        ? "C'EST PARTI !"
+        : s.picks[0]
+          ? "L'ADVERSAIRE CHOISIT…"
+          : 'CHOISIS TON COMBATTANT'
       : s.step === 0
         ? duo
           ? 'JOUEUR 1 : CHOISIS TON COMBATTANT'
@@ -90,7 +96,10 @@ function refresh(): void {
           : "CHOISIS L'ADVERSAIRE";
   $$('#selGrid .tile').forEach((tile, i) => {
     tile.classList.toggle('c0', s.cursor[0] === i && (s.step === 0 || !!s.picks[0]));
-    tile.classList.toggle('c1', s.step === 1 && s.cursor[1] === i);
+    const remote = s.mode === 'lan' ? !!s.remoteHover || !!s.picks[1] : s.step === 1;
+    tile.classList.toggle('c1', remote && s.cursor[1] === i);
+    // en réseau, la case de l'adversaire clignote tant qu'il n'a pas validé
+    tile.classList.toggle('locked', s.mode === 'lan' && !!s.picks[1] && s.cursor[1] === i);
   });
   for (const side of [0, 1] as const) {
     const who = shown(side);
@@ -99,7 +108,7 @@ function refresh(): void {
     $('.pname', box).textContent =
       who === 'random' ? 'AU HASARD' : who ? who.name : hiddenOpponents ? '? ? ?' : '';
     box.style.setProperty('--c', who && who !== 'random' ? who.color : '#555555');
-    box.classList.toggle('active', s.step === side);
+    box.classList.toggle('active', s.mode === 'lan' ? side === 0 || !!who : s.step === side);
   }
 }
 
@@ -138,6 +147,13 @@ function confirm(): void {
   }, CONFIRM_DELAY_MS);
 }
 
+/** En réseau : prévient l'autre appareil de la case survolée (tant qu'on n'a pas validé). */
+function notifyHover(): void {
+  const s = sel!;
+  if (s.mode !== 'lan' || s.picks[0]) return;
+  game().lanHover(roster[s.cursor[0]]?.id ?? '?');
+}
+
 function buildTile(char: Character | undefined, index: number): HTMLButtonElement {
   const tile = document.createElement('button');
   tile.className = 'tile';
@@ -160,12 +176,14 @@ function buildTile(char: Character | undefined, index: number): HTMLButtonElemen
     s.cursor[s.step] = index;
     playSfx('move');
     refresh();
+    notifyHover();
   });
   tile.addEventListener('focus', () => {
     const s = sel!;
     if (pointerDown || s.cursor[s.step] === index) return;
     s.cursor[s.step] = index;
     refresh();
+    notifyHover();
   });
   return tile;
 }
@@ -252,7 +270,22 @@ export function tickSelect(): void {
 export function setRemotePick(char: Character | null): void {
   if (!sel || sel.mode !== 'lan') return;
   sel.picks[1] = char;
-  if (char) sel.flash[1] = 14;
+  if (char) {
+    sel.flash[1] = 14;
+    const index = roster.findIndex((c) => c.id === char.id);
+    if (index >= 0) sel.cursor[1] = index;
+    playSfx('ok');
+  }
+  refresh();
+}
+
+/** Combat en réseau : la case que l'adversaire survole (identifiant, « ? » pour « au hasard »). */
+export function setRemoteHover(id: string): void {
+  if (!sel || sel.mode !== 'lan' || sel.picks[1]) return;
+  const index = id === '?' ? roster.length : roster.findIndex((c) => c.id === id);
+  // un personnage que cet appareil ne connaît pas : on ne montre rien de précis
+  sel.remoteHover = index >= 0;
+  if (index >= 0) sel.cursor[1] = index;
   refresh();
 }
 

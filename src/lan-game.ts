@@ -14,7 +14,8 @@ import { NetFightScene } from './scenes/net-fight-scene';
 import type { Scene } from './scenes/scene';
 import { Versus } from './scenes/versus';
 import { Victory } from './scenes/victory';
-import { hideScreens, openSelect, setRemotePick, showResult, toast, wipe } from './ui';
+import { hideScreens, openSelect, setRemoteHover, setRemotePick, showResult, toast, wipe } from './ui';
+import { roster } from './data/roster';
 
 /** Ce dont la partie en réseau a besoin du jeu. */
 export interface LanHost {
@@ -79,6 +80,7 @@ export class LanGame {
     };
     link.sendCtrl({ t: 'hello', v: PROTOCOL, name: playerName });
     openSelect('lan');
+    this.hover(roster[0]?.id ?? '?');
   }
 
   private handle(msg: NetMsg): void {
@@ -95,6 +97,8 @@ export class LanGame {
           );
         });
         return;
+      case 'hover':
+        return setRemoteHover(msg.id);
       case 'pick':
         this.theirs = msg.c;
         setRemotePick(charFrom(msg.c));
@@ -118,6 +122,11 @@ export class LanGame {
         }
         return;
     }
+  }
+
+  /** Le joueur de cet appareil passe sur une case : l'autre le voit hésiter. */
+  hover(id: string): void {
+    this.link.sendCtrl({ t: 'hover', id });
   }
 
   /** Le joueur de cet appareil a choisi son personnage. */
@@ -200,6 +209,7 @@ export class LanGame {
     this.mine = this.theirs = this.fight = null;
     this.game.attract();
     openSelect('lan');
+    this.hover(roster[0]?.id ?? '?');
   }
 
   /** Quitte la partie ; `notify` : prévenir l'autre appareil. */

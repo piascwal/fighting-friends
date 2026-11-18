@@ -25,6 +25,8 @@ export type StageSpec = { char: string } | { index: number };
 export type NetMsg =
   | { t: 'hello'; v: number; name: string }
   | { t: 'pick'; c: CharSpec }
+  /** Case survolée pendant le choix (identifiant du personnage, « ? » pour « au hasard »). */
+  | { t: 'hover'; id: string }
   | { t: 'start'; p: [CharSpec, CharSpec]; scales: [number, number]; stage: StageSpec; rounds: number }
   | { t: 'again' }
   | { t: 'reselect' }
@@ -62,6 +64,8 @@ export function readMsg(o: unknown): NetMsg | null {
   switch (m.t) {
     case 'hello':
       return isNum(m.v, 0, 1000) && isText(m.name, 14) ? { t: 'hello', v: m.v, name: m.name } : null;
+    case 'hover':
+      return isText(m.id, 40) && /^([a-z0-9-]+|\?)$/.test(m.id) ? { t: 'hover', id: m.id } : null;
     case 'pick': {
       const c = readChar(m.c);
       return c ? { t: 'pick', c } : null;

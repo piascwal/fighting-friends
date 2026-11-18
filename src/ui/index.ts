@@ -9,14 +9,14 @@ import { MOVES_HTML, backFromMoves, initMoves, openMoves } from './moves';
 import { OPTIONS_HTML, initOptions, openOptions } from './options';
 import { closePoseModal, isPoseModalOpen, tickPoseModal } from './pose-modal';
 import { currentScreen, hideScreens, mountScreens, showScreen } from './screens';
-import { LAN_HTML, initLan, openLan } from './lan';
+import { LAN_HTML, backFromLan, initLan, openLan } from './lan';
 import { SELECT_HTML, backFromSelect, initSelect, openSelect, tickSelect } from './select';
 import { resetTitle, tickTitle } from './title-fx';
 
 export type { GameMode, UiActions } from './actions';
 export { showResult } from './menus';
 export { currentScreen, hideScreens, showScreen } from './screens';
-export { openSelect, setRemotePick } from './select';
+export { openSelect, setRemoteHover, setRemotePick } from './select';
 export { toast } from './dom';
 export { checkForUpdate } from './update-banner';
 
@@ -37,7 +37,7 @@ function goBack(screen: string): void {
   if (screen === 'chars' && isPoseModalOpen()) closePoseModal();
   else if (screen === 'select') backFromSelect();
   else if (screen === 'moves') backFromMoves();
-  else if (screen === 'lan') $('#lanBack').click();
+  else if (screen === 'lan') backFromLan();
   else if (screen === 'chars') $('#chBack').click();
   else if (screen === 'options') $('#optBack').click();
 }

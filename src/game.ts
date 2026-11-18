@@ -131,6 +131,10 @@ class Game implements UiActions {
     );
   }
 
+  lanHover(id: string): void {
+    this.lan?.hover(id);
+  }
+
   lanPicked(char: Character): void {
     this.lan?.picked(char);
   }

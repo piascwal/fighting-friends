@@ -17,6 +17,8 @@ export interface UiActions {
   currentPlayer(): Character | null;
   /** Deux joueurs sur le même Wi-Fi : la liaison est établie (`host` : cet appareil a créé la partie). */
   startLan(link: Link, host: boolean): void;
+  /** Combat en réseau : le joueur de cet appareil passe sur une case (identifiant, « ? » : au hasard). */
+  lanHover(id: string): void;
   /** Combat en réseau : le joueur de cet appareil a choisi son personnage. */
   lanPicked(char: Character): void;
   /** Quitte le combat en réseau (prévient l'autre appareil). */

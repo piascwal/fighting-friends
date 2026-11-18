@@ -1270,9 +1270,57 @@ html:not([data-started]) #app::after {
 body.netfight #pauseBtn {
   display: none;
 }
-.lanMenu {
-  margin: 4px 0 8px;
+
+/* écran 2 JOUEURS : d'abord le choix (deux boutons de même poids), puis le formulaire Wi-Fi */
+#s-lan {
+  background: rgba(8, 4, 22, 0.9);
 }
-#lanGames .nav {
-  margin: 4px 8px 4px 0;
+.lanWifi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(6px, 2vmin, 12px);
+  width: min(92vw, 520px);
+  max-height: 82vh;
+  overflow-y: auto;
+}
+.lanWifi.hidden {
+  display: none;
+}
+.lanName {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--f);
+  font-style: italic;
+  color: var(--y);
+}
+#lanHost {
+  width: 100%;
+}
+.lanWifi h3 {
+  margin: 6px 0 0;
+}
+#lanGames {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lanGame {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+}
+.lanGame b {
+  font-size: 1.2em;
+}
+#lanStatus:empty {
+  display: none;
+}
+
+/* sélection en réseau : la case validée par l'adversaire reste allumée (son curseur ne clignote plus) */
+.tile.locked::after {
+  animation: none;
 }
