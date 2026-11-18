@@ -1,5 +1,6 @@
 /* Affichage des projectiles : sprite du personnage s'il en fournit un, sinon dessin selon l'élément. */
 import { spriteEntry, type SpriteEntry } from '../assets/sprite-store';
+import type { SpriteKey } from '../data/sprite-poses';
 import { GROUND_Y } from '../core/constants';
 import { pick, rand } from '../core/math';
 import { drawProjectileShape } from './projectile-shapes';
@@ -8,9 +9,26 @@ import type { Fx } from './fx';
 
 type Ctx = CanvasRenderingContext2D;
 
-/** Image du projectile fournie par le personnage, s'il y en a une. */
-export const projectileSprite = (p: Projectile) =>
-  p.def.sprite ? spriteEntry(p.owner.char.id, p.def.sprite) : undefined;
+/** Image à afficher : en course au sol, les images de course en boucle ; sinon l'image principale. */
+function spriteKeyOf(p: Projectile): SpriteKey | undefined {
+  const { def } = p;
+  const running = def.frames?.length && (!def.gravity || p.landed);
+  return running ? def.frames![Math.floor(p.age / RUN_FRAME) % def.frames!.length] : def.sprite;
+}
+
+/** Image du projectile fournie par le personnage, s'il y en a une (sinon une autre de ses images). */
+export function projectileSprite(p: Projectile): SpriteEntry | undefined {
+  const id = p.owner.char.id;
+  const keys = [spriteKeyOf(p), p.def.sprite, ...(p.def.frames ?? [])];
+  for (const key of keys) {
+    const entry = key && spriteEntry(id, key);
+    if (entry) return entry;
+  }
+  return undefined;
+}
+
+/** Durée d'une image de course, en frames. */
+const RUN_FRAME = 5;
 
 /**
  * Dessine un projectile. Avec une image fournie : dessinée telle quelle (elle est déjà en pixel art) ;
@@ -27,6 +45,11 @@ export function drawProjectile(ctx: Ctx, p: Projectile): void {
   const sprite = projectileSprite(p);
   if (sprite && def.look === 'beam') {
     drawBeamSprite(ctx, p, sprite, w, h);
+  } else if (sprite && def.look === 'companion') {
+    // animal : posé sur le bas de sa zone (ses pattes touchent le sol), sur toute sa longueur
+    const k = ((w * 1.35) / sprite.w) * sprite.adj.s;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(sprite.img, (-sprite.w * k) / 2, h / 2 - sprite.h * k, sprite.w * k, sprite.h * k);
   } else if (sprite) {
     // l'image couvre la zone de frappe : en hauteur pour les projectiles hauts (éclair, pic), en largeur sinon
     const k =

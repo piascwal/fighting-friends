@@ -93,6 +93,8 @@ const RAW = {
   windStick: { t: -14, hd: -6, aF: [-120, -80], aB: [-140, -100], lF: [30, 0], lB: [-30, -46] },
   slapshot: { t: 34, hd: 10, aF: [60, 40], aB: [50, 30], lF: [50, -6], lB: [-44, -60] },
   bodyCheck: { t: 30, hd: 6, aF: [70, 160], aB: [60, 150], lF: [50, -10], lB: [-46, -60] },
+  command: { t: 22, hd: 4, aF: [95, 92], aB: [40, 160], lF: [44, -4], lB: [-36, -52] },
+  signal: { t: -6, hd: -8, aF: [178, 180], aB: [20, 130], lF: [34, -24], lB: [-26, -52] },
   brawl: { t: 16, hd: -4, aF: [80, 88], aB: [100, 170], lF: [36, -2], lB: [-28, -44] },
 } satisfies Record<string, RawPose>;
 
@@ -229,6 +231,8 @@ export const POSE_SPRITE: Record<PoseName, SpriteKey> = {
   slapshot: 'sp_slapshot',
   bodyCheck: 'sp_body_check',
   brawl: 'sp_hockey_fight',
+  command: 'sp_call_pet',
+  signal: 'sp_signal_jump',
 };
 
 /** Postures de préparation : pendant un coup, elles gardent leur propre sprite au lieu de celui du coup. */

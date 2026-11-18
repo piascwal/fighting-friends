@@ -21,6 +21,8 @@ export interface Projectile {
   /** Frames avant de pouvoir retoucher (projectiles à touches multiples). */
   cooldown: number;
   age: number;
+  /** Lancé en cloche qui a atterri et continue au sol (voir ProjectileDef.landRun). */
+  landed: boolean;
 }
 
 const REHIT_DELAY = 7;
@@ -56,6 +58,7 @@ export function createProjectile(owner: Fighter, def: ProjectileDef): Projectile
     hits: def.hits ?? 1,
     cooldown: 0,
     age: 0,
+    landed: false,
   };
 }
 
@@ -70,11 +73,17 @@ export function projectileBox(p: Projectile): Rect {
 export function updateProjectiles(list: Projectile[], emit: Emit, onHit: OnHit): Projectile[] {
   for (const p of list) {
     p.x += p.vx;
-    if (p.def.gravity) {
-      // lancé en cloche : retombe, et se brise en touchant le sol
+    if (p.def.gravity && !p.landed) {
+      // lancé en cloche : retombe, et se brise en touchant le sol (ou y atterrit et repart en courant)
       p.vy += p.def.gravity;
       p.y += p.vy;
-      if (p.y >= GROUND_Y - 8) {
+      const floor = GROUND_Y - (p.def.h / 2) * p.owner.bodyScale;
+      if (p.def.landRun && p.y >= floor) {
+        p.y = floor;
+        p.vy = 0;
+        p.landed = true;
+        emit({ type: 'dust', x: p.x, y: GROUND_Y, dir: p.dir, count: 6 });
+      } else if (!p.def.landRun && p.y >= GROUND_Y - 8) {
         p.hits = 0;
         emit({ type: 'impact', x: p.x, y: GROUND_Y - 8, fx: p.def.fx, power: 40, dir: p.dir });
         emit({ type: 'sfx', name: 'block' });

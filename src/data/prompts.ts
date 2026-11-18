@@ -103,6 +103,14 @@ export function buildPrompt(char: Character, key: SpriteKey): string {
   const spec = SPRITE_BY_KEY[key];
   const desc = styledDescription(char.style, key);
   if (spec.stage) return buildStagePrompt(char, '');
+  if (spec.pet) {
+    return (
+      `Je te joins une PHOTO de l'animal de compagnie du personnage « ${char.name} », et l'image de référence de « ${char.name} » pour le style. ` +
+      `Génère UNE SEULE image de cet animal, EN ENTIER, vu de profil et tourné vers la DROITE, ${desc}. ` +
+      `Reprends fidèlement l'animal de la photo (race, taille, pelage, couleurs, taches, collier) pour qu'on le reconnaisse. Il n'est jamais menaçant : c'est un compagnon joyeux qui vient jouer. ` +
+      `Aucun personnage, aucun humain, aucun effet, aucun texte. L'animal est centré et occupe environ 80 % de la largeur de l'image. ${STYLE} ${BACKGROUND} ${FORMAT}`
+    );
+  }
   if (spec.proj) {
     return `Génère UNE SEULE image d'un effet de jeu de combat, dans l'esprit et la palette de couleurs du personnage « ${char.name} » de l'image de référence jointe, SANS aucun personnage : ${desc}. L'effet se déplace vers la DROITE, il est centré et occupe environ 70 % de l'image. ${STYLE} ${BACKGROUND} ${FORMAT}`;
   }
@@ -160,6 +168,7 @@ export function moveSprites(move: MoveDef): SpriteKey[] {
       if (isSpecialKey(key)) keys.add(key);
     }
     if (m.proj?.sprite) keys.add(m.proj.sprite);
+    for (const frame of m.proj?.frames ?? []) keys.add(frame);
   }
   return [...keys];
 }

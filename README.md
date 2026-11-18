@@ -59,12 +59,13 @@ copies locales sont effacées et les marqueurs disparaissent au chargement suiva
 Chaque personnage peut aussi avoir son **décor** : carte « Décor » dans l'écran des sprites, avec un prompt à
 compléter par la description de la scène et une image guide qui fixe le sol et la taille des combattants.
 
-**21 styles de combat**, chacun avec sa famille et ses capacités (affichées à la sélection) :
+**22 styles de combat**, chacun avec sa famille et ses capacités (affichées à la sélection) :
 Équilibré, Rapide, Lourd, Technique, Lutteur (prises imparables), Maître du contre, Givre, Voltigeur, Boxeur,
 Taekwondo, Tempête, Poing ivre, Soldat (coups à charge), Enchaîneur (frappe en trois temps), Tigre (posture
 à quatre sorties), Berserker (rage temporaire), Artificier (mines), Miroir (renvoie les projectiles), Énergiste
 (rayon), Moine (méditation qui soigne) et Hockeyeur (palet au ras du sol à bloquer accroupi, mise en
-échec avec armure, bagarre « gants jetés » en super). Changer le style d'un personnage ne fait perdre aucune image ; la liste
+échec avec armure, bagarre « gants jetés » en super) et Dresseur (son animal de compagnie fonce, bondit par-dessus lui et
+bouscule l'adversaire ; ses images se génèrent à partir d'une photo de l'animal). Changer le style d'un personnage ne fait perdre aucune image ; la liste
 des styles indique ceux qui sont déjà pris, et un nouveau personnage reçoit d'office un style libre.
 
 ## Installer le jeu sur un téléphone

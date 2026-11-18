@@ -14,6 +14,7 @@ interface SpecialSpec {
   ax?: number;
   fb: readonly CommonSpriteKey[];
   proj?: boolean;
+  pet?: boolean;
 }
 
 /** Posture de coup spécial : image du personnage, détourée comme les autres. */
@@ -25,6 +26,16 @@ const pose = (label: string, rig: PoseName, desc: string, extra: Partial<Special
   ax: 0.42,
   fb: ['punch_heavy', 'idle'],
   ...extra,
+});
+
+/** Animal de compagnie (style Dresseur) : image de l'animal seul, de profil, d'après sa photo. */
+const pet = (label: string, desc: string): SpecialSpec => ({
+  label,
+  rig: null,
+  proj: true,
+  pet: true,
+  fb: [],
+  desc,
 });
 
 /** Projectile : image d'un effet seul, sans personnage. */
@@ -224,6 +235,33 @@ export const SPECIAL_POSES = {
     'brawl',
     "bagarre de hockey, gants jetés : sans crosse, une main agrippe vers l'avant un maillot invisible (poing fermé tendu à hauteur d'épaule), l'autre poing armé au-dessus de la tête prêt à frapper, mâchoire serrée",
     { h: 1, ax: 0.42, fb: ['punch_light', 'idle'] },
+  ),
+
+  sp_call_pet: pose(
+    "Appel de l'animal",
+    'command',
+    "il appelle son animal de compagnie pour qu'il fonce : un bras tendu droit devant lui, index pointé vers l'avant, l'autre main portée à la bouche comme pour siffler, buste penché vers l'avant, sourire complice",
+    { h: 0.97, ax: 0.42, fb: ['punch_heavy', 'idle'] },
+  ),
+  sp_signal_jump: pose(
+    'Signal du saut',
+    'signal',
+    "il donne à son animal de compagnie le signal du saut : un bras levé bien haut au-dessus de la tête, main ouverte, l'autre poing sur la hanche, genoux fléchis, regard joyeux tourné vers l'avant",
+    { h: 1.1, ax: 0.45, fb: ['uppercut', 'idle'] },
+  ),
+
+  // ---------- animal de compagnie (style Dresseur) ----------
+  pj_pet_run1: pet(
+    'Animal qui court (1)',
+    "en pleine course au galop : pattes avant tendues loin devant, pattes arrière tendues loin derrière, corps allongé, oreilles au vent, langue pendante, l'air joueur et joyeux",
+  ),
+  pj_pet_run2: pet(
+    'Animal qui court (2)',
+    "en pleine course au galop, l'autre temps de la foulée : les quatre pattes regroupées sous le ventre, dos arrondi, oreilles au vent, langue pendante, l'air joueur et joyeux",
+  ),
+  pj_pet_leap: pet(
+    'Animal qui saute',
+    "en plein bond dans les airs (aucun sol visible) : corps étiré en diagonale vers l'avant et le haut, pattes avant tendues devant lui, pattes arrière tendues derrière, queue relevée, gueule ouverte joyeuse, comme pour sauter dans les bras de quelqu'un pour jouer",
   ),
 
   // ---------- projectiles ----------

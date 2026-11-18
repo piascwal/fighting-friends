@@ -57,7 +57,8 @@ export type ProjectileLook =
   | 'grenade'
   | 'light'
   | 'beam'
-  | 'puck';
+  | 'puck'
+  | 'companion';
 
 export interface ProjectileDef {
   /** Frame d'apparition. */
@@ -66,6 +67,10 @@ export interface ProjectileDef {
   look: ProjectileLook;
   /** Image du projectile fournie par le personnage (sinon : dessin selon `look`). */
   sprite?: SpriteKey;
+  /** Images de course jouées en boucle quand il avance au sol (animal de compagnie). */
+  frames?: readonly SpriteKey[];
+  /** Lancé en cloche : au lieu de se briser au sol, il atterrit et continue en courant. */
+  landRun?: boolean;
   /** Durée de vie en frames (projectiles fixes : pic, éclair). */
   life?: number;
   /** Vitesse verticale de départ et gravité (projectile lancé en cloche, qui se brise au sol). */
@@ -194,7 +199,8 @@ export type StyleId =
   | 'mirror'
   | 'beam'
   | 'monk'
-  | 'hockey';
+  | 'hockey'
+  | 'trainer';
 
 /** Capacités d'un style, affichées pour aider à choisir. */
 export type StyleTag =

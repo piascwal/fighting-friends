@@ -52,6 +52,8 @@ export interface SpritePoseSpec {
   desc: string | null;
   portrait?: boolean;
   proj?: boolean;
+  /** Image de l'animal de compagnie (sans le personnage) : prompt à partir d'une photo de l'animal. */
+  pet?: boolean;
   /** Décor du personnage : image entière, sans détourage. */
   stage?: boolean;
 }

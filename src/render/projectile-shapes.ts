@@ -154,6 +154,22 @@ function drawDisc(ctx: Ctx, w: number, h: number, age: number): void {
   ctx.fillRect(-w * 0.35, -1.5, w * 0.7, 3);
 }
 
+/** Animal de compagnie (en attendant ses images) : silhouette de chien qui galope. */
+function drawCompanion(ctx: Ctx, w: number, h: number, age: number): void {
+  const stride = Math.floor(age / 5) % 2 ? 0.18 : -0.18;
+  ctx.fillStyle = '#b8743a';
+  ctx.fillRect(-w * 0.32, -h * 0.15, w * 0.6, h * 0.32); // corps
+  ctx.fillRect(w * 0.2, -h * 0.42, w * 0.24, h * 0.3); // tête
+  ctx.fillRect(w * 0.38, -h * 0.3, w * 0.12, h * 0.12); // museau
+  ctx.fillRect(-w * 0.46, -h * 0.3, w * 0.16, h * 0.08); // queue
+  ctx.fillStyle = '#7a4a22';
+  ctx.fillRect(w * 0.22, -h * 0.5, w * 0.08, h * 0.14); // oreille
+  for (const x of [-0.26, 0.14]) {
+    ctx.fillRect(w * (x + stride), h * 0.15, w * 0.08, h * 0.35);
+    ctx.fillRect(w * (x - stride + 0.06), h * 0.15, w * 0.08, h * 0.35);
+  }
+}
+
 /** Palet de hockey : disque noir vu de côté, traînée de glace pilée derrière lui. */
 function drawPuck(ctx: Ctx, w: number, h: number, age: number): void {
   ctx.fillStyle = 'rgba(220,240,255,.7)';
@@ -246,5 +262,7 @@ export function drawProjectileShape(ctx: Ctx, look: ProjectileLook, w: number, h
       return drawBeam(ctx, w, h, age);
     case 'puck':
       return drawPuck(ctx, w, h, age);
+    case 'companion':
+      return drawCompanion(ctx, w, h, age);
   }
 }
