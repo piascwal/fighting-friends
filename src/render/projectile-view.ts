@@ -3,6 +3,7 @@ import { spriteEntry, type SpriteEntry } from '../assets/sprite-store';
 import type { SpriteKey } from '../data/sprite-poses';
 import { GROUND_Y } from '../core/constants';
 import { pick, rand } from '../core/math';
+import { PET_SIZE, petScale } from './companion-draw';
 import { drawProjectileShape } from './projectile-shapes';
 import type { Projectile } from '../engine/projectiles';
 import type { Fx } from './fx';
@@ -46,8 +47,8 @@ export function drawProjectile(ctx: Ctx, p: Projectile): void {
   if (sprite && def.look === 'beam') {
     drawBeamSprite(ctx, p, sprite, w, h);
   } else if (sprite && def.look === 'companion') {
-    // animal : posé sur le bas de sa zone (ses pattes touchent le sol), sur toute sa longueur
-    const k = ((w * 1.35) / sprite.w) * sprite.adj.s;
+    // animal : posé sur le bas de sa zone (ses pattes touchent le sol), à sa taille habituelle
+    const k = petScale(sprite, PET_SIZE * p.owner.bodyScale);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(sprite.img, (-sprite.w * k) / 2, h / 2 - sprite.h * k, sprite.w * k, sprite.h * k);
   } else if (sprite) {

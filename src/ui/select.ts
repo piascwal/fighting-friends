@@ -218,7 +218,7 @@ function drawPreview(side: 0 | 1): void {
         PREVIEW_W / 2 + facing * 70,
         PREVIEW_H - 8,
         facing,
-        scale * 0.8,
+        scale,
         time,
       );
     }
