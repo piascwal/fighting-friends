@@ -635,7 +635,8 @@ textarea {
 }
 select,
 input[type='text'],
-#newName {
+#newName,
+#lanName {
   background: #1e153a;
   border: 2px solid var(--ln);
   border-radius: 8px;
@@ -1263,4 +1264,15 @@ html:not([data-started]) #app::after {
   html:not([data-started]) #rotateChars {
     visibility: hidden;
   }
+}
+
+/* combat en réseau : pas de pause (le combat continue sur l'autre appareil) */
+body.netfight #pauseBtn {
+  display: none;
+}
+.lanMenu {
+  margin: 4px 0 8px;
+}
+#lanGames .nav {
+  margin: 4px 8px 4px 0;
 }

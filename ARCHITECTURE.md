@@ -32,19 +32,20 @@ infraction fait échouer la CI, donc le déploiement. Les autres relèvent de la
         data/  ──────────────────────────────────►  core/   (outils sans dépendance)
 ```
 
-| Couche    | Rôle                                                                                               | Peut importer                                        |
-| --------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `core/`   | Outils génériques : maths, couleurs, constantes, stockage, réglages, plateforme (plein écran, PWA) | rien                                                 |
-| `data/`   | Contenu du jeu : types, poses, coups, styles, personnages, prompts                                 | `core`                                               |
-| `engine/` | Simulation du combat, IA, règles d'enchaînement                                                    | `core`, `data`                                       |
-| `assets/` | Sprites en mémoire, détourage, import/export de personnages                                        | `core`, `data`                                       |
-| `audio/`  | Synthèse sonore, effets, musique                                                                   | `core`                                               |
-| `input/`  | Clavier, tactile, manettes → manettes abstraites du moteur                                         | `core`, `data`, `engine`                             |
-| `render/` | Tout ce qui dessine dans le canvas                                                                 | `core`, `data`, `engine`, `assets`                   |
-| `scenes/` | Écrans animés du canvas (combat, versus, victoire, fin)                                            | toutes les couches sauf `ui`                         |
-| `ui/`     | Menus HTML par-dessus le canvas                                                                    | `core`, `data`, `assets`, `render`, `audio`, `input` |
-| `game.ts` | Enchaîne les écrans et les modes de jeu                                                            | tout                                                 |
-| `main.ts` | Démarrage, mise à l'échelle, boucle principale                                                     | tout                                                 |
+| Couche    | Rôle                                                                                               | Peut importer                                               |
+| --------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `core/`   | Outils génériques : maths, couleurs, constantes, stockage, réglages, plateforme (plein écran, PWA) | rien                                                        |
+| `data/`   | Contenu du jeu : types, poses, coups, styles, personnages, prompts                                 | `core`                                                      |
+| `engine/` | Simulation du combat, IA, règles d'enchaînement                                                    | `core`, `data`                                              |
+| `assets/` | Sprites en mémoire, détourage, import/export de personnages                                        | `core`, `data`                                              |
+| `audio/`  | Synthèse sonore, effets, musique                                                                   | `core`                                                      |
+| `input/`  | Clavier, tactile, manettes → manettes abstraites du moteur                                         | `core`, `data`, `engine`                                    |
+| `render/` | Tout ce qui dessine dans le canvas                                                                 | `core`, `data`, `engine`, `assets`                          |
+| `net/`    | Combat à deux appareils : lockstep des entrées, protocole, mise en relation (lan-kit)              | `core`, `data`, `engine`                                    |
+| `scenes/` | Écrans animés du canvas (combat, versus, victoire, fin)                                            | toutes les couches sauf `ui`                                |
+| `ui/`     | Menus HTML par-dessus le canvas                                                                    | `core`, `data`, `assets`, `render`, `audio`, `input`, `net` |
+| `game.ts` | Enchaîne les écrans et les modes de jeu (`lan-game.ts` : déroulé d'une partie en réseau)           | tout                                                        |
+| `main.ts` | Démarrage, mise à l'échelle, boucle principale                                                     | tout                                                        |
 
 Règles :
 
@@ -110,6 +111,7 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
 | Changer la reprise d'un personnage local par sa version du dépôt                 | `assets/repo-characters.ts`                                                                                                         |
 | Changements locaux d'un perso du jeu (« à envoyer », export du delta)            | `assets/local-changes.ts` (couches jeu / appareil des images : `assets/sprite-store.ts`)                                            |
 | Motion design (intro VS, bandeau de super, K.O., victoire)                       | briques dans `render/motion.ts` ; séquences dans `scenes/versus.ts`, `scenes/victory.ts`, `render/super-cutin.ts`                   |
+| Combat à deux sur le même Wi-Fi                                                  | `net/` (lockstep, protocole, mise en relation avec lan-kit) ; déroulé dans `lan-game.ts` ; écran `ui/lan.ts`                        |
 | Ajouter un écran de menu                                                         | un fichier dans `ui/`, branché dans `ui/index.ts`                                                                                   |
 | Changer l'enchaînement des écrans                                                | `game.ts`                                                                                                                           |
 

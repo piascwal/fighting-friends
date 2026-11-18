@@ -4,7 +4,8 @@ import { game } from './actions';
 import { $, $$ } from './dom';
 import { wipe } from './transition';
 
-export type ScreenName = 'title' | 'menu' | 'select' | 'options' | 'chars' | 'moves' | 'pause' | 'result';
+export type ScreenName =
+  'title' | 'menu' | 'select' | 'options' | 'chars' | 'moves' | 'pause' | 'result' | 'lan';
 
 let current: ScreenName | null = null;
 /** Faux au tout premier affichage : le jeu s'ouvre sans transition. */

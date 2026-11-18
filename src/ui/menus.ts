@@ -25,7 +25,7 @@ export const MENUS_HTML = `
     <div class="menu">
       <button class="nav big" data-mode="arcade">ARCADE<small>Bats tous les adversaires</small></button>
       <button class="nav big" data-mode="versus">VERSUS<small>Un combat contre la console</small></button>
-      <button class="nav big" data-mode="duo">2 JOUEURS<small>Sur le même clavier / manettes</small></button>
+      <button class="nav big" data-mode="duo">2 JOUEURS<small>Sur cet appareil ou sur le même Wi-Fi</small></button>
       <button class="nav big" data-mode="training">ENTRAÎNEMENT<small>Répète tes combos</small></button>
       <button class="nav big alt" id="menuOptions">OPTIONS<small>Personnages, sprites, commandes</small></button>
     </div>
@@ -44,6 +44,8 @@ export const MENUS_HTML = `
 
 export interface MenuHandlers {
   openSelect(mode: GameMode): void;
+  /** « 2 JOUEURS » : choix entre local et même Wi-Fi. */
+  openLan(): void;
   openOptions(): void;
   openMovesFromPause(): void;
 }
@@ -76,7 +78,9 @@ export function initMenus(handlers: MenuHandlers): void {
     button.addEventListener('click', () => {
       void enterImmersive();
       playSfx('ok');
-      handlers.openSelect(button.dataset.mode as GameMode);
+      const mode = button.dataset.mode as GameMode;
+      if (mode === 'duo') handlers.openLan();
+      else handlers.openSelect(mode);
     });
   }
   on('#menuOptions', () => {

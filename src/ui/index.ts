@@ -9,13 +9,15 @@ import { MOVES_HTML, backFromMoves, initMoves, openMoves } from './moves';
 import { OPTIONS_HTML, initOptions, openOptions } from './options';
 import { closePoseModal, isPoseModalOpen, tickPoseModal } from './pose-modal';
 import { currentScreen, hideScreens, mountScreens, showScreen } from './screens';
+import { LAN_HTML, initLan, openLan } from './lan';
 import { SELECT_HTML, backFromSelect, initSelect, openSelect, tickSelect } from './select';
 import { resetTitle, tickTitle } from './title-fx';
 
 export type { GameMode, UiActions } from './actions';
 export { showResult } from './menus';
 export { currentScreen, hideScreens, showScreen } from './screens';
-export { openSelect } from './select';
+export { openSelect, setRemotePick } from './select';
+export { toast } from './dom';
 export { checkForUpdate } from './update-banner';
 
 const MOVE_KEYS: Record<string, number> = {
@@ -35,6 +37,7 @@ function goBack(screen: string): void {
   if (screen === 'chars' && isPoseModalOpen()) closePoseModal();
   else if (screen === 'select') backFromSelect();
   else if (screen === 'moves') backFromMoves();
+  else if (screen === 'lan') $('#lanBack').click();
   else if (screen === 'chars') $('#chBack').click();
   else if (screen === 'options') $('#optBack').click();
 }
@@ -68,9 +71,10 @@ function onKey(event: KeyboardEvent): void {
 
 export function initUi(actions: UiActions): void {
   setActions(actions);
-  mountScreens(MENUS_HTML + SELECT_HTML + OPTIONS_HTML + CHARACTERS_HTML + MOVES_HTML);
+  mountScreens(MENUS_HTML + SELECT_HTML + OPTIONS_HTML + CHARACTERS_HTML + MOVES_HTML + LAN_HTML);
   initMenus({
     openSelect,
+    openLan,
     openOptions,
     openMovesFromPause: () => openMoves('pause', game().currentPlayer()),
   });
@@ -78,6 +82,7 @@ export function initUi(actions: UiActions): void {
   initOptions({ openCharacters: () => openCharacters(), openMoves: () => openMoves('options') });
   initCharacters(openOptions);
   initMoves();
+  initLan();
   $('#rotateChars').addEventListener('click', openCharactersShortcut);
   input.onKey = onKey;
   document.addEventListener('pointerdown', unlockAudio, { once: true });

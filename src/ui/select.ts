@@ -77,13 +77,17 @@ function refresh(): void {
   const s = sel!;
   const duo = s.mode === 'duo';
   $('#selTitle').textContent =
-    s.step === 0
-      ? duo
-        ? 'JOUEUR 1 : CHOISIS TON COMBATTANT'
+    s.mode === 'lan'
+      ? s.picks[0] && !s.picks[1]
+        ? "EN ATTENTE DE L'ADVERSAIRE…"
         : 'CHOISIS TON COMBATTANT'
-      : duo
-        ? 'JOUEUR 2 : CHOISIS TON COMBATTANT'
-        : "CHOISIS L'ADVERSAIRE";
+      : s.step === 0
+        ? duo
+          ? 'JOUEUR 1 : CHOISIS TON COMBATTANT'
+          : 'CHOISIS TON COMBATTANT'
+        : duo
+          ? 'JOUEUR 2 : CHOISIS TON COMBATTANT'
+          : "CHOISIS L'ADVERSAIRE";
   $$('#selGrid .tile').forEach((tile, i) => {
     tile.classList.toggle('c0', s.cursor[0] === i && (s.step === 0 || !!s.picks[0]));
     tile.classList.toggle('c1', s.step === 1 && s.cursor[1] === i);
@@ -112,6 +116,12 @@ function confirm(): void {
   s.picks[step] = char;
   s.flash[step] = 14;
   playSfx('ok');
+  if (s.mode === 'lan') {
+    // en réseau, chacun ne choisit que le sien : l'hôte lance le combat quand les deux ont choisi
+    refresh();
+    game().lanPicked(char);
+    return;
+  }
 
   if (step === 0 && s.mode !== 'arcade') {
     s.step = 1;
@@ -162,7 +172,7 @@ function buildTile(char: Character | undefined, index: number): HTMLButtonElemen
 
 export function openSelect(mode: GameMode): void {
   sel = { mode, step: 0, picks: [null, null], cursor: [0, Math.min(1, roster.length - 1)], flash: [0, 0] };
-  $('#tag1').textContent = mode === 'duo' ? '2P' : 'CPU';
+  $('#tag1').textContent = mode === 'duo' ? '2P' : mode === 'lan' ? 'ADVERSAIRE' : 'CPU';
   const grid = $('#selGrid');
   grid.innerHTML = '';
   const tiles = [...roster, undefined];
@@ -238,9 +248,21 @@ export function tickSelect(): void {
   drawPreview(1);
 }
 
+/** Combat en réseau : le personnage choisi par l'autre appareil (null : pas encore choisi). */
+export function setRemotePick(char: Character | null): void {
+  if (!sel || sel.mode !== 'lan') return;
+  sel.picks[1] = char;
+  if (char) sel.flash[1] = 14;
+  refresh();
+}
+
 export function backFromSelect(): void {
   const s = sel!;
   playSfx('back');
+  if (s.mode === 'lan') {
+    // en réseau : quitter la partie (l'autre appareil est prévenu)
+    return game().leaveLan();
+  }
   if (s.step === 1) {
     s.step = 0;
     s.picks[0] = null;

@@ -70,6 +70,18 @@ S'y ajoutent Padel (balle tendue et smash à la raquette), Yogi (mandala, lévit
 Danseuse (pirouettes, pole dance, projecteurs du club). Changer le style d'un personnage ne fait perdre aucune image ; la liste
 des styles indique ceux qui sont déjà pris, et un nouveau personnage reçoit d'office un style libre.
 
+## Jouer à deux sur le même Wi-Fi
+
+**2 JOUEURS ▸ Même Wi-Fi** : chacun sur son appareil, connectés au même Wi-Fi. L'un fait **Créer une
+partie**, l'autre la voit apparaître et la **rejoint** : aucune adresse à saisir, aucun serveur à installer.
+La mise en relation passe par [lan-kit](https://github.com/piascwal/lan-kit) (comme Face-Off et Bandeja),
+puis les deux appareils sont reliés directement (WebRTC, réseau local uniquement).
+
+Chacun choisit son personnage ; les deux appareils font tourner le même combat et n'échangent que les
+entrées des manettes, image par image (« lockstep », `src/net/lockstep.ts`), avec 50 ms de retard
+d'entrée. Pour le tester sur un seul ordinateur : ouvrir le jeu dans deux onglets avec `?lan=test`
+au bout de l'adresse.
+
 ## Installer le jeu sur un téléphone
 
 Le jeu est une application web installable (PWA) : une fois installé, il se lance depuis son icône, en plein

@@ -12,6 +12,9 @@ import { FightScene } from './scenes/fight-scene';
 import type { Scene } from './scenes/scene';
 import { Versus } from './scenes/versus';
 import { Victory } from './scenes/victory';
+import { NetFightScene } from './scenes/net-fight-scene';
+import { LanGame } from './lan-game';
+import type { Link } from './net/link';
 import {
   currentScreen,
   hideScreens,
@@ -37,6 +40,8 @@ class Game implements UiActions {
   /** Mode arcade : adversaires à affronter, et numéro du combat en cours. */
   private ladder: Character[] = [];
   private ladderStep = 0;
+  /** Partie en cours avec un autre appareil sur le même Wi-Fi. */
+  private lan: LanGame | null = null;
 
   private setScene(scene: Scene): void {
     this.scene = scene;
@@ -71,7 +76,9 @@ class Game implements UiActions {
   screenChanged(): void {
     this.holdDuringSprites();
     // les commandes tactiles n'apparaissent que pendant un combat, sans menu par-dessus
-    const fighting = !!this.activeFight && !currentScreen();
+    const fighting = !!(this.activeFight || this.scene instanceof NetFightScene) && !currentScreen();
+    // en réseau, pas de pause : le combat continue chez l'autre
+    document.body.classList.toggle('netfight', this.scene instanceof NetFightScene);
     document.body.classList.toggle('infight', fighting);
     if (fighting) input.touch.layout();
     else input.touch.reset();
@@ -99,8 +106,38 @@ class Game implements UiActions {
   }
 
   private toMenu(): void {
+    this.lan = null;
     this.startAttract();
     showScreen('menu');
+  }
+
+  startLan(link: Link, host: boolean): void {
+    let name = 'JOUEUR';
+    try {
+      name = localStorage.getItem('ff-pseudo') ?? name;
+    } catch {
+      // pas de stockage
+    }
+    this.mode = 'lan';
+    this.lan = new LanGame(
+      link,
+      host,
+      {
+        setScene: (s) => this.setScene(s),
+        toMenu: () => this.toMenu(),
+        attract: () => this.startAttract(),
+      },
+      name,
+    );
+  }
+
+  lanPicked(char: Character): void {
+    this.lan?.picked(char);
+  }
+
+  leaveLan(): void {
+    if (this.lan) this.lan.leave();
+    else this.toMenu();
   }
 
   startGame(mode: GameMode, player: Character, opponent: Character | null): void {
@@ -129,6 +166,7 @@ class Game implements UiActions {
       case 'training':
         return new Ai(0, true);
       case 'duo':
+      case 'lan':
         return null;
     }
   }

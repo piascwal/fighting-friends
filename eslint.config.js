@@ -17,8 +17,9 @@ const LAYERS = {
   audio: ['core'],
   input: ['core', 'data', 'engine'],
   render: ['core', 'data', 'engine', 'assets'],
-  scenes: ['core', 'data', 'engine', 'assets', 'render', 'audio', 'input'],
-  ui: ['core', 'data', 'assets', 'render', 'audio', 'input'],
+  net: ['core', 'data', 'engine'],
+  scenes: ['core', 'data', 'engine', 'assets', 'render', 'audio', 'input', 'net'],
+  ui: ['core', 'data', 'assets', 'render', 'audio', 'input', 'net'],
 };
 const layerNames = Object.keys(LAYERS);
 
