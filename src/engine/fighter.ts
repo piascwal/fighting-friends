@@ -106,6 +106,8 @@ export class Fighter {
   used = new Set<MoveId>();
   /** Répétitions consécutives du même coup léger. */
   chain = 0;
+  /** Le coup en cours a été enchaîné sur un autre (combo), et non lancé depuis la garde. */
+  comboMove = false;
   airAttacks = 0;
   /** Saut de poursuite après un lanceur : plus flottant, pour laisser le temps d'enchaîner en l'air. */
   pursuit = false;

@@ -47,10 +47,12 @@ export type OnHit = (
 
 export function createProjectile(owner: Fighter, def: ProjectileDef): Projectile {
   const s = owner.bodyScale;
+  // lancé en combo, un projectile à distance fixe apparaît sous l'adversaire (voir comboOnTarget)
+  const onTarget = def.comboOnTarget && owner.comboMove;
   return {
     owner,
     def,
-    x: owner.x + owner.facing * (def.x ?? 70) * s,
+    x: onTarget ? owner.opp.x : owner.x + owner.facing * (def.x ?? 70) * s,
     y: GROUND_Y + def.y * s,
     vx: def.vx * owner.facing,
     vy: def.vy ?? 0,

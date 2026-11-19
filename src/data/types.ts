@@ -93,6 +93,11 @@ export interface ProjectileDef {
   ground?: boolean;
   /** Reste affiché jusqu'au bout de sa durée de vie même après avoir touché (rayon), sans retoucher. */
   persist?: boolean;
+  /**
+   * Projectile qui apparaît à distance fixe (pic, éclair) : lancé en combo (enchaîné sur un coup qui
+   * touche), il apparaît plutôt sous l'adversaire, sinon il raterait un adversaire collé à soi.
+   */
+  comboOnTarget?: boolean;
   /** Hauteur de la touche ('low' : à bloquer accroupi). 'mid' par défaut. */
   lvl?: HitLevel;
   /** Projection appliquée par la dernière touche. */

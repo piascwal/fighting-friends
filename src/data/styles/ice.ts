@@ -30,7 +30,10 @@ const iceShard = (heavy: boolean) =>
     },
   });
 
-/** Pic de glace : surgit du sol devant (léger) ou loin devant (fort), puis disparaît. */
+/**
+ * Pic de glace : surgit du sol devant (léger) ou loin devant (fort), puis disparaît.
+ * Enchaîné en combo, il surgit directement sous l'adversaire.
+ */
 const iceSpike = (heavy: boolean) =>
   special({
     name: 'Pic de glace',
@@ -57,6 +60,7 @@ const iceSpike = (heavy: boolean) =>
       fx: 'ice',
       life: 20,
       ground: true,
+      comboOnTarget: true,
       launchLast: [2, -14],
     },
   });

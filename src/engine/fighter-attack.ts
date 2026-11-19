@@ -14,6 +14,7 @@ export function startMove(f: Fighter, id: MoveId): void {
 export function startMoveDef(f: Fighter, move: MoveDef): void {
   const id = move.id;
   const chaining = f.state === 'attack';
+  f.comboMove = chaining;
   if (f.grounded && !chaining) f.faceOpponent();
   f.chain = chaining && f.move?.id === id ? f.chain + 1 : 0;
   if (!chaining) f.used.clear();

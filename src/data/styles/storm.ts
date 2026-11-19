@@ -30,6 +30,7 @@ const lightning = (heavy: boolean) =>
       kb: 4,
       fx: 'elec',
       life: 16,
+      comboOnTarget: true,
       launchLast: [2, -9],
     },
   });
