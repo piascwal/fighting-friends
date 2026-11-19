@@ -7,25 +7,30 @@
   "title": "Nouveau challenger",
   "quote": "À qui le tour ?",
   "files": {
-    "idle": "idle.webp",
+    "stage": "stage.webp",
     "crouch": "crouch.webp",
+    "idle": "idle.webp",
     "block": "block.webp",
-    "portrait": "portrait.webp",
     "super": "super.webp",
     "kick_heavy": "kick_heavy.webp",
+    "portrait": "portrait.webp",
     "jump": "jump.webp",
-    "punch_heavy": "punch_heavy.webp",
+    "punch_light": "punch_light.webp",
     "down": "down.webp",
+    "sp_energy_cast": "sp_energy_cast.webp",
     "hit": "hit.webp",
     "kick_light": "kick_light.webp",
-    "punch_light": "punch_light.webp",
-    "sp_energy_cast": "sp_energy_cast.webp",
-    "stage": "stage.webp"
+    "punch_heavy": "punch_heavy.webp",
+    "crouch_block": "crouch_block.webp",
+    "jump_kick": "jump_kick.webp",
+    "jump_punch": "jump_punch.webp",
+    "walk1": "walk1.webp",
+    "crouch_kick": "crouch_kick.webp"
   },
   "adjust": {
-    "idle": {
-      "s": 1.04,
-      "dx": 8,
+    "stage": {
+      "s": 1,
+      "dx": 0,
       "dy": 0
     },
     "crouch": {
@@ -33,12 +38,12 @@
       "dx": 27,
       "dy": 0
     },
-    "block": {
-      "s": 1,
-      "dx": 0,
+    "idle": {
+      "s": 1.04,
+      "dx": 8,
       "dy": 0
     },
-    "portrait": {
+    "block": {
       "s": 1,
       "dx": 0,
       "dy": 0
@@ -53,20 +58,30 @@
       "dx": -17,
       "dy": 0
     },
+    "portrait": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
     "jump": {
       "s": 1.01,
       "dx": 9,
       "dy": 0
     },
-    "punch_heavy": {
+    "punch_light": {
       "s": 1,
-      "dx": -19,
+      "dx": 7,
       "dy": 0
     },
     "down": {
       "s": 1,
       "dx": 0,
       "dy": 11
+    },
+    "sp_energy_cast": {
+      "s": 1.01,
+      "dx": 8,
+      "dy": 0
     },
     "hit": {
       "s": 1,
@@ -78,21 +93,36 @@
       "dx": 0,
       "dy": 0
     },
-    "punch_light": {
+    "punch_heavy": {
       "s": 1,
-      "dx": 7,
+      "dx": -19,
       "dy": 0
     },
-    "sp_energy_cast": {
-      "s": 1.01,
-      "dx": 8,
+    "crouch_block": {
+      "s": 1.05,
+      "dx": 23,
       "dy": 0
     },
-    "stage": {
+    "jump_kick": {
       "s": 1,
       "dx": 0,
       "dy": 0
+    },
+    "jump_punch": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "walk1": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "crouch_kick": {
+      "s": 1.28,
+      "dx": -40,
+      "dy": 0
     }
   },
-  "updated": 1795037921171
+  "updated": 1795072977229
 }
