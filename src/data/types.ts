@@ -98,6 +98,8 @@ export interface ProjectileDef {
    * touche), il apparaît plutôt sous l'adversaire, sinon il raterait un adversaire collé à soi.
    */
   comboOnTarget?: boolean;
+  /** Décalage de départ quand il est lancé en combo (au lieu de `x`) : un animal qui part de plus près. */
+  comboX?: number;
   /** Hauteur de la touche ('low' : à bloquer accroupi). 'mid' par défaut. */
   lvl?: HitLevel;
   /** Projection appliquée par la dernière touche. */

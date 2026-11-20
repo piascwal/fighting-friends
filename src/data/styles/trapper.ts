@@ -31,6 +31,8 @@ const mine = (heavy: boolean) =>
       fx: 'fire',
       life: 420,
       ground: true,
+      // en combo, la mine est posée sous l'adversaire étourdi : elle explose aussitôt
+      comboOnTarget: true,
       launchLast: [4, -12],
     },
   });

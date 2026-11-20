@@ -67,11 +67,12 @@ export class Ai {
     private readonly level: number,
     private readonly dummy = false,
   ) {
-    this.react = byLevel([28, 17, 11, 7], level);
-    this.blockRate = byLevel([0.12, 0.38, 0.6, 0.82], level);
-    this.comboRate = byLevel([0.12, 0.45, 0.72, 0.92], level);
-    this.aggression = byLevel([0.38, 0.52, 0.66, 0.8], level);
-    this.specialRate = byLevel([0.15, 0.3, 0.45, 0.6], level);
+    // niveau 1-2 (« normal ») relevé : la console réagit plus vite, bloque et enchaîne davantage
+    this.react = byLevel([26, 13, 9, 6], level);
+    this.blockRate = byLevel([0.15, 0.5, 0.7, 0.86], level);
+    this.comboRate = byLevel([0.15, 0.6, 0.82, 0.95], level);
+    this.aggression = byLevel([0.4, 0.58, 0.7, 0.82], level);
+    this.specialRate = byLevel([0.15, 0.36, 0.5, 0.62], level);
   }
 
   /** Décide de bloquer (et comment) un coup qui arrive. */

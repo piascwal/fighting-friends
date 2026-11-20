@@ -45,6 +45,10 @@ export type OnHit = (
   dir: number,
 ) => void;
 
+/** Décalage de départ : `comboX` s'il est lancé en combo, sinon `x` (70 par défaut). */
+const startX = (owner: Fighter, def: ProjectileDef): number =>
+  owner.comboMove && def.comboX !== undefined ? def.comboX : (def.x ?? 70);
+
 export function createProjectile(owner: Fighter, def: ProjectileDef): Projectile {
   const s = owner.bodyScale;
   // lancé en combo, un projectile à distance fixe apparaît sous l'adversaire (voir comboOnTarget)
@@ -52,7 +56,7 @@ export function createProjectile(owner: Fighter, def: ProjectileDef): Projectile
   return {
     owner,
     def,
-    x: onTarget ? owner.opp.x : owner.x + owner.facing * (def.x ?? 70) * s,
+    x: onTarget ? owner.opp.x : owner.x + owner.facing * (startX(owner, def) * s),
     y: GROUND_Y + def.y * s,
     vx: def.vx * owner.facing,
     vy: def.vy ?? 0,

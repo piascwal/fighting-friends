@@ -88,6 +88,7 @@ const dancefloor = () =>
       kb: 2,
       fx: 'elec',
       life: 70,
+      comboOnTarget: true,
       launchLast: [4, -13],
     },
   });

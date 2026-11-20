@@ -114,6 +114,8 @@ export class Fighter {
   /** Coups portés dans le combo en cours, et leurs dégâts cumulés. */
   combo = 0;
   comboDmg = 0;
+  /** Combien de fois chaque coup a déjà touché dans le combo en cours (voir hitstunDecay). */
+  readonly comboUses = new Map<string, number>();
   /** Nombre de fois où ce combattant a été repris en l'air : limite les jongles infinis. */
   juggle = 0;
   lastDmg = 0;

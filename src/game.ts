@@ -163,10 +163,10 @@ class Game implements UiActions {
       case 'arcade': {
         const last = this.ladder.length - 1;
         const progress = last > 0 ? this.ladderStep / last : 1;
-        return new Ai(clamp(base * 0.9 + progress * 1.3, 0, 3));
+        return new Ai(clamp(base + 0.3 + progress * 1.2, 0, 3));
       }
       case 'versus':
-        return new Ai(base + 0.6);
+        return new Ai(base + 0.9);
       case 'training':
         return new Ai(0, true);
       case 'duo':

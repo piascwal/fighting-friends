@@ -34,12 +34,13 @@ const fetch = (heavy: boolean) =>
       t: 8,
       vx: heavy ? 13 : 10,
       x: -230,
+      // en combo, le chien part juste derrière son maître : il arrive à temps
+      comboX: -40,
       dmg: heavy ? 80 : 70,
       hs: 20,
       bs: 12,
       kb: 7,
       life: 150,
-      launchLast: heavy ? [4, -7] : undefined,
     },
   });
 
@@ -63,6 +64,7 @@ const leap = (heavy: boolean) =>
       gravity: 0.75,
       landRun: true,
       x: -150,
+      comboX: -20,
       y: -40,
       h: 70,
       dmg: heavy ? 90 : 80,
@@ -90,6 +92,7 @@ const bestFriends = () =>
       t: 12,
       vx: 6,
       x: -260,
+      comboX: -40,
       w: 110,
       dmg: 34,
       hits: 5,

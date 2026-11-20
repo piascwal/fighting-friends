@@ -1,6 +1,7 @@
 /* Affichage des projectiles : sprite du personnage s'il en fournit un, sinon dessin selon l'élément. */
 import { spriteEntry, type SpriteEntry } from '../assets/sprite-store';
 import type { SpriteKey } from '../data/sprite-poses';
+import type { ProjectileLook } from '../data/types';
 import { GROUND_Y } from '../core/constants';
 import { pick, rand } from '../core/math';
 import { PET_SIZE, petScale } from './companion-draw';
@@ -57,7 +58,15 @@ export function drawProjectile(ctx: Ctx, p: Projectile): void {
       (def.h > def.w * 2 ? h / sprite.h : (Math.max(w, h) * 1.6) / Math.max(sprite.w, sprite.h)) *
       sprite.adj.s;
     const lift = def.ground && def.h <= def.w * 2 ? -h * 0.3 : 0;
-    ctx.drawImage(sprite.img, (-sprite.w * k) / 2, (-sprite.h * k) / 2 + lift, sprite.w * k, sprite.h * k);
+    drawGlowing(
+      ctx,
+      sprite.img,
+      def.look,
+      (-sprite.w * k) / 2,
+      (-sprite.h * k) / 2 + lift,
+      sprite.w * k,
+      sprite.h * k,
+    );
   } else {
     drawProjectileShape(ctx, def.look, w, h, p.age);
   }
@@ -76,7 +85,43 @@ function drawBeamSprite(ctx: Ctx, p: Projectile, sprite: SpriteEntry, w: number,
   const thickness = h * 1.5 * fade * (p.age % 4 < 2 ? 1 : 0.92) * sprite.adj.s;
   const length = w * grow;
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(sprite.img, -w / 2, -thickness / 2, length, thickness);
+  drawGlowing(ctx, sprite.img, 'beam', -w / 2, -thickness / 2, length, thickness);
+}
+
+/**
+ * Effets lumineux (rayon, éclair, projecteur, énergie) : une lumière laisse voir à travers elle. L'image est
+ * dessinée en partie transparente, puis une seconde fois en mode additif pour l'éclat du cœur lumineux.
+ * Les objets (palet, mine, animal…) restent opaques.
+ */
+const GLOW: Partial<Record<ProjectileLook, readonly [opacity: number, glow: number]>> = {
+  beam: [0.62, 0.35],
+  bolt: [0.7, 0.3],
+  light: [0.72, 0.28],
+  fire: [0.85, 0.2],
+};
+
+function drawGlowing(
+  ctx: Ctx,
+  img: CanvasImageSource,
+  look: ProjectileLook,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): void {
+  const glow = GLOW[look];
+  if (!glow) {
+    ctx.drawImage(img, x, y, w, h);
+    return;
+  }
+  const alpha = ctx.globalAlpha;
+  ctx.globalAlpha = alpha * glow[0];
+  ctx.drawImage(img, x, y, w, h);
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = alpha * glow[1];
+  ctx.drawImage(img, x, y, w, h);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = alpha;
 }
 
 /** Particules laissées dans le sillage d'un projectile. */

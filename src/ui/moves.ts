@@ -105,7 +105,7 @@ function render(): void {
       ${row(`<b>↓ ↓</b> + ${A}/${B}${or('ou en combo')}encore ${B} ou ${D} après un coup spécial`, `<b class="sup">${escapeHtml(names.super)}</b> — jauge SUPER pleine`)}
     </table>
     <h3>Combos</h3>
-    <p class="note">Règle d'or : quand un coup <b>touche</b>, appuie tout de suite sur un autre bouton. Les 4 boutons s'enchaînent dans l'ordre que tu veux (une fois chacun, les légers jusqu'à 3 fois). Rappuyer sur le <b>même bouton fort</b> déclenche le coup spécial, et une 3ᵉ fois le SUPER si la jauge est pleine.</p>
+    <p class="note">Règle d'or : quand un coup <b>touche</b>, appuie tout de suite sur un autre bouton. Les 4 boutons s'enchaînent dans l'ordre que tu veux (une fois chacun, les légers jusqu'à 3 fois). Rappuyer sur le <b>même bouton fort</b> déclenche le coup spécial, et une 3ᵉ fois le SUPER si la jauge est pleine. <b>Varie tes coups</b> : le même coup répété étourdit de moins en moins, et l'adversaire finit par reprendre sa garde.</p>
     <table>${COMBO_EXAMPLES.map(([title, inputs]) => row(escapeHtml(title), withBadges(inputs))).join('')}</table>`;
 }
 

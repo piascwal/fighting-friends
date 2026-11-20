@@ -119,8 +119,9 @@ export class FightSim implements FighterWorld {
     return out;
   }
 
+  /** Un projectile encore capable de toucher (un animal qui repart, un rayon qui s'éteint ne comptent plus). */
   hasProjectile(owner: Fighter): boolean {
-    return this.projectiles.some((p) => p.owner === owner);
+    return this.projectiles.some((p) => p.owner === owner && p.hits > 0);
   }
 
   projectileNear(target: Fighter): boolean {

@@ -23,6 +23,24 @@ const MAX_JUGGLE = 8;
 const MIN_DAMAGE_SCALE = 0.3;
 /** Chaque coup d'un combo fait 10 % de dégâts en moins que le précédent. */
 const SCALE_PER_HIT = 0.1;
+/**
+ * Décroissance de l'étourdissement dans un combo, comme dans la plupart des jeux de combat :
+ * - le MÊME coup réutilisé étourdit de moins en moins (martelage d'un bouton : l'adversaire finit par
+ *   récupérer et peut bloquer) ;
+ * - au-delà de COMBO_FREE coups, tout combo s'essouffle un peu.
+ * Les enchaînements variés restent donc possibles, et plus longs que le martelage.
+ */
+const REPEAT_DECAY = 0.78;
+const COMBO_FREE = 7;
+const LENGTH_DECAY = 0.05;
+const MIN_STUN_RATIO = 0.45;
+
+/** Part de l'étourdissement conservée : `uses` = fois où ce coup a déjà touché dans le combo. */
+export function hitstunDecay(combo: number, uses: number): number {
+  const length = 1 - LENGTH_DECAY * Math.max(0, combo - COMBO_FREE);
+  return Math.max(MIN_STUN_RATIO, REPEAT_DECAY ** uses * length);
+}
+
 /** Part des dégâts qui traverse la garde sur un coup spécial. */
 const CHIP_RATIO = 0.12;
 
@@ -144,6 +162,12 @@ export function applyHit(
   const dmg = Math.max(1, Math.round(base * scale));
   att.combo = comboing ? att.combo + 1 : 1;
   att.comboDmg = (comboing ? att.comboDmg : 0) + dmg;
+  if (!comboing) att.comboUses.clear();
+  // projectile : `special` sans coup en cours qui le porte, on le compte à part
+  const key = att.state === 'attack' && att.move ? att.move.id : 'projectile';
+  const uses = att.comboUses.get(key) ?? 0;
+  att.comboUses.set(key, uses + 1);
+  const stunRatio = hitstunDecay(att.combo, uses);
   def.hp -= dmg;
   def.lastDmg = dmg;
   def.flash = 6;
@@ -169,7 +193,7 @@ export function applyHit(
     const hitLow = hit.box[1] + hit.box[3] / 2 > -95;
     const keepsCrouch = ['neutral', 'hitstun', 'blockstun', 'attack'].includes(def.state);
     if (!keepsCrouch) def.crouching = false;
-    def.stun = hit.hs;
+    def.stun = Math.round(hit.hs * stunRatio);
     def.vx = dir * hit.kb;
     def.setState('hitstun');
     def.setPose(hitLow || def.crouching ? 'hitLow' : 'hit', 0.8);
