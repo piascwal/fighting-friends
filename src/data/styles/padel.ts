@@ -55,7 +55,7 @@ const smash = (heavy: boolean) =>
     ],
   });
 
-/** Super : une rafale de balles enchaînées, la dernière envoie au tapis. */
+/** Super : une balle liftée surpuissante qui frappe plusieurs fois au passage, puis envoie au tapis. */
 const porTres = () =>
   superMove({
     name: 'POR TRES',
@@ -72,12 +72,13 @@ const porTres = () =>
       t: 12,
       look: 'ball',
       sprite: 'pj_padel_ball',
-      vx: 9,
+      // une balle liftée, lente et lourde : de taille normale, elle frappe plusieurs fois au passage
+      vx: 4,
       y: -125,
-      w: 70,
-      h: 60,
-      dmg: 45,
-      hits: 5,
+      w: 36,
+      h: 36,
+      dmg: 52,
+      hits: 4,
       hs: 22,
       bs: 10,
       kb: 2,
