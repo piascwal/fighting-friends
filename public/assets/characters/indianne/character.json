@@ -1,0 +1,134 @@
+{
+  "id": "indianne",
+  "name": "INDIANNE",
+  "style": "yogi",
+  "color": "#3d9bff",
+  "size": 1,
+  "title": "Nouveau challenger",
+  "quote": "À qui le tour ?",
+  "files": {
+    "block": "block.webp",
+    "hit": "hit.webp",
+    "crouch": "crouch.webp",
+    "intro": "intro.webp",
+    "idle": "idle.webp",
+    "jump": "jump.webp",
+    "kick_light": "kick_light.webp",
+    "kick_heavy": "kick_heavy.webp",
+    "portrait": "portrait.webp",
+    "punch_light": "punch_light.webp",
+    "pj_mandala": "pj_mandala.webp",
+    "punch_heavy": "punch_heavy.webp",
+    "sp_mudra": "sp_mudra.webp",
+    "super": "super.webp",
+    "uppercut": "uppercut.webp",
+    "pj_spirit": "pj_spirit.webp",
+    "sp_levitate": "sp_levitate.webp",
+    "walk1": "walk1.webp",
+    "win": "win.webp",
+    "stage": "stage.webp"
+  },
+  "adjust": {
+    "block": {
+      "s": 1.03,
+      "dx": -7,
+      "dy": 0
+    },
+    "hit": {
+      "s": 1,
+      "dx": -5,
+      "dy": 0
+    },
+    "crouch": {
+      "s": 1.1,
+      "dx": 35,
+      "dy": 0
+    },
+    "intro": {
+      "s": 1.03,
+      "dx": 0,
+      "dy": 0
+    },
+    "idle": {
+      "s": 1,
+      "dx": 6,
+      "dy": 0
+    },
+    "jump": {
+      "s": 1.02,
+      "dx": 5,
+      "dy": 0
+    },
+    "kick_light": {
+      "s": 1.04,
+      "dx": 7,
+      "dy": 0
+    },
+    "kick_heavy": {
+      "s": 1,
+      "dx": -28,
+      "dy": 0
+    },
+    "portrait": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "punch_light": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "pj_mandala": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "punch_heavy": {
+      "s": 1,
+      "dx": -11,
+      "dy": 0
+    },
+    "sp_mudra": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "super": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "uppercut": {
+      "s": 1.01,
+      "dx": -30,
+      "dy": 0
+    },
+    "pj_spirit": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "sp_levitate": {
+      "s": 1.09,
+      "dx": 20,
+      "dy": -1
+    },
+    "walk1": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "win": {
+      "s": 1,
+      "dx": 0,
+      "dy": -40
+    },
+    "stage": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    }
+  },
+  "updated": 1795253260683
+}
