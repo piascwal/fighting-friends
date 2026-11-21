@@ -1,0 +1,38 @@
+{
+  "id": "tom",
+  "name": "TOM",
+  "style": "drunken",
+  "color": "#c56bff",
+  "size": 1,
+  "title": "Nouveau challenger",
+  "quote": "À qui le tour ?",
+  "files": {
+    "idle": "idle.webp",
+    "stage": "stage.webp",
+    "portrait": "portrait.webp",
+    "kick_heavy": "kick_heavy.webp"
+  },
+  "adjust": {
+    "idle": {
+      "s": 1,
+      "dx": 9,
+      "dy": 0
+    },
+    "stage": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "portrait": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "kick_heavy": {
+      "s": 1,
+      "dx": -17,
+      "dy": 0
+    }
+  },
+  "updated": 1795279158809
+}

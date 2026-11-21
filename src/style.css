@@ -498,7 +498,9 @@ textarea {
   gap: clamp(8px, 4vmin, 28px);
 }
 #selGrid {
-  --tile: clamp(52px, 15vmin, 110px);
+  --cols: 3;
+  /* la plus petite des deux : la taille voulue, ou ce que permet la largeur de la zone centrale */
+  --tile: min(clamp(44px, 15vmin, 110px), calc((28vw - 12px) / var(--cols)));
   display: grid;
   gap: 0;
   border: 4px solid #000;

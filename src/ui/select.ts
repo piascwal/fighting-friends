@@ -196,7 +196,10 @@ export function openSelect(mode: GameMode): void {
   const tiles = [...roster, undefined];
   tiles.forEach((char, i) => grid.appendChild(buildTile(char, i)));
   // grille la plus carrée possible : 3 colonnes jusqu'à 9 cases, puis 4
-  grid.style.gridTemplateColumns = `repeat(${Math.min(tiles.length, tiles.length > 9 ? 4 : 3)}, var(--tile))`;
+  const cols = Math.min(tiles.length, tiles.length > 9 ? 4 : 3);
+  grid.style.gridTemplateColumns = `repeat(${cols}, var(--tile))`;
+  // la taille des cases dépend du nombre de colonnes : la grille tient toujours dans la zone centrale
+  grid.style.setProperty('--cols', String(cols));
   showScreen('select');
   refresh();
 }
