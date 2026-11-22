@@ -1,0 +1,176 @@
+{
+  "id": "jbm",
+  "name": "JBM",
+  "style": "counter",
+  "color": "#b55b00",
+  "size": 1.12,
+  "title": "Nouveau challenger",
+  "quote": "À qui le tour ?",
+  "files": {
+    "stage": "stage.webp",
+    "block": "block.webp",
+    "hit": "hit.webp",
+    "intro": "intro.webp",
+    "win": "win.webp",
+    "crouch": "crouch.webp",
+    "jump": "jump.webp",
+    "kick_light": "kick_light.webp",
+    "punch_light": "punch_light.webp",
+    "idle": "idle.webp",
+    "walk1": "walk1.webp",
+    "super": "super.webp",
+    "kick_heavy": "kick_heavy.webp",
+    "uppercut": "uppercut.webp",
+    "punch_heavy": "punch_heavy.webp",
+    "portrait": "portrait.webp",
+    "crouch_kick": "crouch_kick.webp",
+    "jump_kick": "jump_kick.webp",
+    "jump_punch": "jump_punch.webp",
+    "crouch_block": "crouch_block.webp",
+    "walk2": "walk2.webp",
+    "fall": "fall.webp",
+    "sp_counter_stance": "sp_counter_stance.webp",
+    "sp_palm_strike": "sp_palm_strike.webp",
+    "down": "down.webp",
+    "crouch_punch": "crouch_punch.webp",
+    "pj_palm_wave": "pj_palm_wave.webp"
+  },
+  "adjust": {
+    "stage": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "block": {
+      "s": 1.03,
+      "dx": 0,
+      "dy": 0
+    },
+    "hit": {
+      "s": 1.03,
+      "dx": 3,
+      "dy": 0
+    },
+    "intro": {
+      "s": 1.01,
+      "dx": 7,
+      "dy": 0
+    },
+    "win": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "crouch": {
+      "s": 1.09,
+      "dx": 33,
+      "dy": 0
+    },
+    "jump": {
+      "s": 1.14,
+      "dx": 11,
+      "dy": 0
+    },
+    "kick_light": {
+      "s": 1.03,
+      "dx": 0,
+      "dy": 0
+    },
+    "punch_light": {
+      "s": 1,
+      "dx": 10,
+      "dy": 0
+    },
+    "idle": {
+      "s": 1,
+      "dx": 14,
+      "dy": 0
+    },
+    "walk1": {
+      "s": 0.99,
+      "dx": 0,
+      "dy": -3
+    },
+    "super": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "kick_heavy": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "uppercut": {
+      "s": 1.01,
+      "dx": -19,
+      "dy": 0
+    },
+    "punch_heavy": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "portrait": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "crouch_kick": {
+      "s": 1.35,
+      "dx": -33,
+      "dy": 0
+    },
+    "jump_kick": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "jump_punch": {
+      "s": 1,
+      "dx": 11,
+      "dy": 0
+    },
+    "crouch_block": {
+      "s": 1.07,
+      "dx": 27,
+      "dy": 0
+    },
+    "walk2": {
+      "s": 1.01,
+      "dx": 9,
+      "dy": 0
+    },
+    "fall": {
+      "s": 1,
+      "dx": 3,
+      "dy": 2
+    },
+    "sp_counter_stance": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "sp_palm_strike": {
+      "s": 1,
+      "dx": 14,
+      "dy": 0
+    },
+    "down": {
+      "s": 1,
+      "dx": 0,
+      "dy": 10
+    },
+    "crouch_punch": {
+      "s": 1.13,
+      "dx": 30,
+      "dy": 0
+    },
+    "pj_palm_wave": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    }
+  },
+  "updated": 1794950913660
+}
