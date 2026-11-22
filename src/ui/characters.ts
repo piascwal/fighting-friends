@@ -1,14 +1,9 @@
 /* Écran « Personnages & sprites » : créer un personnage, voir les images manquantes, copier les prompts. */
 import { playSfx } from '../audio/audio';
 import { exportCharacterZip, saveCharacterSettings, saveCustomCharacters } from '../assets/character-files';
-import { exportChanges, pendingChange, pendingChanges } from '../assets/local-changes';
-import {
-  hasRepoLayer,
-  hasSprite,
-  removeCharacterSprites,
-  spriteCount,
-  spriteEntries,
-} from '../assets/sprite-store';
+import { exportChanges, hasRepoLayer, pendingChange, pendingChanges } from '../assets/local-changes';
+import { ensureSprites, isLoaded, spriteTotal } from '../assets/repo-characters';
+import { hasSprite, removeCharacterSprites, spriteCount, spriteEntries } from '../assets/sprite-store';
 import { allowAnyOrientation, lockLandscape } from '../core/display';
 import { pick } from '../core/math';
 import { escapeHtml, slug } from '../core/text';
@@ -35,7 +30,7 @@ import {
   openPoseModal,
 } from './pose-modal';
 import { CREATION_HTML, initCreation, refreshCreation } from './creation-prompt';
-import { showScreen } from './screens';
+import { currentScreen, showScreen } from './screens';
 
 const SIZE_OPTIONS = SIZES.map(
   (s) => `<option value="${s.value}"${s.value === 1 ? ' selected' : ''}>${s.label}</option>`,
@@ -144,7 +139,7 @@ function refresh(): void {
   const char = selected();
   selectCharacter(char.id);
   const count = (c: Character) =>
-    `${spriteCount(c.id)} sprite${spriteCount(c.id) > 1 ? 's' : ''}${pendingChanges(c.id).length ? ' · ✎ à envoyer' : ''}`;
+    `${spriteTotal(c.id)} sprite${spriteTotal(c.id) > 1 ? 's' : ''}${pendingChanges(c.id).length ? ' · ✎ à envoyer' : ''}`;
   const select = $<HTMLSelectElement>('#chSel');
   select.innerHTML = roster
     .map((c) => `<option value="${c.id}">${escapeHtml(c.name)} (${count(c)})</option>`)
@@ -157,6 +152,16 @@ function refresh(): void {
   $<HTMLInputElement>('#edCol').value = char.color;
   $<HTMLSelectElement>('#edSize').value = String(sizeChoice(char.size));
   $('#edDel').classList.toggle('hidden', !(char.custom && !char.repo));
+
+  // les images du personnage affiché ne sont chargées qu'à ce moment-là (pas celles des autres)
+  if (!isLoaded(char.id, 'all')) {
+    $('#chInfo').textContent = 'Chargement des images…';
+    $('#chGrid').innerHTML = '';
+    void ensureSprites(char.id, 'all').then(() => {
+      if (selected() === char && currentScreen() === 'chars') refresh();
+    });
+    return;
+  }
 
   const poses = spritePosesFor(char);
   const provided = poses.filter((p) => hasSprite(char.id, p.key)).length;
@@ -382,12 +387,14 @@ export function initCharacters(onBack: () => void): void {
     const char = selected();
     if (!spriteCount(char.id)) return toast('Aucune image à exporter pour ce personnage');
     toast('Préparation du fichier…');
+    await ensureSprites(char.id, 'all');
     await exportCharacterZip(char);
   });
   on('#chSend', async () => {
     const char = selected();
     if (!pendingChanges(char.id).length) return toast('Aucun changement à envoyer pour ce personnage');
     toast('Préparation du fichier…');
+    await ensureSprites(char.id, 'all');
     await exportChanges(char);
   });
   on('#chCopyAll', copyMissingPrompts);

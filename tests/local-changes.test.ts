@@ -15,8 +15,9 @@ vi.mock('../src/core/storage', () => {
 });
 
 import {
-  applyAdjustOverrides,
+  applyStoredAdjust,
   changesManifest,
+  registerRepoManifest,
   pendingChanges,
   resetAdjust,
   saveAdjust,
@@ -44,7 +45,9 @@ const UPDATED = 1_000;
 function loadRepo(updated = UPDATED): void {
   putSprite(ID, 'idle', img(), 'repo', { file: 'idle.webp' });
   putSprite(ID, 'crouch', img(), 'repo', { file: 'crouch.webp', adj: { s: 0.9 } });
-  applyAdjustOverrides(ID, { updated, files: { idle: 'idle.webp', crouch: 'crouch.webp' } });
+  registerRepoManifest(ID, { updated, files: { idle: 'idle.webp', crouch: 'crouch.webp' } });
+  // chaque image du jeu reprend son réglage modifié sur l'appareil, une fois chargée
+  for (const key of ['idle', 'crouch'] as const) applyStoredAdjust(ID, key);
 }
 
 describe('changements locaux', () => {

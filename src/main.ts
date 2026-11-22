@@ -2,7 +2,7 @@
 import './style.css';
 import { setBackground } from './audio/audio';
 import { applyOverrides, loadCustomCharacters, renameLegacySprite } from './assets/character-files';
-import { loadRepoCharacters } from './assets/repo-characters';
+import { loadRepoCharacters, preloadRoster } from './assets/repo-characters';
 import { addCharacter, roster } from './data/roster';
 import { loadLocalSprites } from './assets/sprite-store';
 import { FPS, VIEW_H, VIEW_W } from './core/constants';
@@ -78,6 +78,8 @@ async function boot(): Promise<void> {
   initUi(gameState);
   resize();
   gameState.startAttract();
+  // portraits et poses de repos de tout le monde se chargent en arrière-plan, après l'affichage du jeu
+  void preloadRoster().catch(() => {});
   // raccourci de l'icône de l'application (appui long sur Android) : ouvre directement les sprites
   if (new URLSearchParams(location.search).get('ecran') === 'personnages') openCharactersShortcut();
 

@@ -14,6 +14,7 @@ import { NetFightScene } from './scenes/net-fight-scene';
 import type { Scene } from './scenes/scene';
 import { Versus } from './scenes/versus';
 import { Victory } from './scenes/victory';
+import { ensureSprites } from './assets/repo-characters';
 import { hideScreens, openSelect, setRemoteHover, setRemotePick, showResult, toast, wipe } from './ui';
 import { roster } from './data/roster';
 
@@ -58,6 +59,10 @@ export class LanGame {
   private theirs: CharSpec | null = null;
   private wantAgain = [false, false];
   private fight: NetFightScene | null = null;
+  /** Un combat a eu lieu depuis le dernier choix des personnages (la revanche demande l'accord des deux). */
+  private inMatch = false;
+  /** L'hôte prépare le lancement (chargement des images en cours). */
+  private starting = false;
   private warnedDesync = false;
   private ended = false;
 
@@ -104,7 +109,7 @@ export class LanGame {
         setRemotePick(charFrom(msg.c));
         return this.maybeStart();
       case 'start':
-        if (!this.isHost) this.start(msg);
+        if (!this.isHost) void this.start(msg);
         return;
       case 'again':
         this.wantAgain[1] = true;
@@ -138,10 +143,16 @@ export class LanGame {
 
   /** L'hôte lance le combat dès que les deux ont choisi (et, après un combat, voulu la revanche). */
   private maybeStart(): void {
-    if (!this.isHost || !this.mine || !this.theirs) return;
-    if (this.fight && !(this.wantAgain[0] && this.wantAgain[1])) return;
-    const p: [CharSpec, CharSpec] = [this.mine, this.theirs];
+    if (!this.isHost || !this.mine || !this.theirs || this.starting) return;
+    if (this.inMatch && !(this.wantAgain[0] && this.wantAgain[1])) return;
+    this.starting = true;
+    void this.beginMatch([this.mine, this.theirs]).finally(() => (this.starting = false));
+  }
+
+  private async beginMatch(p: [CharSpec, CharSpec]): Promise<void> {
     const chars = p.map(charFrom);
+    // la taille d'un personnage (et son décor) dépendent de ses images : on les charge avant de décider
+    await Promise.all(chars.map((c) => ensureSprites(c.id, 'all')));
     // décor : celui d'un des deux personnages s'il en a un, sinon un décor dessiné au hasard
     const own = chars.find((c) => stageForCharacter(c).kind === 'image');
     const stage: StageSpec = own ? { char: own.id } : { index: randomStageIndex() };
@@ -153,34 +164,41 @@ export class LanGame {
       rounds: settings.rounds,
     };
     this.link.sendCtrl(msg);
-    this.start(msg);
+    await this.start(msg);
   }
 
-  private start(msg: Extract<NetMsg, { t: 'start' }>): void {
+  private async start(msg: Extract<NetMsg, { t: 'start' }>): Promise<void> {
+    this.inMatch = true;
     this.wantAgain = [false, false];
     const [left, right] = msg.p.map(charFrom) as [Character, Character];
     hideScreens();
     playMusic(null);
-    const fight = new NetFightScene({
-      chars: [left, right],
-      scales: msg.scales,
-      stage: stageFrom(msg.stage),
-      rounds: msg.rounds,
-      link: this.link,
-      side: this.isHost ? 0 : 1,
-      onEnd: (winner) => this.end(winner, left, right),
+    // la rencontre n'a besoin que des poses de présentation ; le reste se charge pendant qu'elle joue
+    await Promise.all([left, right].map((c) => ensureSprites(c.id, 'preview')));
+    const ready = Promise.all([left, right].map((c) => ensureSprites(c.id, 'all'))).then(() => {
+      const fight = new NetFightScene({
+        chars: [left, right],
+        scales: msg.scales,
+        stage: stageFrom(msg.stage),
+        rounds: msg.rounds,
+        link: this.link,
+        side: this.isHost ? 0 : 1,
+        onEnd: (winner) => this.end(winner, left, right),
+      });
+      this.fight = fight; // reçoit déjà les entrées de l'autre appareil pendant la rencontre
+      return fight;
     });
-    this.fight = fight;
     this.game.setScene(
       new Versus(
         left,
         right,
         `${this.isHost ? 'TOI' : this.remoteName} VS ${this.isHost ? this.remoteName : 'TOI'}`,
-        () => {
-          playMusic('fight');
-          wipe();
-          this.game.setScene(fight);
-        },
+        () =>
+          void ready.then((fight) => {
+            playMusic('fight');
+            wipe();
+            this.game.setScene(fight);
+          }),
       ),
     );
   }
@@ -207,6 +225,7 @@ export class LanGame {
   private reselect(ours: boolean): void {
     if (ours) this.link.sendCtrl({ t: 'reselect' });
     this.mine = this.theirs = this.fight = null;
+    this.inMatch = false;
     this.game.attract();
     openSelect('lan');
     this.hover(roster[0]?.id ?? '?');

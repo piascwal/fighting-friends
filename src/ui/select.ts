@@ -1,6 +1,7 @@
 /* Écran de sélection : cases-portraits au centre, personnage en entier de chaque côté. */
 import { playSfx } from '../audio/audio';
 import { shade } from '../core/color';
+import { ensureSprites, isLoaded, spritesPending } from '../assets/repo-characters';
 import { pick } from '../core/math';
 import { roster } from '../data/roster';
 import type { Character } from '../data/types';
@@ -79,6 +80,11 @@ function shown(side: 0 | 1): Character | 'random' | null {
 
 function refresh(): void {
   const s = sel!;
+  // l'aperçu en pied (garde, victoire…) de chaque côté est chargé au moment où on le survole
+  for (const side of [0, 1] as const) {
+    const who = shown(side);
+    if (who && who !== 'random') void ensureSprites(who.id, 'preview');
+  }
   const duo = s.mode === 'duo';
   $('#selTitle').textContent =
     s.mode === 'lan'
@@ -161,6 +167,12 @@ function buildTile(char: Character | undefined, index: number): HTMLButtonElemen
     const [canvas, ctx] = newCanvas(120);
     drawPortrait(ctx, char, 120);
     tile.appendChild(canvas);
+    // le portrait est chargé en arrière-plan : la case se redessine dès qu'il est là
+    if (!isLoaded(char.id, 'portrait'))
+      void ensureSprites(char.id, 'portrait').then(() => {
+        ctx.clearRect(0, 0, 120, 120);
+        drawPortrait(ctx, char, 120);
+      });
   } else {
     tile.textContent = '?';
     tile.classList.add('rnd');
@@ -236,6 +248,8 @@ function drawPreview(side: 0 | 1): void {
         drawCharacter(ctx, who, pose, x, PREVIEW_H - 8, facing, scale, 0, { silhouette: colors[i]! });
       }
     }
+    // pas encore chargé : on n'affiche rien plutôt qu'un pantin qui se transforme une seconde plus tard
+    if (spritesPending(who.id)) return;
     drawCharacter(ctx, who, pose, PREVIEW_W / 2, PREVIEW_H - 8, facing, scale, time, {
       flash: s.flash[side] > 8,
     });

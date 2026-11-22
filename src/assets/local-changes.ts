@@ -12,7 +12,7 @@ import type { Character } from '../data/types';
 import { downloadZip, readJson, writeJson, type CharacterFile } from './character-files';
 import { encodeImage, extensionOf } from './image-codec';
 import {
-  hasRepoLayer,
+  localEntries,
   localEntry,
   persist,
   repoEntry,
@@ -46,23 +46,35 @@ function updateOverrides(change: (all: AdjustOverrides) => void): void {
   writeJson(ADJUST_KEY, all);
 }
 
+/** Le personnage a-t-il une version livrée avec le jeu ? (connu dès la lecture de sa fiche) */
+export const hasRepoLayer = (charId: string): boolean => repoFiles.has(charId);
+
 /**
- * Après le chargement d'un personnage du jeu : réapplique les réglages modifiés sur l'appareil,
- * sauf ceux antérieurs à la version livrée (déjà intégrés au dépôt), qui sont oubliés.
+ * À la lecture de la fiche d'un personnage du jeu : les réglages modifiés sur l'appareil avant la date de
+ * cette version sont déjà intégrés au dépôt, on les oublie. Les autres sont réappliqués image par image,
+ * quand chaque image est chargée (applyStoredAdjust).
  */
-export function applyAdjustOverrides(charId: string, file: CharacterFile): void {
+export function registerRepoManifest(charId: string, file: CharacterFile): void {
   repoFiles.set(charId, file);
   const updated = file.updated ?? 0;
   updateOverrides((all) => {
     const mine = all[charId] ?? {};
     for (const [key, stored] of Object.entries(mine) as [SpriteKey, StoredAdjust][]) {
-      const entry = repoEntry(charId, key);
-      if (!entry || stored.at <= updated) delete mine[key];
-      else Object.assign(entry, { adj: { ...stored.adj }, adjAt: stored.at });
+      if (stored.at <= updated) delete mine[key];
     }
     if (Object.keys(mine).length) all[charId] = mine;
     else delete all[charId];
   });
+}
+
+const storedAdjust = (charId: string): Partial<Record<SpriteKey, StoredAdjust>> =>
+  readJson<AdjustOverrides>(ADJUST_KEY, {})[charId] ?? {};
+
+/** Une image du jeu vient d'être chargée : lui rend le réglage modifié sur cet appareil, s'il y en a un. */
+export function applyStoredAdjust(charId: string, key: SpriteKey): void {
+  const stored = storedAdjust(charId)[key];
+  const entry = repoEntry(charId, key);
+  if (stored && entry) Object.assign(entry, { adj: { ...stored.adj }, adjAt: stored.at });
 }
 
 /** Enregistre le réglage de l'image affichée, qu'elle vienne de l'appareil ou du jeu. */
@@ -91,10 +103,11 @@ export function resetAdjust(charId: string, key: SpriteKey): void {
 /** Les changements à envoyer d'un personnage livré avec le jeu (aucun pour un personnage local). */
 export function pendingChanges(charId: string): PendingChange[] {
   if (!hasRepoLayer(charId)) return [];
-  const changes: PendingChange[] = [];
-  for (const [key, entry] of spriteEntries(charId)) {
-    if (entry.src === 'local') changes.push({ key, kind: 'image' });
-    else if (entry.adjAt) changes.push({ key, kind: 'adjust' });
+  const changes: PendingChange[] = localEntries(charId).map(([key]) => ({ key, kind: 'image' }));
+  // les réglages sont lus dans le stockage : pas besoin que les images du jeu soient chargées
+  const images = new Set(changes.map((c) => c.key));
+  for (const key of Object.keys(storedAdjust(charId)) as SpriteKey[]) {
+    if (!images.has(key)) changes.push({ key, kind: 'adjust' });
   }
   return changes;
 }

@@ -1243,7 +1243,8 @@ i.b {
 html:not([data-started]) #cv {
   visibility: hidden;
 }
-html:not([data-started]) #app::after {
+html:not([data-started]) #app::after,
+body.loading #app::after {
   content: 'CHARGEMENT…';
   position: absolute;
   inset: 0;
@@ -1257,6 +1258,10 @@ html:not([data-started]) #app::after {
   color: var(--y);
   text-shadow: 3px 3px 0 #000;
   animation: bl 0.8s steps(2) infinite;
+}
+body.loading #app::after {
+  z-index: 6;
+  pointer-events: none;
 }
 @media (orientation: portrait) and (pointer: coarse) {
   html:not([data-started]) #rotate {

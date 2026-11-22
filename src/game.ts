@@ -1,5 +1,6 @@
 /* Déroulement du jeu : quel écran vient après quel autre (menus ▸ rencontre ▸ combat ▸ victoire ▸ fin). */
 import { playMusic } from './audio/audio';
+import { ensureSprites, isLoaded, type SpriteGroup } from './assets/repo-characters';
 import { clamp, shuffle } from './core/math';
 import { settings } from './core/settings';
 import { roster } from './data/roster';
@@ -43,7 +44,11 @@ class Game implements UiActions {
   /** Partie en cours avec un autre appareil sur le même Wi-Fi. */
   private lan: LanGame | null = null;
 
+  /** Chaque changement de scène invalide le combat de démonstration en cours de chargement. */
+  private attractToken = 0;
+
   private setScene(scene: Scene): void {
+    this.attractToken++;
     this.scene = scene;
     this.paused = false;
     this.heldForSprites = false;
@@ -88,21 +93,46 @@ class Game implements UiActions {
     return this.fighters?.[0] ?? null;
   }
 
+  /**
+   * Charge les images de ces personnages. Un petit message s'affiche si cela dure plus d'un instant
+   * (premier combat avec un personnage : ses images n'étaient pas encore chargées).
+   */
+  private async load(chars: readonly Character[], group: SpriteGroup): Promise<void> {
+    const waiting = chars.filter((c) => !isLoaded(c.id, group));
+    if (!waiting.length) return;
+    const timer = setTimeout(() => document.body.classList.add('loading'), 250);
+    try {
+      await Promise.all(waiting.map((c) => ensureSprites(c.id, group)));
+    } finally {
+      clearTimeout(timer);
+      document.body.classList.remove('loading');
+    }
+  }
+
   /** Combat console contre console qui tourne derrière les menus. */
   startAttract(): void {
     input.twoPlayers = false;
-    const [a, b] = shuffle(roster) as [Character, Character];
-    this.setScene(
-      new FightScene({
-        chars: [a, b ?? a],
-        ais: [new Ai(ATTRACT_LEVEL), new Ai(ATTRACT_LEVEL)],
-        stage: stageForCharacter(b ?? a),
-        rounds: 1,
-        mode: 'attract',
-        onEnd: () => this.startAttract(),
-      }),
-    );
-    playMusic('menu');
+    // de préférence deux personnages dont les images sont déjà chargées (ceux qui viennent de combattre)
+    const ready = roster.filter((c) => isLoaded(c.id, 'all'));
+    const [a, b] = shuffle(ready.length >= 2 ? ready : roster) as [Character, Character];
+    const token = this.attractToken;
+    const start = () => {
+      if (token !== this.attractToken) return; // un autre écran a pris la place pendant le chargement
+      this.setScene(
+        new FightScene({
+          chars: [a, b ?? a],
+          ais: [new Ai(ATTRACT_LEVEL), new Ai(ATTRACT_LEVEL)],
+          stage: stageForCharacter(b ?? a),
+          rounds: 1,
+          mode: 'attract',
+          onEnd: () => this.startAttract(),
+        }),
+      );
+      playMusic('menu');
+    };
+    const chars = [a, b ?? a];
+    if (chars.every((c) => isLoaded(c.id, 'all'))) start();
+    else void Promise.all(chars.map((c) => ensureSprites(c.id, 'all'))).then(start);
   }
 
   private toMenu(): void {
@@ -186,9 +216,13 @@ class Game implements UiActions {
     const { mode } = this;
     this.fighters = [player, opponent];
     hideScreens();
+    const chars = [player, opponent];
     const fight = () => {
       playMusic('fight');
       wipe();
+      // le prochain adversaire du mode arcade se charge pendant ce combat
+      const next = this.ladder[this.ladderStep + 1];
+      if (mode === 'arcade' && next) void ensureSprites(next.id, 'all');
       this.setScene(
         new FightScene({
           chars: [player, opponent],
@@ -200,11 +234,20 @@ class Game implements UiActions {
         }),
       );
     };
-    if (mode === 'training') return fight();
+    if (mode === 'training') {
+      void this.load(chars, 'all').then(fight);
+      return;
+    }
     playMusic(null);
     const label = mode === 'arcade' ? `COMBAT ${this.ladderStep + 1} / ${this.ladder.length}` : '';
     const ladder = mode === 'arcade' ? { opponents: this.ladder, step: this.ladderStep } : undefined;
-    this.setScene(new Versus(player, opponent, label, fight, ladder));
+    // la rencontre n'a besoin que des poses de présentation : le reste se charge pendant qu'elle joue
+    void this.load(chars, 'preview').then(() => {
+      void Promise.all(chars.map((c) => ensureSprites(c.id, 'all')));
+      this.setScene(
+        new Versus(player, opponent, label, () => void this.load(chars, 'all').then(fight), ladder),
+      );
+    });
   }
 
   private endMatch(winnerIndex: number): void {
@@ -239,11 +282,15 @@ class Game implements UiActions {
 
   private playEnding(champion: Character): void {
     hideScreens();
-    this.setScene(
-      new Ending(champion, () => {
-        this.startAttract();
-        showScreen('title');
-      }),
+    // le générique montre jusqu'à huit personnages autour du champion
+    const cast = [champion, ...roster.filter((c) => c !== champion).slice(0, 8)];
+    void this.load(cast, 'preview').then(() =>
+      this.setScene(
+        new Ending(champion, () => {
+          this.startAttract();
+          showScreen('title');
+        }),
+      ),
     );
   }
 

@@ -1,6 +1,7 @@
 /* Panneau « Créer son apparence à partir d'une photo » de l'écran des sprites : un prompt à copier pour
    générer l'image de garde d'un nouveau personnage, avec une photo de la personne et l'image de garde
    d'un personnage existant comme modèle de direction artistique (sur fond magenta, comme les autres). */
+import { ensureSprites, isLoaded, knowsSprite } from '../assets/repo-characters';
 import { spriteEntry } from '../assets/sprite-store';
 import { escapeHtml } from '../core/text';
 import { buildCreationPrompt } from '../data/prompts';
@@ -48,7 +49,7 @@ function saveDesc(id: string, text: string): void {
 }
 
 /** Personnages dont l'image de garde peut servir de modèle (les autres que celui qu'on crée). */
-const references = (char: Character) => roster.filter((c) => c !== char && spriteEntry(c.id, 'idle'));
+const references = (char: Character) => roster.filter((c) => c !== char && knowsSprite(c.id, 'idle'));
 
 /** Image de garde d'un personnage, posée sur fond magenta au format des images générées. */
 function referenceImage(char: Character): HTMLCanvasElement | null {
@@ -77,6 +78,8 @@ export function refreshCreation(char: Character): void {
   const previous = select.value;
   select.innerHTML = refs.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
   if (refs.some((c) => c.id === previous)) select.value = previous;
+  // l'image du modèle choisi est chargée dès maintenant : elle doit être prête quand on la copie
+  if (select.value) void ensureSprites(select.value, 'idle');
   if (changed) {
     $<HTMLTextAreaElement>('#crDesc').value = readDesc(char.id);
     $<HTMLDetailsElement>('#crBox').open = !spriteEntry(char.id, 'idle');
@@ -92,8 +95,17 @@ export function initCreation(): void {
     const prompt = buildCreationPrompt(current, $<HTMLTextAreaElement>('#crDesc').value, ref.name);
     void copyText(prompt, 'Prompt de création copié');
   });
+  on(
+    '#crRef',
+    () => {
+      const ref = selectedReference();
+      if (ref) void ensureSprites(ref.id, 'idle');
+    },
+    'change',
+  );
   on('#crImg', async () => {
     const ref = selectedReference();
+    if (ref && !isLoaded(ref.id, 'idle')) return toast("L'image du modèle charge : réessaie dans un instant");
     const image = ref && referenceImage(ref);
     if (!image) return toast('Choisis un modèle de style');
     if (await copyImage(image)) toast(`Image de ${ref.name} copiée`);
@@ -101,6 +113,7 @@ export function initCreation(): void {
   });
   on('#crShare', () => {
     const ref = selectedReference();
+    if (ref && !isLoaded(ref.id, 'idle')) return toast("L'image du modèle charge : réessaie dans un instant");
     const image = ref && referenceImage(ref);
     if (image) void shareOrDownloadImage(image, `reference-${ref.id}.png`);
   });

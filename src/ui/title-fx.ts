@@ -1,5 +1,6 @@
 /* Écran titre : derrière le logo, un bandeau noir où tous les personnages du jeu défilent en
    silhouette à leur couleur, sur des traits de vitesse. Dessiné petit puis agrandi : grain pixel art. */
+import { spritesPending } from '../assets/repo-characters';
 import { roster } from '../data/roster';
 import { drawCharacter } from '../render/character-draw';
 import { slantPath, speedLines } from '../render/motion';
@@ -36,6 +37,8 @@ export function tickTitle(): void {
   speedLines(ctx, t + 50, -1, '#ffd23a', zone, 7);
   const span = Math.max(W + 400, roster.length * GAP);
   roster.forEach((char, i) => {
+    // ses images arrivent en arrière-plan : il rejoint le défilé dès qu'elles sont là
+    if (spritesPending(char.id)) return;
     const x = ((t * SPEED + i * GAP) % span) - 200;
     const pose = Math.floor((t + i * 5) / 9) % 2 ? 'walkA' : 'walkB';
     drawCharacter(ctx, char, pose, x, BAND_TOP + BAND_H - 6, 1, 1.05, 0, { silhouette: char.color });

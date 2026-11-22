@@ -66,8 +66,10 @@ export function spriteEntries(charId: string): [SpriteKey, SpriteEntry][] {
   return [...merged];
 }
 export const spriteCount = (charId: string): number => spriteEntries(charId).length;
-/** Le personnage a-t-il une version livrée avec le jeu ? */
-export const hasRepoLayer = (charId: string): boolean => !!layers.repo.get(charId)?.size;
+/** Les images importées sur cet appareil pour ce personnage. */
+export const localEntries = (charId: string): [SpriteKey, SpriteEntry][] => [
+  ...(layers.local.get(charId) ?? []),
+];
 
 /** Un personnage s'affiche avec ses images dès que sa pose de repos existe ; sinon, avec le pantin. */
 export const usesSprites = (char: Character): boolean => hasSprite(char.id, 'idle');
