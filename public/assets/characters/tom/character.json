@@ -8,27 +8,33 @@
   "quote": "À qui le tour ?",
   "files": {
     "stage": "stage.webp",
-    "portrait": "portrait.webp",
-    "idle": "idle.webp",
-    "kick_heavy": "kick_heavy.webp",
     "block": "block.webp",
-    "intro": "intro.webp",
-    "hit": "hit.webp",
+    "kick_heavy": "kick_heavy.webp",
     "kick_light": "kick_light.webp",
+    "idle": "idle.webp",
+    "hit": "hit.webp",
+    "intro": "intro.webp",
+    "portrait": "portrait.webp",
     "crouch": "crouch.webp",
-    "punch_light": "punch_light.webp",
     "punch_heavy": "punch_heavy.webp",
     "jump_kick": "jump_kick.webp",
+    "punch_light": "punch_light.webp",
     "super": "super.webp",
     "uppercut": "uppercut.webp",
-    "win": "win.webp",
-    "sp_spin_kick": "sp_spin_kick.webp",
     "jump": "jump.webp",
+    "fall": "fall.webp",
     "walk1": "walk1.webp",
+    "win": "win.webp",
+    "down": "down.webp",
     "crouch_punch": "crouch_punch.webp",
     "jump_punch": "jump_punch.webp",
-    "down": "down.webp",
-    "fall": "fall.webp"
+    "sp_spin_kick": "sp_spin_kick.webp",
+    "crouch_block": "crouch_block.webp",
+    "crouch_kick": "crouch_kick.webp",
+    "sp_sway": "sp_sway.webp",
+    "sp_lob_throw": "sp_lob_throw.webp",
+    "walk2": "walk2.webp",
+    "pj_bottle": "pj_bottle.webp"
   },
   "adjust": {
     "stage": {
@@ -36,14 +42,9 @@
       "dx": 0,
       "dy": 0
     },
-    "portrait": {
-      "s": 1,
+    "block": {
+      "s": 1.03,
       "dx": 0,
-      "dy": 0
-    },
-    "idle": {
-      "s": 1,
-      "dx": 9,
       "dy": 0
     },
     "kick_heavy": {
@@ -51,8 +52,18 @@
       "dx": -17,
       "dy": 0
     },
-    "block": {
-      "s": 1.03,
+    "kick_light": {
+      "s": 1.04,
+      "dx": 10,
+      "dy": 0
+    },
+    "idle": {
+      "s": 1,
+      "dx": 9,
+      "dy": 0
+    },
+    "hit": {
+      "s": 1,
       "dx": 0,
       "dy": 0
     },
@@ -61,24 +72,14 @@
       "dx": 14,
       "dy": 0
     },
-    "hit": {
+    "portrait": {
       "s": 1,
       "dx": 0,
-      "dy": 0
-    },
-    "kick_light": {
-      "s": 1.04,
-      "dx": 10,
       "dy": 0
     },
     "crouch": {
       "s": 1.22,
       "dx": 34,
-      "dy": 0
-    },
-    "punch_light": {
-      "s": 1,
-      "dx": 0,
       "dy": 0
     },
     "punch_heavy": {
@@ -91,6 +92,11 @@
       "dx": 28,
       "dy": 0
     },
+    "punch_light": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
     "super": {
       "s": 1,
       "dx": 0,
@@ -101,25 +107,30 @@
       "dx": 0,
       "dy": 0
     },
-    "win": {
-      "s": 1,
-      "dx": 0,
-      "dy": 0
-    },
-    "sp_spin_kick": {
-      "s": 1,
-      "dx": 0,
-      "dy": 0
-    },
     "jump": {
       "s": 1.05,
       "dx": 7,
+      "dy": 0
+    },
+    "fall": {
+      "s": 1,
+      "dx": 0,
       "dy": 0
     },
     "walk1": {
       "s": 1,
       "dx": 0,
       "dy": 0
+    },
+    "win": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "down": {
+      "s": 1,
+      "dx": 0,
+      "dy": 6
     },
     "crouch_punch": {
       "s": 1.23,
@@ -131,16 +142,41 @@
       "dx": 16,
       "dy": 0
     },
-    "down": {
+    "sp_spin_kick": {
       "s": 1,
       "dx": 0,
-      "dy": 6
+      "dy": 0
     },
-    "fall": {
+    "crouch_block": {
+      "s": 1.1,
+      "dx": 31,
+      "dy": 0
+    },
+    "crouch_kick": {
+      "s": 1.27,
+      "dx": -34,
+      "dy": 0
+    },
+    "sp_sway": {
+      "s": 1,
+      "dx": 0,
+      "dy": 0
+    },
+    "sp_lob_throw": {
+      "s": 1.04,
+      "dx": -13,
+      "dy": 0
+    },
+    "walk2": {
+      "s": 1.05,
+      "dx": -5,
+      "dy": 0
+    },
+    "pj_bottle": {
       "s": 1,
       "dx": 0,
       "dy": 0
     }
   },
-  "updated": 1795335867807
+  "updated": 1795350079507
 }
