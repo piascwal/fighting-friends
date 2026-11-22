@@ -8,7 +8,7 @@ import { press, run } from './harness';
 /** Spéciaux qui ne frappent pas eux-mêmes : garde de contre, pas éclair, posture, rage, méditation. */
 const NO_HIT: Partial<Record<StyleId, MoveId[]>> = {
   counter: ['s1h'],
-  lazy: ['s2h'],
+  lazy: ['s2l', 's2h'],
   storm: ['s2h'],
   tiger: ['s2h'],
   berserker: ['s2h'],

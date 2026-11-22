@@ -33,7 +33,7 @@ describe('flemmard', () => {
     expect(ball('s1l', 120).hits).toBeGreaterThanOrEqual(1);
   });
 
-  it('la sieste soigne', () => {
+  it('la flemme soigne', () => {
     const { sim, pad } = createTraining({ style: 'lazy', distance: 300 });
     const me = sim.fighters[0];
     me.hp = 500;

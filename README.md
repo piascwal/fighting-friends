@@ -67,7 +67,7 @@ Taekwondo, Tempête, Poing ivre, Soldat (coups à charge), Enchaîneur (frappe e
 échec avec armure, bagarre « gants jetés » en super) et Dresseur (son animal de compagnie fonce, bondit par-dessus lui et
 bouscule l'adversaire ; ses images se génèrent à partir d'une photo de l'animal).
 S'y ajoutent Padel (balle tendue et smash à la raquette), Yogi (mandala, lévitation, esprit totem) et
-Danseuse (pirouettes, pole dance, projecteurs du club) et Flemmard (une-deux au ballon qui revient, sieste qui soigne). Changer le style d'un personnage ne fait perdre aucune image ; la liste
+Danseuse (pirouettes, pole dance, projecteurs du club) et Flemmard (une-deux au ballon qui revient, flemme nonchalante qui soigne). Changer le style d'un personnage ne fait perdre aucune image ; la liste
 des styles indique ceux qui sont déjà pris, et un nouveau personnage reçoit d'office un style libre.
 
 ## Jouer à deux sur le même Wi-Fi

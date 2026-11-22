@@ -1,7 +1,6 @@
 /* FLEMMARD : très flemmard, mais très fort tactiquement au foot. Son spécial est un une-deux : il
-   envoie le ballon, qui revient vers lui en repassant par l'adversaire. Sa flemme : une sieste en plein
-   combat (il encaisse un coup sans broncher et récupère de la vie), puis un réveil en mauvaise humeur. */
-import { hit, moveSet, special, superMove } from '../move-builders';
+   envoie le ballon, qui revient vers lui en repassant par l'adversaire. Sa flemme : il fait mine de ne pas vouloir se battre (bâille, hausse les épaules), encaisse un coup sans broncher et regagne de la vie. */
+import { moveSet, special, superMove } from '../move-builders';
 import { NORMALS } from '../normals';
 import type { StyleDef } from '../types';
 
@@ -38,31 +37,18 @@ const oneTwo = (heavy: boolean) =>
     },
   });
 
-/** La flemme : sieste qui encaisse un coup et soigne, puis coup de pied de réveil. */
+/** La flemme : il hausse les épaules, bâille, et fait comme si de rien n'était. Encaisse un coup, regagne de la vie. */
 const flemme = (heavy: boolean) => {
-  const total = heavy ? 74 : 62;
-  const wake = heavy ? 48 : 38;
+  const total = heavy ? 64 : 50;
   return special({
     name: 'Flemme',
     total,
-    low: true,
-    armor: [4, heavy ? 40 : 30],
-    heal: { t: heavy ? 36 : 28, amount: heavy ? 90 : 60 },
+    sprite: 'sp_nonchalant',
+    armor: [3, total - 14],
+    heal: { t: total - 14, amount: heavy ? 100 : 65 },
     anim: [
-      [0, 'crouch', 0.9],
-      [5, 'nap', 1],
-      [wake - 4, 'windK', 0.9],
-      [wake, 'hk', 1],
-      [total - 10, 'idle', 0.35],
-    ],
-    hits: [
-      hit(wake, 5, [10, -130, 110, 100], heavy ? 95 : 80, {
-        launch: [5, -9],
-        fx: 'heavy',
-        kb: 7,
-        stop: 12,
-        sw: 'up',
-      }),
+      [0, 'nonchalant', 0.7],
+      [total - 8, 'idle', 0.35],
     ],
   });
 };
@@ -70,7 +56,7 @@ const flemme = (heavy: boolean) => {
 export const lazy: StyleDef = {
   id: 'lazy',
   label: 'Flemmard',
-  hint: 'Une-deux au ballon, sieste qui soigne',
+  hint: 'Une-deux au ballon, flemme qui soigne',
   archetype: 'Stratège',
   tags: ['Projectile', 'Armure', 'Soin', 'Coup bas'],
   stats: { hp: 980, speed: 3.8, jump: 22, power: 1 },

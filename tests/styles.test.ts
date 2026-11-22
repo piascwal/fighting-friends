@@ -23,6 +23,7 @@ const NO_DAMAGE: Record<string, readonly MoveId[]> = {
   tiger: ['s2l', 's2h'], // posture : ce sont ses suites qui frappent
   berserker: ['s2l', 's2h'], // rage
   monk: ['s2l', 's2h'], // méditation
+  lazy: ['s2l', 's2h'], // flemme
 };
 
 /** Lance un coup par ordre direct (comme la console), le mannequin placé à `distance`. */

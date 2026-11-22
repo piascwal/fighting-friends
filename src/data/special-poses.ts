@@ -224,11 +224,11 @@ export const SPECIAL_POSES = {
     "tir de footballeur : il vient de frapper un ballon du coup de pied avant, jambe tendue devant lui, bras écartés pour l'équilibre, buste légèrement en arrière, l'air détendu et sûr de lui (ne dessine PAS le ballon)",
     {},
   ),
-  sp_nap: pose(
-    'Sieste',
-    'nap',
-    'il fait la sieste : avachi au sol, assis le dos contre le sol, la tête qui tombe sur la poitrine, les yeux fermés, bouche entrouverte, bras ballants, totalement avachi',
-    { h: 0.55, ax: 0.5, fb: ['crouch', 'idle'] },
+  sp_nonchalant: pose(
+    'Nonchalance',
+    'nonchalant',
+    "attitude de flemme totale : debout, épaules haussées et affaissées, les mains dans les poches ou les bras ballants, tête penchée sur le côté, il bâille en se grattant la nuque, l'air complètement blasé et pas du tout concerné par le combat",
+    {},
   ),
   sp_slapshot: pose(
     'Lancer frappé',
