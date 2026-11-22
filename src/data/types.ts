@@ -59,7 +59,8 @@ export type ProjectileLook =
   | 'beam'
   | 'puck'
   | 'companion'
-  | 'ball';
+  | 'ball'
+  | 'football';
 
 export interface ProjectileDef {
   /** Frame d'apparition. */
@@ -104,6 +105,8 @@ export interface ProjectileDef {
   lvl?: HitLevel;
   /** Projection appliquée par la dernière touche. */
   launchLast?: Launch;
+  /** Frame (depuis l'apparition) où il fait demi-tour et revient vers son lanceur (une-deux). */
+  turnAt?: number;
 }
 
 /** [frame, posture visée, vitesse de transition 0..1] */
@@ -211,7 +214,8 @@ export type StyleId =
   | 'trainer'
   | 'padel'
   | 'yogi'
-  | 'dancer';
+  | 'dancer'
+  | 'lazy';
 
 /** Capacités d'un style, affichées pour aider à choisir. */
 export type StyleTag =

@@ -96,6 +96,10 @@ export function updateProjectiles(list: Projectile[], emit: Emit, onHit: OnHit):
       }
     }
     p.age++;
+    if (p.def.turnAt && p.age === p.def.turnAt) {
+      p.vx = -p.vx;
+      p.dir = -p.dir;
+    }
     p.cooldown--;
     hitTarget(p, onHit, emit);
     clash(p, list, emit);

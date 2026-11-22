@@ -23,6 +23,7 @@ import { tech } from './tech';
 import { tiger } from './tiger';
 import { trainer } from './trainer';
 import { dancer } from './dancer';
+import { lazy } from './lazy';
 import { padel } from './padel';
 import { yogi } from './yogi';
 import { trapper } from './trapper';
@@ -55,5 +56,6 @@ export const STYLES: Record<StyleId, StyleDef> = {
   padel,
   yogi,
   dancer,
+  lazy,
 };
 export const STYLE_LIST: readonly StyleDef[] = Object.values(STYLES);

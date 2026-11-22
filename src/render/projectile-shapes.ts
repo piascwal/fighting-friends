@@ -167,6 +167,28 @@ function drawBall(ctx: Ctx, w: number, h: number): void {
   ctx.stroke();
 }
 
+/** Ballon de foot (en attendant son image) : sphère blanche à pavés noirs, qui tourne. */
+function drawFootball(ctx: Ctx, w: number, h: number, age: number): void {
+  const r = Math.min(w, h) / 2;
+  ctx.fillStyle = '#f4f4f4';
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, 7);
+  ctx.fill();
+  ctx.fillStyle = '#1d1b26';
+  const a = age * 0.35;
+  for (let i = 0; i < 3; i++) {
+    const t = a + (i * Math.PI * 2) / 3;
+    ctx.beginPath();
+    ctx.arc(Math.cos(t) * r * 0.55, Math.sin(t) * r * 0.55, r * 0.26, 0, 7);
+    ctx.fill();
+  }
+  ctx.strokeStyle = '#1d1b26';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, 7);
+  ctx.stroke();
+}
+
 /** Animal de compagnie (en attendant ses images) : silhouette de chien qui galope. */
 function drawCompanion(ctx: Ctx, w: number, h: number, age: number): void {
   const stride = Math.floor(age / 5) % 2 ? 0.18 : -0.18;
@@ -279,5 +301,7 @@ export function drawProjectileShape(ctx: Ctx, look: ProjectileLook, w: number, h
       return drawCompanion(ctx, w, h, age);
     case 'ball':
       return drawBall(ctx, w, h);
+    case 'football':
+      return drawFootball(ctx, w, h, age);
   }
 }

@@ -218,6 +218,18 @@ export const SPECIAL_POSES = {
     'en méditation : assis en tailleur au sol, dos bien droit, mains posées sur les genoux paumes vers le haut, yeux fermés, expression sereine',
     { h: 0.55, ax: 0.5, fb: ['crouch', 'idle'] },
   ),
+  sp_ball_kick: pose(
+    'Tir au ballon',
+    'ballKick',
+    "tir de footballeur : il vient de frapper un ballon du coup de pied avant, jambe tendue devant lui, bras écartés pour l'équilibre, buste légèrement en arrière, l'air détendu et sûr de lui (ne dessine PAS le ballon)",
+    {},
+  ),
+  sp_nap: pose(
+    'Sieste',
+    'nap',
+    'il fait la sieste : avachi au sol, assis le dos contre le sol, la tête qui tombe sur la poitrine, les yeux fermés, bouche entrouverte, bras ballants, totalement avachi',
+    { h: 0.55, ax: 0.5, fb: ['crouch', 'idle'] },
+  ),
   sp_slapshot: pose(
     'Lancer frappé',
     'slapshot',
@@ -382,6 +394,10 @@ export const SPECIAL_POSES = {
   pj_beam: projectile(
     'Rayon',
     "un rayon d'énergie horizontal, long et épais, très lumineux au centre, qui traverse toute la largeur de l'image",
+  ),
+  pj_football: projectile(
+    'Ballon de foot',
+    "un ballon de football classique noir et blanc vu de côté, qui file très vite en tournant, avec une traînée de vitesse et quelques brins d'herbe arrachés vers la gauche",
   ),
   pj_puck: projectile(
     'Palet',

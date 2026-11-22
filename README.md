@@ -59,7 +59,7 @@ copies locales sont effacées et les marqueurs disparaissent au chargement suiva
 Chaque personnage peut aussi avoir son **décor** : carte « Décor » dans l'écran des sprites, avec un prompt à
 compléter par la description de la scène et une image guide qui fixe le sol et la taille des combattants.
 
-**25 styles de combat**, chacun avec sa famille et ses capacités (affichées à la sélection) :
+**26 styles de combat**, chacun avec sa famille et ses capacités (affichées à la sélection) :
 Équilibré, Rapide, Lourd, Technique, Lutteur (prises imparables), Maître du contre, Givre, Voltigeur, Boxeur,
 Taekwondo, Tempête, Poing ivre, Soldat (coups à charge), Enchaîneur (frappe en trois temps), Tigre (posture
 à quatre sorties), Berserker (rage temporaire), Artificier (mines), Miroir (renvoie les projectiles), Énergiste
@@ -67,7 +67,7 @@ Taekwondo, Tempête, Poing ivre, Soldat (coups à charge), Enchaîneur (frappe e
 échec avec armure, bagarre « gants jetés » en super) et Dresseur (son animal de compagnie fonce, bondit par-dessus lui et
 bouscule l'adversaire ; ses images se génèrent à partir d'une photo de l'animal).
 S'y ajoutent Padel (balle tendue et smash à la raquette), Yogi (mandala, lévitation, esprit totem) et
-Danseuse (pirouettes, pole dance, projecteurs du club). Changer le style d'un personnage ne fait perdre aucune image ; la liste
+Danseuse (pirouettes, pole dance, projecteurs du club) et Flemmard (une-deux au ballon qui revient, sieste qui soigne). Changer le style d'un personnage ne fait perdre aucune image ; la liste
 des styles indique ceux qui sont déjà pris, et un nouveau personnage reçoit d'office un style libre.
 
 ## Jouer à deux sur le même Wi-Fi
