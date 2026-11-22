@@ -100,7 +100,7 @@ class Game implements UiActions {
   private async load(chars: readonly Character[], group: SpriteGroup): Promise<void> {
     const waiting = chars.filter((c) => !isLoaded(c.id, group));
     if (!waiting.length) return;
-    const timer = setTimeout(() => document.body.classList.add('loading'), 250);
+    const timer = setTimeout(() => document.body.classList.add('loading'), 150);
     try {
       await Promise.all(waiting.map((c) => ensureSprites(c.id, group)));
     } finally {

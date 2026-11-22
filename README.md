@@ -91,9 +91,9 @@ Le jeu est une application web installable (PWA) : une fois installé, il se lan
   _Installer l'application_).
 - **iPhone** : ouvrir le jeu dans Safari, bouton **Partager** ▸ **Sur l'écran d'accueil**.
 
-Pour travailler les sprites en alternant avec un générateur d'images, pas besoin de tourner le téléphone :
-le message « Tourne ton téléphone » a un bouton **Personnages & sprites**, et cet écran s'utilise à la
-verticale. Sur Android, un appui long sur l'icône du jeu propose aussi ce raccourci.
+Pour travailler les sprites en alternant avec un générateur d'images : **Options ▸ Personnages & sprites** passe
+le jeu à la verticale (quand le téléphone le permet) et le remet à l'horizontale en quittant cet écran. Sur
+Android, un appui long sur l'icône du jeu propose aussi ce raccourci.
 
 Sans installation, le jeu passe quand même en plein écran au premier appui (sauf sur iPhone, où Safari ne le
 permet pas).

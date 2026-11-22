@@ -131,6 +131,8 @@ function confirm(): void {
   s.picks[step] = char;
   s.flash[step] = 14;
   playSfx('ok');
+  // choisi : toutes ses images se chargent dès maintenant, pendant l'animation de validation
+  void ensureSprites(char.id, 'all');
   if (s.mode === 'lan') {
     // en réseau, chacun ne choisit que le sien : l'hôte lance le combat quand les deux ont choisi
     refresh();

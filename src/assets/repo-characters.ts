@@ -13,7 +13,7 @@ import { addCharacter, characterById } from '../data/roster';
 import { SPRITE_BY_KEY, SPRITE_POSES, isSpriteKey, type SpriteKey } from '../data/sprite-poses';
 import type { CharacterDef } from '../data/types';
 import { saveCustomCharacters, setOverride, type CharacterFile } from './character-files';
-import { loadImage, prepareStage, removeMagentaBackground } from './chroma-key';
+import { loadImage, prepareStage } from './chroma-key';
 import { toCanvas } from './image-codec';
 import { applyStoredAdjust, registerRepoManifest } from './local-changes';
 import {
@@ -191,8 +191,10 @@ async function loadRepoImage(
   const response = await fetch(url);
   if (!response.ok) throw new Error(`image absente : ${url}`);
   const blob = await response.blob();
-  // images déjà détourées : seul le recadrage s'applique, les couleurs ne changent pas
-  return { canvas: removeMagentaBackground(toCanvas(await createImageBitmap(blob))), blob };
+  // Les images du dépôt viennent de l'export du jeu : déjà détourées, recadrées au pixel près et
+  // plafonnées à 640 px. Les repasser dans le détourage (lecture de tous les pixels) ne change rien et
+  // monopolise le processeur : on se contente de les décoder.
+  return { canvas: toCanvas(await createImageBitmap(blob)), blob };
 }
 
 /**

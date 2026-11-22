@@ -178,20 +178,6 @@ body.infight #pauseBtn {
 body.portrait.touch:not([data-screen='chars']) #rotate {
   display: flex;
 }
-#rotate .nav {
-  margin-top: 10px;
-  font-size: 18px;
-  padding: 10px 18px;
-}
-#rotate .nav small {
-  display: block;
-  font:
-    600 11px system-ui,
-    sans-serif;
-  letter-spacing: 0;
-  opacity: 0.75;
-  margin-top: 3px;
-}
 #rotate p {
   margin: 0;
 }
@@ -1123,7 +1109,6 @@ i.b {
 
 /* direction artistique : angles droits partout dans les menus (les commandes tactiles restent rondes) */
 #ui *,
-#rotate .nav,
 #toast,
 #update,
 #update button {
@@ -1266,10 +1251,6 @@ body.loading #app::after {
 @media (orientation: portrait) and (pointer: coarse) {
   html:not([data-started]) #rotate {
     display: flex;
-  }
-  /* le raccourci vers les sprites n'est utilisable qu'une fois le jeu chargé */
-  html:not([data-started]) #rotateChars {
-    visibility: hidden;
   }
 }
 

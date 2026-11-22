@@ -83,7 +83,6 @@ export function initUi(actions: UiActions): void {
   initCharacters(openOptions);
   initMoves();
   initLan();
-  $('#rotateChars').addEventListener('click', openCharactersShortcut);
   input.onKey = onKey;
   document.addEventListener('pointerdown', unlockAudio, { once: true });
   showScreen('title');

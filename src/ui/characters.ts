@@ -4,7 +4,7 @@ import { exportCharacterZip, saveCharacterSettings, saveCustomCharacters } from 
 import { exportChanges, hasRepoLayer, pendingChange, pendingChanges } from '../assets/local-changes';
 import { ensureSprites, isLoaded, spriteTotal } from '../assets/repo-characters';
 import { hasSprite, removeCharacterSprites, spriteCount, spriteEntries } from '../assets/sprite-store';
-import { allowAnyOrientation, lockLandscape } from '../core/display';
+import { lockLandscape, lockPortrait } from '../core/display';
 import { pick } from '../core/math';
 import { escapeHtml, slug } from '../core/text';
 import { buildPrompt, spritePosesFor } from '../data/prompts';
@@ -314,13 +314,13 @@ function copyMissingPrompts(): void {
 }
 
 /**
- * Ouvre l'écran des sprites. Il est utilisable à la verticale, pour passer facilement
- * du jeu au générateur d'images et inversement.
+ * Ouvre l'écran des sprites. Le jeu passe alors à la verticale (si le téléphone le permet), pour passer
+ * facilement du jeu au générateur d'images et inversement ; il repasse à l'horizontale en quittant l'écran.
  * @param back action du bouton Retour (par défaut : revenir aux options)
  */
 export function openCharacters(back?: () => void): void {
   goBack = back ?? defaultBack;
-  void allowAnyOrientation();
+  void lockPortrait(); // le jeu passe à la verticale ; en quittant, retour à l'horizontale
   closePoseModal();
   setCreating(false);
   refresh();
