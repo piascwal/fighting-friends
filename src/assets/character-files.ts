@@ -118,8 +118,8 @@ export function renameLegacySprite(charId: string, key: string): SpriteKey | nul
   return null;
 }
 
-/** Télécharge `<id>.zip` : le dossier à déposer dans public/assets/characters/. */
-export async function exportCharacterZip(char: Character): Promise<void> {
+/** Fichiers du dossier complet d'un personnage (`<id>/character.json` + toutes ses images). */
+export async function characterZipFiles(char: Character): Promise<ZipFile[]> {
   const zipFiles: ZipFile[] = [];
   const files: CharacterFile['files'] = {};
   const adjust: CharacterFile['adjust'] = {};
@@ -147,7 +147,12 @@ export async function exportCharacterZip(char: Character): Promise<void> {
     name: `${char.id}/character.json`,
     data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)),
   });
-  downloadZip(zipFiles, `${char.id}.zip`);
+  return zipFiles;
+}
+
+/** Télécharge `<id>.zip` : le dossier à déposer dans public/assets/characters/. */
+export async function exportCharacterZip(char: Character): Promise<void> {
+  downloadZip(await characterZipFiles(char), `${char.id}.zip`);
 }
 
 /** Propose le téléchargement d'un .zip. */

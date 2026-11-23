@@ -1,7 +1,13 @@
 /* Écran « Personnages & sprites » : créer un personnage, voir les images manquantes, copier les prompts. */
 import { playSfx } from '../audio/audio';
 import { exportCharacterZip, saveCharacterSettings, saveCustomCharacters } from '../assets/character-files';
-import { exportChanges, hasRepoLayer, pendingChange, pendingChanges } from '../assets/local-changes';
+import {
+  exportChanges,
+  hasRepoLayer,
+  pendingChange,
+  pendingChanges,
+  settingsChanges,
+} from '../assets/local-changes';
 import { ensureSprites, isLoaded, spriteTotal } from '../assets/repo-characters';
 import { hasSprite, removeCharacterSprites, spriteCount, spriteEntries } from '../assets/sprite-store';
 import { lockLandscape, lockPortrait } from '../core/display';
@@ -29,6 +35,7 @@ import {
   initPoseModal,
   openPoseModal,
 } from './pose-modal';
+import { BULK_HTML, initBulkExport, openBulkExport } from './bulk-export';
 import { CREATION_HTML, initCreation, refreshCreation } from './creation-prompt';
 import { currentScreen, showScreen } from './screens';
 
@@ -40,7 +47,8 @@ export const CHARACTERS_HTML = `
   <div class="screen panel" id="s-chars">
     <div class="bar"><button class="nav sm alt" id="chBack">◀ RETOUR</button><h2>PERSONNAGES &amp; SPRITES</h2></div>
     <div class="scroll">
-      <div class="row" id="chTop"><select id="chSel"></select><button class="nav sm" id="chNewBtn">＋ NOUVEAU PERSONNAGE</button></div>
+      <div class="row" id="chTop"><select id="chSel"></select><button class="nav sm" id="chNewBtn">＋ NOUVEAU PERSONNAGE</button><button class="nav sm alt" id="chBulkBtn">EXPORT EN MASSE</button></div>
+      ${BULK_HTML}
       <div class="hidden" id="chNew">
         <h3>NOUVEAU PERSONNAGE</h3>
         <div class="row">
@@ -77,6 +85,7 @@ export const CHARACTERS_HTML = `
           <li>Seule la pose <b>Garde (repos)</b> est obligatoire pour jouer : les poses manquantes réutilisent la pose la plus proche. Plus tu en ajoutes, plus le personnage est vivant.</li>
           <li><b>EXPORTER .ZIP</b> crée le dossier à déposer dans <code>public/assets/characters/</code> du projet pour que le personnage soit disponible pour tout le monde.</li>
           <li>Pour un personnage déjà livré avec le jeu, ce que tu changes ici (image remplacée ou ajoutée, taille/position modifiée) est marqué <b>✎ À ENVOYER</b>. <b>EXPORTER LES CHANGEMENTS</b> crée un petit .zip avec seulement ces images et la liste des changements, à envoyer pour qu'ils soient intégrés au jeu.</li>
+          <li><b>EXPORT EN MASSE</b> liste tous les changements de tous les personnages (images, tailles, positions, style, couleur, nouveaux personnages) : coche ce que tu veux (ou <b>TOUT SÉLECTIONNER</b>) et tout part dans un seul .zip.</li>
         </ol>
         <p>Les images importées ici sont enregistrées uniquement sur cet appareil.</p>
       </details>
@@ -139,7 +148,7 @@ function refresh(): void {
   const char = selected();
   selectCharacter(char.id);
   const count = (c: Character) =>
-    `${spriteTotal(c.id)} sprite${spriteTotal(c.id) > 1 ? 's' : ''}${pendingChanges(c.id).length ? ' · ✎ à envoyer' : ''}`;
+    `${spriteTotal(c.id)} sprite${spriteTotal(c.id) > 1 ? 's' : ''}${pendingChanges(c.id).length || settingsChanges(c).length ? ' · ✎ à envoyer' : ''}`;
   const select = $<HTMLSelectElement>('#chSel');
   select.innerHTML = roster
     .map((c) => `<option value="${c.id}">${escapeHtml(c.name)} (${count(c)})</option>`)
@@ -323,6 +332,7 @@ export function openCharacters(back?: () => void): void {
   void lockPortrait(); // le jeu passe à la verticale ; en quittant, retour à l'horizontale
   closePoseModal();
   setCreating(false);
+  openBulkExport(false);
   refresh();
   showScreen('chars');
 }
@@ -392,10 +402,13 @@ export function initCharacters(onBack: () => void): void {
   });
   on('#chSend', async () => {
     const char = selected();
-    if (!pendingChanges(char.id).length) return toast('Aucun changement à envoyer pour ce personnage');
+    if (!pendingChanges(char.id).length && !settingsChanges(char).length)
+      return toast('Aucun changement à envoyer pour ce personnage');
     toast('Préparation du fichier…');
     await ensureSprites(char.id, 'all');
     await exportChanges(char);
   });
   on('#chCopyAll', copyMissingPrompts);
+  on('#chBulkBtn', () => openBulkExport(true));
+  initBulkExport(refresh);
 }

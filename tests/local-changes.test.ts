@@ -116,4 +116,20 @@ describe('changements locaux', () => {
     expect(manifest.adjust!.crouch).toEqual({ s: 0.9, dx: 4, dy: 0 });
     expect(manifest.updated).toBeGreaterThan(UPDATED);
   });
+
+  it("export partiel : un changement laissé de côté garde la version du jeu et reste sur l'appareil", async () => {
+    const at = Date.now() - 5_000;
+    putSprite(ID, 'win', img(), 'local', { at: Date.now() });
+    spriteEntry(ID, 'crouch')!.adj.dx = 4;
+    await saveAdjust(ID, 'crouch');
+    const char = { ...(characterById('ardan') as Character), id: ID, size: 0.8 };
+    // on n'exporte que l'image « victoire », sans les réglages du personnage
+    const manifest = changesManifest(char, { win: 'win.webp' }, { keys: new Set(['win']), settings: false });
+    expect(manifest.changes).toEqual({ images: ['win'], adjust: [] });
+    expect(manifest.adjust!.crouch).toEqual({ s: 0.9, dx: 0, dy: 0 });
+    expect(manifest.size).not.toBe(0.8);
+    // la date d'export précède le réglage non exporté : il ne sera pas effacé à la mise à jour
+    expect(manifest.updated).toBeLessThan(Date.now());
+    expect(manifest.updated).toBeGreaterThan(at);
+  });
 });

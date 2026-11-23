@@ -115,49 +115,110 @@ export function pendingChanges(charId: string): PendingChange[] {
 export const pendingChange = (charId: string, key: SpriteKey): PendingChange | undefined =>
   pendingChanges(charId).find((c) => c.key === key);
 
-/** Le character.json à jour : réglages et fichiers actuels, `updated` = maintenant, liste des changements. */
-export function changesManifest(char: Character, names: Partial<Record<SpriteKey, string>>): CharacterFile {
+/** Réglages du personnage (style, couleur, taille) changés sur l'appareil par rapport à la version du jeu. */
+export type SettingsField = 'style' | 'color' | 'size';
+
+export function settingsChanges(char: Character): SettingsField[] {
+  const repo = repoFiles.get(char.id);
+  if (!repo) return [];
+  const out: SettingsField[] = [];
+  if ((repo.style ?? repo.template ?? char.styleId) !== char.styleId) out.push('style');
+  if ((repo.color ?? char.color).toLowerCase() !== char.color.toLowerCase()) out.push('color');
+  if ((repo.size ?? 1) !== char.size) out.push('size');
+  return out;
+}
+
+/** Ce qu'on choisit d'exporter : des poses (image ou réglage) et, ou non, les réglages du personnage. */
+export interface ChangeSelection {
+  keys: ReadonlySet<SpriteKey>;
+  settings: boolean;
+}
+
+/** Tout exporter. */
+export const fullSelection = (char: Character): ChangeSelection => ({
+  keys: new Set(pendingChanges(char.id).map((c) => c.key)),
+  settings: true,
+});
+
+/** Date d'un changement fait sur l'appareil (inconnue pour les images importées avant cette information). */
+const changeTime = (charId: string, c: PendingChange): number | undefined =>
+  c.kind === 'image' ? localEntry(charId, c.key)?.at : storedAdjust(charId)[c.key]?.at;
+
+/**
+ * Date `updated` de l'export. Une fois dans le dépôt, les changements de l'appareil plus anciens que cette
+ * date sont absorbés (effacés) : si on n'exporte pas tout, elle se place juste avant le plus ancien
+ * changement laissé de côté, pour qu'il reste sur l'appareil.
+ */
+function exportDate(charId: string, left: PendingChange[]): number {
+  const times = left.map((c) => changeTime(charId, c) ?? Date.now());
+  return times.length ? Math.min(Date.now(), ...times) - 1 : Date.now();
+}
+
+/**
+ * Le character.json à jour : réglages et fichiers actuels pour les changements choisis, ceux du jeu pour
+ * les autres ; `updated` (voir exportDate) ; liste des changements exportés.
+ */
+export function changesManifest(
+  char: Character,
+  names: Partial<Record<SpriteKey, string>>,
+  selection: ChangeSelection = fullSelection(char),
+): CharacterFile {
   const repo = repoFiles.get(char.id) ?? {};
   const changes = pendingChanges(char.id);
+  const picked = changes.filter((c) => selection.keys.has(c.key));
+  const left = changes.filter((c) => !selection.keys.has(c.key));
   const files: CharacterFile['files'] = {};
   const adjust: CharacterFile['adjust'] = {};
   for (const [key, entry] of spriteEntries(char.id)) {
-    const name = names[key] ?? entry.file;
+    const skipped = left.some((c) => c.key === key);
+    // changement laissé de côté : on garde l'image du jeu (s'il y en a une) et son réglage d'origine
+    const shown = skipped ? repoEntry(char.id, key) : entry;
+    if (!shown) continue;
+    const name = skipped ? shown.file : (names[key] ?? shown.file);
     if (name) files[key] = name;
-    adjust[key] = { ...entry.adj };
+    adjust[key] = { ...(skipped ? (shown.repoAdj ?? shown.adj) : shown.adj) };
   }
+  const settings = selection.settings;
   return {
     ...repo,
     id: char.id,
     name: char.name,
-    style: char.styleId,
-    color: char.color,
-    size: char.size,
+    style: settings ? char.styleId : (repo.style ?? repo.template ?? char.styleId),
+    color: settings ? char.color : (repo.color ?? char.color),
+    size: settings ? char.size : (repo.size ?? 1),
     files,
     adjust,
-    updated: Date.now(),
+    updated: exportDate(char.id, left),
     changes: {
-      images: changes.filter((c) => c.kind === 'image').map((c) => c.key),
-      adjust: changes.filter((c) => c.kind === 'adjust').map((c) => c.key),
+      images: picked.filter((c) => c.kind === 'image').map((c) => c.key),
+      adjust: picked.filter((c) => c.kind === 'adjust').map((c) => c.key),
     },
   };
 }
 
-/** Télécharge `<id>-changements.zip` : character.json à jour + les seules images modifiées. */
-export async function exportChanges(char: Character): Promise<void> {
+/** Fichiers de l'export des changements choisis : `<id>/character.json` + les images modifiées choisies. */
+export async function changesZipFiles(
+  char: Character,
+  selection: ChangeSelection = fullSelection(char),
+): Promise<ZipFile[]> {
   const zipFiles: ZipFile[] = [];
   const names: Partial<Record<SpriteKey, string>> = {};
   for (const { key, kind } of pendingChanges(char.id)) {
-    if (kind !== 'image') continue;
+    if (kind !== 'image' || !selection.keys.has(key)) continue;
     const entry = spriteEntry(char.id, key)!;
     const blob = entry.blob ?? (await encodeImage(entry.img, SPRITE_BY_KEY[key].stage ? 'stage' : 'sprite'));
     names[key] = `${key}.${extensionOf(blob)}`;
     zipFiles.push({ name: `${char.id}/${names[key]}`, data: new Uint8Array(await blob.arrayBuffer()) });
   }
-  const manifest = changesManifest(char, names);
+  const manifest = changesManifest(char, names, selection);
   zipFiles.unshift({
     name: `${char.id}/character.json`,
     data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)),
   });
-  downloadZip(zipFiles, `${char.id}-changements.zip`);
+  return zipFiles;
+}
+
+/** Télécharge `<id>-changements.zip` : character.json à jour + les seules images modifiées. */
+export async function exportChanges(char: Character): Promise<void> {
+  downloadZip(await changesZipFiles(char), `${char.id}-changements.zip`);
 }

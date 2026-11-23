@@ -1202,6 +1202,23 @@ i.b {
 }
 
 /* écran des sprites, mode création : seul le formulaire du nouveau personnage reste visible */
+#s-chars.bulk .scroll > :not(#chBulk) {
+  display: none;
+}
+.bulkGroup {
+  background: var(--pn);
+  border-left: 4px solid var(--y);
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+.bulkItems {
+  margin: 4px 0 0 22px;
+  display: grid;
+  gap: 4px;
+}
+.bulkAll {
+  margin: 8px 0;
+}
 #s-chars.creating .scroll > :not(#chNew) {
   display: none;
 }
