@@ -107,7 +107,11 @@ export function updateProjectiles(list: Projectile[], emit: Emit, onHit: OnHit):
         emit({ type: 'sfx', name: 'block' });
       }
     }
-    if (p.def.bounce && ((p.x < WALL_MARGIN && p.vx < 0) || (p.x > STAGE_W - WALL_MARGIN && p.vx > 0))) {
+    const { arena } = p.owner.world;
+    if (
+      p.def.bounce &&
+      ((p.x < arena.left + WALL_MARGIN && p.vx < 0) || (p.x > arena.right - WALL_MARGIN && p.vx > 0))
+    ) {
       // rebond sur le bord de l'écran : la balle repart dans l'autre sens
       p.vx = -p.vx;
       p.dir = -p.dir;

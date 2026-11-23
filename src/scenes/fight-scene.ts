@@ -7,7 +7,7 @@ import { FightSim, type FightMode } from '../engine/fight';
 import { input } from '../input';
 import { bodyScaleOf } from '../render/character-draw';
 import { FightView } from '../render/fight-view';
-import type { Stage } from '../render/stages';
+import { arenaWidthOf, type Stage } from '../render/stages';
 import type { Scene } from './scene';
 
 export interface FightSceneOptions {
@@ -35,6 +35,7 @@ export class FightScene implements Scene {
       bodyScales: [bodyScaleOf(chars[0]), bodyScaleOf(chars[1])],
       rounds: options.rounds,
       mode: options.mode,
+      arenaWidth: arenaWidthOf(options.stage),
       onEnd: options.onEnd,
     });
     this.view = new FightView(this.sim, options.stage);

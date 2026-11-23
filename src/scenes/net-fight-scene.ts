@@ -10,7 +10,7 @@ import { input } from '../input';
 import type { Link } from '../net/link';
 import { Lockstep, readPad, writePad } from '../net/lockstep';
 import { FightView } from '../render/fight-view';
-import type { Stage } from '../render/stages';
+import { arenaWidthOf, type Stage } from '../render/stages';
 import { arcadeText } from '../render/text';
 import type { Scene } from './scene';
 
@@ -18,6 +18,8 @@ export interface NetFightOptions {
   chars: readonly [Character, Character];
   scales: readonly [number, number];
   stage: Stage;
+  /** Largeur de l'arène décidée par l'hôte (sinon : celle du décor). */
+  arena?: number;
   rounds: number;
   link: Link;
   /** 0 : cet appareil pilote le combattant de gauche (hôte) ; 1 : celui de droite. */
@@ -48,6 +50,8 @@ export class NetFightScene implements Scene {
       bodyScales: options.scales,
       rounds: options.rounds,
       mode: 'match',
+      // l'hôte fixe la largeur de l'arène : les deux appareils simulent exactement le même combat
+      arenaWidth: options.arena ?? arenaWidthOf(options.stage),
       onEnd: options.onEnd,
     });
     this.view = new FightView(this.sim, options.stage);

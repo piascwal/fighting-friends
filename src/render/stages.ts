@@ -124,26 +124,43 @@ export function stageForCharacter(char: Character): Stage {
   return stage;
 }
 
+/** Échelle d'une image de décor : calée sur la hauteur de l'écran, au moins aussi large que lui. */
+function imageScale(image: HTMLCanvasElement): number {
+  const k = VIEW_H / image.height;
+  return image.width * k < VIEW_W ? VIEW_W / image.width : k;
+}
+
 /**
- * Image de décor : calée sur la hauteur de l'écran, sol en bas. Si elle est plus large que l'écran,
- * elle défile avec la caméra ; sinon elle est agrandie pour couvrir toute la largeur.
+ * Largeur de l'arène que couvre un décor (pixels monde) : la largeur de son image à l'écran, entre un
+ * seul écran (VIEW_W, la caméra ne bouge pas) et tout le monde (STAGE_W). Les décors dessinés couvrent tout.
  */
-function drawImageStage(ctx: CanvasRenderingContext2D, image: HTMLCanvasElement, camX: number): void {
-  let k = VIEW_H / image.height;
-  if (image.width * k < VIEW_W) k = VIEW_W / image.width;
+export function arenaWidthOf(stage: Stage): number {
+  if (stage.kind !== 'image') return STAGE_W;
+  const width = Math.floor(stage.image.width * imageScale(stage.image));
+  return Math.min(STAGE_W, Math.max(VIEW_W, width));
+}
+
+/**
+ * Image de décor : calée sur la hauteur de l'écran, sol en bas, centrée sur l'arène. Elle défile exactement
+ * avec la caméra (le sol ne glisse jamais sous les pieds des combattants).
+ */
+function drawImageStage(ctx: CanvasRenderingContext2D, stage: ImageStage, camX: number): void {
+  const { image } = stage;
+  const k = imageScale(image);
   const w = image.width * k;
   const h = image.height * k;
-  const travel = (w - VIEW_W) * (camX / (STAGE_W - VIEW_W));
+  // l'image est centrée sur le monde, comme l'arène (voir FightSim.arena)
+  const left = (STAGE_W - w) / 2;
   ctx.save();
   // pixel art : agrandi sans lissage pour rester net
   ctx.imageSmoothingEnabled = k * ctx.getTransform().a < 1;
-  ctx.drawImage(image, -travel, VIEW_H - h, w, h);
+  ctx.drawImage(image, left - camX, VIEW_H - h, w, h);
   ctx.restore();
 }
 
 /** @param camX bord gauche de l'écran dans le décor */
 export function drawStage(ctx: CanvasRenderingContext2D, stage: Stage, camX: number, time: number): void {
-  if (stage.kind === 'image') return drawImageStage(ctx, stage.image, camX);
+  if (stage.kind === 'image') return drawImageStage(ctx, stage, camX);
   ctx.drawImage(stage.back, -camX * PARALLAX - 4, 0);
   ctx.drawImage(stage.front, -camX, 0);
   for (const mote of stage.motes) drawMote(ctx, stage, mote, time);

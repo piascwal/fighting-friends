@@ -1,5 +1,6 @@
 /* Messages fiables échangés pendant un combat en réseau (canal ctrl). Tout ce qui arrive du réseau est
    vérifié champ par champ : un message invalide est ignoré. */
+import { STAGE_W, VIEW_W } from '../core/constants';
 import { STYLES } from '../data/styles';
 import type { StyleId } from '../data/types';
 
@@ -27,7 +28,15 @@ export type NetMsg =
   | { t: 'pick'; c: CharSpec }
   /** Case survolée pendant le choix (identifiant du personnage, « ? » pour « au hasard »). */
   | { t: 'hover'; id: string }
-  | { t: 'start'; p: [CharSpec, CharSpec]; scales: [number, number]; stage: StageSpec; rounds: number }
+  | {
+      t: 'start';
+      p: [CharSpec, CharSpec];
+      scales: [number, number];
+      stage: StageSpec;
+      rounds: number;
+      /** Largeur de l'arène (selon l'image du décor chez l'hôte) : la même sur les deux appareils. */
+      arena?: number;
+    }
   | { t: 'again' }
   | { t: 'reselect' }
   | { t: 'bye' }
@@ -77,7 +86,8 @@ export function readMsg(o: unknown): NetMsg | null {
       const stage = readStage(m.stage);
       const scales = m.scales.every((s) => isNum(s, 0.5, 1.5)) ? (m.scales as [number, number]) : null;
       if (!a || !b || !stage || !scales || !isNum(m.rounds, 1, 5)) return null;
-      return { t: 'start', p: [a, b], scales, stage, rounds: m.rounds };
+      const arena = isNum(m.arena, VIEW_W, STAGE_W) ? m.arena : undefined;
+      return { t: 'start', p: [a, b], scales, stage, rounds: m.rounds, arena };
     }
     case 'again':
     case 'reselect':

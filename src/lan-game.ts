@@ -9,7 +9,7 @@ import type { Character } from './data/types';
 import type { Link } from './net/link';
 import { PROTOCOL, readMsg, type CharSpec, type NetMsg, type StageSpec } from './net/protocol';
 import { bodyScaleOf } from './render/character-draw';
-import { getStage, randomStageIndex, stageForCharacter } from './render/stages';
+import { arenaWidthOf, getStage, randomStageIndex, stageForCharacter } from './render/stages';
 import { NetFightScene } from './scenes/net-fight-scene';
 import type { Scene } from './scenes/scene';
 import { Versus } from './scenes/versus';
@@ -162,6 +162,7 @@ export class LanGame {
       scales: [bodyScaleOf(chars[0]!), bodyScaleOf(chars[1]!)] as [number, number],
       stage,
       rounds: settings.rounds,
+      arena: arenaWidthOf(stageFrom(stage)),
     };
     this.link.sendCtrl(msg);
     await this.start(msg);
@@ -180,6 +181,7 @@ export class LanGame {
         chars: [left, right],
         scales: msg.scales,
         stage: stageFrom(msg.stage),
+        arena: msg.arena,
         rounds: msg.rounds,
         link: this.link,
         side: this.isHost ? 0 : 1,

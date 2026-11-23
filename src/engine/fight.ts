@@ -10,7 +10,7 @@ import type { Controller } from './controller';
 import type { FightEvent } from './events';
 import { Fighter } from './fighter';
 import { createProjectile, updateProjectiles, type Projectile } from './projectiles';
-import type { FighterWorld } from './world';
+import type { Arena, FighterWorld } from './world';
 
 /** 'attract' = démonstration derrière les menus, 'training' = pas de chrono ni de K.O. */
 export type FightMode = 'match' | 'attract' | 'training';
@@ -25,6 +25,11 @@ export interface FightOptions {
   /** Manches à gagner. */
   rounds: number;
   mode: FightMode;
+  /**
+   * Largeur de l'arène (pixels monde, de VIEW_W à STAGE_W), centrée dans le monde. Elle suit la largeur de
+   * l'image du décor, pour que le sol défile exactement avec la caméra. STAGE_W par défaut.
+   */
+  arenaWidth?: number;
   onEnd?: (winner: number) => void;
 }
 
@@ -42,6 +47,8 @@ export interface ComboDisplay {
 const ROUND_SECONDS = 60;
 export const SUPER_FREEZE = 44;
 const START_GAP = 160;
+/** Distance au bord de l'écran (pixels) à partir de laquelle la caméra suit un combattant. */
+const CAMERA_ZONE = 150;
 const PRAISE: readonly (readonly [minHits: number, text: string])[] = [
   [10, 'DÉVASTATEUR !'],
   [7, 'INCROYABLE !'],
@@ -80,6 +87,7 @@ export class FightSim implements FighterWorld {
   private slowMotion = 0;
   /** Bord gauche de l'écran dans le décor. Les bords de l'écran font office de murs. */
   camX = (STAGE_W - VIEW_W) / 2;
+  readonly arena: Arena;
   comboDisplay: [ComboDisplay | null, ComboDisplay | null] = [null, null];
   private events: FightEvent[] = [];
   private readonly ais: readonly [Ai | null, Ai | null];
@@ -91,6 +99,8 @@ export class FightSim implements FighterWorld {
     this.mode = options.mode;
     this.ais = options.ais;
     this.onEnd = options.onEnd;
+    const width = clamp(Math.round(options.arenaWidth ?? STAGE_W), VIEW_W, STAGE_W);
+    this.arena = { left: (STAGE_W - width) / 2, right: (STAGE_W + width) / 2 };
     this.fighters = [
       new Fighter(chars[0], 0, ctrls[0], bodyScales[0]),
       new Fighter(chars[1], 1, ctrls[1], bodyScales[1]),
@@ -158,6 +168,7 @@ export class FightSim implements FighterWorld {
     this.hitstop = this.superFreeze = this.slowMotion = 0;
     this.winner = -1;
     this.camX = (STAGE_W - VIEW_W) / 2;
+    this.updateCamera();
     if (this.mode === 'match') {
       for (const f of this.fighters) {
         f.setState('lock');
@@ -203,8 +214,23 @@ export class FightSim implements FighterWorld {
     this.projectiles = updateProjectiles(this.projectiles, this.emit, this.onHit);
     this.endCombos();
     if (this.mode === 'training') this.applyTrainingRules();
-    const mid = (a.x + b.x) / 2 - VIEW_W / 2;
-    this.camX += (clamp(mid, 0, STAGE_W - VIEW_W) - this.camX) * 0.15;
+    this.updateCamera();
+  }
+
+  /**
+   * Caméra à zone morte : elle reste immobile tant que les deux combattants sont loin des bords de l'écran
+   * (les pas de l'un ne font pas bouger l'autre à l'écran), et ne glisse que pour suivre celui qui s'approche
+   * d'un bord. Trop éloignés pour les deux zones à la fois : elle se centre entre eux.
+   */
+  private updateCamera(): void {
+    const [a, b] = this.fighters;
+    const low = Math.min(a.x, b.x);
+    const high = Math.max(a.x, b.x);
+    let cam = this.camX;
+    if (high - low > VIEW_W - 2 * CAMERA_ZONE) cam = (low + high) / 2 - VIEW_W / 2;
+    else if (low < cam + CAMERA_ZONE) cam = low - CAMERA_ZONE;
+    else if (high > cam + VIEW_W - CAMERA_ZONE) cam = high - (VIEW_W - CAMERA_ZONE);
+    this.camX = clamp(cam, this.arena.left, this.arena.right - VIEW_W);
   }
 
   private banner(
@@ -310,8 +336,8 @@ export class FightSim implements FighterWorld {
         b.x += dir * push;
       }
     }
-    const left = Math.max(WALL_MARGIN, this.camX + 36);
-    const right = Math.min(STAGE_W - WALL_MARGIN, this.camX + VIEW_W - 36);
+    const left = Math.max(this.arena.left + WALL_MARGIN, this.camX + 36);
+    const right = Math.min(this.arena.right - WALL_MARGIN, this.camX + VIEW_W - 36);
     for (const f of this.fighters) {
       const shift = clamp(f.x, left, right) - f.x;
       if (!shift) continue;

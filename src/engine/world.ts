@@ -3,8 +3,15 @@ import type { MoveDef, ProjectileDef } from '../data/types';
 import type { Emit } from './events';
 import type { Fighter } from './fighter';
 
+/** Arène : bords gauche et droit, en pixels monde (les murs sont à WALL_MARGIN à l'intérieur). */
+export interface Arena {
+  readonly left: number;
+  readonly right: number;
+}
+
 export interface FighterWorld {
   emit: Emit;
+  readonly arena: Arena;
   /** La manche est jouée : un combattant au sol ne se relève plus. */
   readonly roundOver: boolean;
   hasProjectile(owner: Fighter): boolean;

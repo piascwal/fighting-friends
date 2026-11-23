@@ -1,6 +1,6 @@
 /* Un combattant : position, vie, et la machine à états qui décide ce qu'il peut faire à chaque frame.
    Le déroulement d'un coup est dans fighter-attack.ts, le choix de la posture dans fighter-pose.ts. */
-import { GROUND_Y, STAGE_W, WALL_MARGIN } from '../core/constants';
+import { GROUND_Y, WALL_MARGIN } from '../core/constants';
 import { clamp } from '../core/math';
 import { POSES, POSE_SPRITE, approachPose, clonePose } from '../data/poses';
 import type { Pose, PoseName } from '../data/poses';
@@ -400,7 +400,7 @@ export class Fighter {
         this.land();
       }
     }
-    this.x = clamp(this.x, WALL_MARGIN, STAGE_W - WALL_MARGIN);
+    this.x = clamp(this.x, this.world.arena.left + WALL_MARGIN, this.world.arena.right - WALL_MARGIN);
   }
 
   private gravity(): number {

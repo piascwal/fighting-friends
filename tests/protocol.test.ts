@@ -9,6 +9,9 @@ describe('protocole du combat en réseau', () => {
     expect(readMsg({ t: 'pick', c: char })).toEqual({ t: 'pick', c: char });
     const start = { t: 'start', p: [char, char], scales: [1, 0.8], stage: { index: 2 }, rounds: 2 };
     expect(readMsg(start)).toEqual(start);
+    // la largeur de l'arène, décidée par l'hôte, passe telle quelle (et reste dans les bornes)
+    expect(readMsg({ ...start, arena: 1100 })).toEqual({ ...start, arena: 1100 });
+    expect((readMsg({ ...start, arena: 99999 }) as { arena?: number }).arena).toBeUndefined();
     expect(readMsg({ t: 'bye' })).toEqual({ t: 'bye' });
     expect(readMsg({ t: 'hover', id: 'mar-1' })).toEqual({ t: 'hover', id: 'mar-1' });
     expect(readMsg({ t: 'hover', id: '?' })).toEqual({ t: 'hover', id: '?' });

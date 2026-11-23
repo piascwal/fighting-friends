@@ -1,6 +1,6 @@
 /* Déroulement d'un coup : démarrage, puis ce qui se passe à chaque frame (animation, déplacement,
    projectile, téléportation, enchaînement). Tout est piloté par la définition du coup (MoveDef). */
-import { GROUND_Y, STAGE_W, WALL_MARGIN } from '../core/constants';
+import { GROUND_Y, WALL_MARGIN } from '../core/constants';
 import { clamp } from '../core/math';
 import { NEUTRAL_POSES } from '../data/poses';
 import { BUTTONS, type Button, type MoveDef, type MoveId } from '../data/types';
@@ -67,7 +67,7 @@ function teleport(f: Fighter, mode: NonNullable<MoveDef['tele']>['mode']): void 
     f.vx = f.facing * 5.5;
     f.vy = 12;
   }
-  f.x = clamp(f.x, WALL_MARGIN, STAGE_W - WALL_MARGIN);
+  f.x = clamp(f.x, f.world.arena.left + WALL_MARGIN, f.world.arena.right - WALL_MARGIN);
   emit({ type: 'dust', x: f.x, y: GROUND_Y + f.y, dir: 0, count: 8 });
   emit({ type: 'sfx', name: 'slash' });
 }
