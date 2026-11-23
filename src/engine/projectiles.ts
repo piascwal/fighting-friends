@@ -23,9 +23,14 @@ export interface Projectile {
   age: number;
   /** Lancé en cloche qui a atterri et continue au sol (voir ProjectileDef.landRun). */
   landed: boolean;
+  /** Issu d'un super : l'affichage lui donne des effets plus spectaculaires. */
+  fromSuper: boolean;
 }
 
 const REHIT_DELAY = 7;
+/** Vitesse verticale minimale après un rebond (px/frame) et marge des bords où une balle rebondit. */
+const MIN_BOUNCE_SPEED = 7;
+const WALL_MARGIN = 30;
 const REFLECT_SPEEDUP = 1.25;
 
 /** Le combattant est-il dans la fenêtre de renvoi d'un de ses coups ? */
@@ -65,6 +70,7 @@ export function createProjectile(owner: Fighter, def: ProjectileDef): Projectile
     cooldown: 0,
     age: 0,
     landed: false,
+    fromSuper: owner.move?.id === 'super',
   };
 }
 
@@ -89,11 +95,23 @@ export function updateProjectiles(list: Projectile[], emit: Emit, onHit: OnHit):
         p.vy = 0;
         p.landed = true;
         emit({ type: 'dust', x: p.x, y: GROUND_Y, dir: p.dir, count: 6 });
-      } else if (!p.def.landRun && p.y >= GROUND_Y - 8) {
+      } else if (p.def.bounce && p.y >= floor) {
+        // rebond : repart vers le haut, avec un minimum pour ne pas s'écraser au sol
+        p.y = floor;
+        p.vy = -Math.max(MIN_BOUNCE_SPEED, Math.abs(p.vy) * p.def.bounce);
+        emit({ type: 'impact', x: p.x, y: GROUND_Y - 8, fx: 'kick', power: 30, dir: p.dir });
+        emit({ type: 'sfx', name: 'block' });
+      } else if (!p.def.landRun && !p.def.bounce && p.y >= GROUND_Y - 8) {
         p.hits = 0;
         emit({ type: 'impact', x: p.x, y: GROUND_Y - 8, fx: p.def.fx, power: 40, dir: p.dir });
         emit({ type: 'sfx', name: 'block' });
       }
+    }
+    if (p.def.bounce && ((p.x < WALL_MARGIN && p.vx < 0) || (p.x > STAGE_W - WALL_MARGIN && p.vx > 0))) {
+      // rebond sur le bord de l'écran : la balle repart dans l'autre sens
+      p.vx = -p.vx;
+      p.dir = -p.dir;
+      emit({ type: 'impact', x: p.x, y: p.y, fx: 'kick', power: 30, dir: p.dir });
     }
     p.age++;
     if (p.def.turnAt && p.age === p.def.turnAt) {

@@ -55,7 +55,7 @@ const smash = (heavy: boolean) =>
     ],
   });
 
-/** Super : une balle liftée surpuissante qui frappe plusieurs fois au passage, puis envoie au tapis. */
+/** Super : une balle folle qui rebondit partout (sol, bords de l'écran) et frappe à chaque passage. */
 const porTres = () =>
   superMove({
     name: 'POR TRES',
@@ -72,13 +72,17 @@ const porTres = () =>
       t: 12,
       look: 'ball',
       sprite: 'pj_padel_ball',
-      // une balle liftée, lente et lourde : de taille normale, elle frappe plusieurs fois au passage
-      vx: 4,
+      // une balle folle : elle rebondit sur le sol et sur les bords de l'écran, et frappe à chaque passage
+      vx: 8,
+      vy: -5,
+      gravity: 0.5,
+      bounce: 0.93,
+      life: 200,
       y: -125,
-      w: 36,
-      h: 36,
-      dmg: 52,
-      hits: 4,
+      w: 46,
+      h: 46,
+      dmg: 38,
+      hits: 6,
       hs: 22,
       bs: 10,
       kb: 2,

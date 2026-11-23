@@ -105,6 +105,8 @@ export interface ProjectileDef {
   lvl?: HitLevel;
   /** Projection appliquée par la dernière touche. */
   launchLast?: Launch;
+  /** Rebondit sur le sol (0..1 : part de vitesse conservée) et sur les bords de l'écran, au lieu de se briser. */
+  bounce?: number;
   /** Frame (depuis l'apparition) où il fait demi-tour et revient vers son lanceur (une-deux). */
   turnAt?: number;
 }

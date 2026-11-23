@@ -6,6 +6,7 @@ import { GROUND_Y, VIEW_H, VIEW_W } from '../core/constants';
 import { rand } from '../core/math';
 import { activeHits, hurtbox, type Rect } from '../engine/combat';
 import type { BannerTone, FightEvent } from '../engine/events';
+import type { HitFx } from '../data/types';
 import { SUPER_FREEZE, type FightSim } from '../engine/fight';
 import { drawFighter, drawShadow, drawTrail } from './fighter-view';
 import { Fx } from './fx';
@@ -13,6 +14,7 @@ import { drawAnnouncement, type Banner } from './announce';
 import { drawHud, drawHudCrisp } from './hud';
 import { PixelLayer, burstLines } from './motion';
 import { drawSuperCutIn } from './super-cutin';
+import { inSuper, superImpact, superPulse, superTrail } from './super-fx';
 import { drawProjectile, emitProjectileTrail, projectileSprite } from './projectile-view';
 import { drawStage, type Stage } from './stages';
 import { BLUE, GOLD, RED, type Gradient } from './text';
@@ -24,6 +26,8 @@ const TONES: Record<BannerTone, Gradient> = { gold: GOLD, red: RED, blue: BLUE }
 const PIXEL = 3;
 /** Grain de l'interface (barres, textes) : plus fin que celui des effets, pour rester lisible. */
 const HUD_PIXEL = 2;
+/** Puissance minimale d'un impact de super pour qu'il soit géant (les rebonds au sol restent discrets). */
+const SUPER_IMPACT_MIN = 35;
 /** Durée du fond de K.O., calée sur le ralenti du coup final. */
 const KO_BACKDROP = 54;
 
@@ -63,13 +67,21 @@ export class FightView {
     this.delayedHp = [sim.fighters[0].hp, sim.fighters[1].hp];
   }
 
+  /** Impact : géant à la couleur de l'attaquant quand il vient d'un super (coup ou projectile). */
+  private impact(x: number, y: number, kind: HitFx, power: number, dir: number): void {
+    const atk = this.sim.fighters.find(inSuper) ?? this.sim.projectiles.find((p) => p.fromSuper)?.owner;
+    if (!atk || power < SUPER_IMPACT_MIN) return this.fx.impact(x, y, kind, power, dir);
+    superImpact(this.fx, x, y, kind, dir, atk.char.color);
+    this.shake = Math.max(this.shake, 7);
+  }
+
   /** Réagit à un événement de la simulation. Les sons sont gérés par la scène. */
   handle(event: FightEvent): void {
     switch (event.type) {
       case 'dust':
         return this.fx.dust(event.x, event.y, event.dir, event.count);
       case 'impact':
-        return this.fx.impact(event.x, event.y, event.fx, event.power, event.dir);
+        return this.impact(event.x, event.y, event.fx, event.power, event.dir);
       case 'guard':
         return this.fx.guard(event.x, event.y);
       case 'swoosh':
@@ -130,6 +142,8 @@ export class FightView {
       if (f.buffed && sim.tick % 3 === 0) fx.aura(f.x, GROUND_Y + f.y, '#ff3b1f');
     }
     if (sim.tick % 2 === 0) for (const p of sim.projectiles) emitProjectileTrail(fx, p);
+    for (const f of sim.fighters) if (inSuper(f)) superPulse(fx, f, sim.tick);
+    for (const p of sim.projectiles) if (p.fromSuper) superTrail(fx, p);
   }
 
   render(ctx: Ctx): void {
