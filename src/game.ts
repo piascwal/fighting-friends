@@ -11,6 +11,7 @@ import { getStage, randomStageIndex, stageForCharacter } from './render/stages';
 import { Ending } from './scenes/ending';
 import { FightScene } from './scenes/fight-scene';
 import type { Scene } from './scenes/scene';
+import { ArcadeProgress } from './scenes/progress';
 import { Versus } from './scenes/versus';
 import { Victory } from './scenes/victory';
 import { NetFightScene } from './scenes/net-fight-scene';
@@ -240,13 +241,15 @@ class Game implements UiActions {
     }
     playMusic(null);
     const label = mode === 'arcade' ? `COMBAT ${this.ladderStep + 1} / ${this.ladder.length}` : '';
-    const ladder = mode === 'arcade' ? { opponents: this.ladder, step: this.ladderStep } : undefined;
     // la rencontre n'a besoin que des poses de présentation : le reste se charge pendant qu'elle joue
-    void this.load(chars, 'preview').then(() => {
+    void this.load(chars, 'preview').then(async () => {
       void Promise.all(chars.map((c) => ensureSprites(c.id, 'all')));
-      this.setScene(
-        new Versus(player, opponent, label, () => void this.load(chars, 'all').then(fight), ladder),
-      );
+      const versus = () =>
+        this.setScene(new Versus(player, opponent, label, () => void this.load(chars, 'all').then(fight)));
+      if (mode !== 'arcade') return versus();
+      // arcade : la carte des étapes (visages de tous les adversaires) précède la rencontre
+      await Promise.all(this.ladder.map((c) => ensureSprites(c.id, 'portrait')));
+      this.setScene(new ArcadeProgress(player, this.ladder, this.ladderStep, versus));
     });
   }
 

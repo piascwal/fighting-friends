@@ -7,7 +7,7 @@ import { shade } from '../core/color';
 import { VIEW_H, VIEW_W } from '../core/constants';
 import { easeOut, rand } from '../core/math';
 import type { Character } from '../data/types';
-import { drawCharacter, drawPortrait } from '../render/character-draw';
+import { drawCharacter } from '../render/character-draw';
 import {
   PixelLayer,
   blinds,
@@ -51,46 +51,7 @@ export class Versus implements Scene {
     private readonly right: Character,
     private readonly label: string,
     private readonly onDone: () => void,
-    /** Mode arcade : tous les adversaires à battre, et le numéro (à partir de 0) de celui-ci. */
-    private readonly ladder?: { opponents: readonly Character[]; step: number },
   ) {}
-
-  /** Échelle du mode arcade : les visages des adversaires, battus (barrés), en cours (encadré), à venir. */
-  private drawLadder(ctx: Ctx): void {
-    const { ladder } = this;
-    const since = this.t - VS_FRAME - 12;
-    if (!ladder || since < 0) return;
-    const shown = ladder.opponents.slice(0, 10);
-    const size = 44;
-    const gap = 8;
-    const left = MID - (shown.length * (size + gap) - gap) / 2;
-    shown.forEach((char, i) => {
-      if (since < i * 4) return;
-      const x = left + i * (size + gap);
-      const y = 70 - Math.max(0, 1 - (since - i * 4) / 5) * 30;
-      const current = i === ladder.step;
-      ctx.fillStyle = current && this.t % 16 < 8 ? '#ffd23a' : '#000';
-      ctx.fillRect(x - 4, y - 4, size + 8, size + 8);
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.imageSmoothingEnabled = false;
-      drawPortrait(ctx, char, size);
-      if (i !== ladder.step) {
-        ctx.fillStyle = i < ladder.step ? 'rgba(0,0,0,.6)' : 'rgba(0,0,0,.35)';
-        ctx.fillRect(0, 0, size, size);
-      }
-      if (i < ladder.step) {
-        // battu : barré de rouge
-        ctx.strokeStyle = '#ff2a2a';
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.moveTo(4, size - 4);
-        ctx.lineTo(size - 4, 4);
-        ctx.stroke();
-      }
-      ctx.restore();
-    });
-  }
 
   skip(): void {
     if (this.t > VS_FRAME + 6 && this.t < FADE_FRAME - 10) this.t = FADE_FRAME - 10;
@@ -203,7 +164,6 @@ export class Versus implements Scene {
     });
     this.drawFighter(ctx, this.left, true);
     this.drawFighter(ctx, this.right, false);
-    this.drawLadder(ctx);
     this.front.draw(ctx, (g) => {
       if (this.local(false) > 6) {
         // la cicatrice blanche entre les deux camps
