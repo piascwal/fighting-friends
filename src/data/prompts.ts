@@ -92,8 +92,13 @@ export function buildStagePrompt(char: Character, description: string): string {
     `Format panoramique 21:9 (par exemple 2016×864) ; si ce format n'est pas proposé, 16:9. ` +
     `Cadrage : vue strictement latérale, caméra à hauteur d'homme. Le sol, plat et horizontal, occupe le bas de l'image à partir de ${STAGE_FLOOR_TOP} % de sa hauteur, vu légèrement en perspective ; ` +
     `les combattants y posent les pieds à ${STAGE_FLOOR} % de la hauteur. Un combattant debout mesurerait environ ${STAGE_FIGHTER} % de la hauteur de l'image : ` +
-    `l'échelle des objets du décor doit correspondre. Le centre de l'image reste dégagé (rien au premier plan qui masquerait les combattants) ; le décor peut être plus chargé sur les côtés et au loin. ` +
-    `AUCUN personnage, aucune silhouette, aucun texte, aucun logo, aucune interface, aucun cadre. ` +
+    `l'échelle des objets du décor doit correspondre. ` +
+    `LE SOL EST UNE LIGNE DE COMBAT PLATE sur laquelle les combattants marchent d'un bout à l'autre de l'image : aucun objet, aucune personne, aucune plante, aucun obstacle ni aucune ombre portée de décor ne doit se trouver sur cette bande de sol ni devant elle. Le premier plan est vide. ` +
+    `Direction artistique : reprends exactement les mêmes pixels visibles, les mêmes contours sombres, la même palette saturée et le même niveau de détail que l'image de référence jointe (un sprite du personnage, ou un autre décor du jeu) ; ` +
+    `la scène doit être riche, contrastée et colorée comme un décor de jeu d'arcade des années 90 (lumières, ombrages en aplats, détails animés en arrière-plan), jamais fade, floue ni plate. ` +
+    `Public : si la scène s'y prête (ou si la description en mentionne), place derrière la ligne de combat, à quelques pas seulement, des spectateurs cohérents avec le lieu (même style de pixel art que les combattants, un peu plus petits et plus sombres pour rester en arrière-plan) qui regardent le combat, en rangées, des deux côtés ET au centre ; ` +
+    `ils restent derrière la bande de sol, jamais sur elle ni au premier plan ; derrière eux, le décor décrit. ` +
+    `AUCUN combattant, aucun texte, aucun logo, aucune interface, aucun cadre. ` +
     `Si une image guide grise est jointe : la bande foncée du bas indique le sol et les deux silhouettes la taille des combattants ; ne les dessine pas. ` +
     `Décor à créer : ${description.trim() || STAGE_PLACEHOLDER}`
   );

@@ -10,7 +10,7 @@ import { SUPER_FREEZE, type FightSim } from '../engine/fight';
 import { drawFighter, drawShadow, drawTrail } from './fighter-view';
 import { Fx } from './fx';
 import { drawAnnouncement, type Banner } from './announce';
-import { drawHud } from './hud';
+import { drawHud, drawHudCrisp } from './hud';
 import { PixelLayer, burstLines } from './motion';
 import { drawSuperCutIn } from './super-cutin';
 import { drawProjectile, emitProjectileTrail, projectileSprite } from './projectile-view';
@@ -213,6 +213,7 @@ export class FightView {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(ui.canvas, 0, 0, VIEW_W, VIEW_H);
     ctx.restore();
+    if (sim.mode !== 'attract') drawHudCrisp(ctx, sim);
   }
 
   /** Pendant un super : l'écran s'assombrit et des traits fusent autour de l'attaquant. */

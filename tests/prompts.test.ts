@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildCreationPrompt, buildPrompt, poseDescription, spritePosesFor } from '../src/data/prompts';
+import {
+  buildCreationPrompt,
+  buildPrompt,
+  buildStagePrompt,
+  poseDescription,
+  spritePosesFor,
+} from '../src/data/prompts';
 import { makeCharacter, roster } from '../src/data/roster';
 import { SPRITE_BY_KEY } from '../src/data/sprite-poses';
 
@@ -26,6 +32,20 @@ describe('prompts de génération des sprites', () => {
     expect(buildPrompt(hockey, 'idle')).toContain('à deux mains');
     expect(buildPrompt(hockey, 'portrait')).not.toContain('crosse');
     expect(buildPrompt(ardan, 'idle')).not.toContain('crosse');
+  });
+
+  it('prompt de décor : sol plat dégagé, public derrière, direction artistique de la référence', () => {
+    const prompt = buildStagePrompt(ardan, 'une plage au coucher du soleil');
+    for (const part of [
+      'PLATE',
+      'aucun objet',
+      'spectateurs',
+      'derrière',
+      'image de référence',
+      'une plage',
+    ]) {
+      expect(prompt).toContain(part);
+    }
   });
 
   it('les prompts de pose interdisent de recopier le personnage de référence à côté', () => {

@@ -162,7 +162,7 @@ function refresh(): void {
   $('#mStageBox').classList.toggle('hidden', !stage);
   if (stage) $<HTMLTextAreaElement>('#mStageDesc').value = readStageDesc(char.id);
   $('#mPromptLbl').textContent = stage
-    ? "1. Prompt à coller dans ton IA d'images (l'image de référence du personnage est facultative) :"
+    ? "1. Prompt à coller dans ton IA d'images, avec une image de référence pour la direction artistique (le sprite du personnage ou un autre décor du jeu) :"
     : "1. Prompt à coller dans ton IA d'images, avec l'image de référence du personnage :";
   updatePrompt();
   $('#mGuideLbl').textContent = stage

@@ -113,20 +113,12 @@ function drawMeter(ctx: Ctx, f: Fighter, tick: number, readyAge: number): void {
 function drawSide(ctx: Ctx, sim: FightSim, f: Fighter, delayedHp: number, readyAge: number): void {
   // vie critique : le portrait clignote en rouge et la barre tremble
   const danger = f.hp > 0 && f.hp / f.maxHp < DANGER && sim.mode !== 'training';
-  const alarm = danger && sim.tick % 16 < 8;
   const right = f.index === 1;
   ctx.save();
   ctx.translate(right ? VIEW_W - MARGIN : MARGIN, TOP);
   ctx.scale(right ? -1 : 1, 1);
   ctx.fillStyle = DARK;
   ctx.fillRect(-6, -8, PORTRAIT + 8, PORTRAIT + 8);
-  ctx.save();
-  ctx.translate(-2, -4);
-  drawPortrait(ctx, f.char, PORTRAIT);
-  ctx.restore();
-  ctx.strokeStyle = alarm ? '#ff2a2a' : f.char.color;
-  ctx.lineWidth = alarm ? 6 : 3;
-  ctx.strokeRect(-2, -4, PORTRAIT, PORTRAIT);
   ctx.save();
   if (danger) ctx.translate(0, sim.tick % 6 < 3 ? 2 : -2);
   drawHealth(ctx, f, delayedHp);
@@ -136,28 +128,54 @@ function drawSide(ctx: Ctx, sim: FightSim, f: Fighter, delayedHp: number, readyA
   ctx.restore();
 }
 
-/** Les textes ne doivent pas être en miroir : ils sont placés à la main de chaque côté. */
+/** Danger : le portrait clignote en rouge (voir drawSide). */
+const isAlarm = (sim: FightSim, f: Fighter): boolean =>
+  f.hp > 0 && f.hp / f.maxHp < DANGER && sim.mode !== 'training' && sim.tick % 16 < 8;
+
+/**
+ * Petits éléments qui doivent rester nets (portrait, nom, mot « SUPER ») : dessinés en pleine
+ * résolution par-dessus la couche à gros grain, à la même taille qu'avant.
+ */
+export function drawHudCrisp(ctx: Ctx, sim: FightSim): void {
+  for (const f of sim.fighters) {
+    const right = f.index === 1;
+    const align = right ? 'right' : 'left';
+    const at = (offset: number) => (right ? VIEW_W - offset : offset);
+    const full = f.meter >= 100;
+    ctx.save();
+    ctx.translate(right ? VIEW_W - MARGIN : MARGIN, TOP);
+    ctx.scale(right ? -1 : 1, 1);
+    ctx.save();
+    ctx.translate(-2, -4);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    drawPortrait(ctx, f.char, PORTRAIT);
+    ctx.restore();
+    const alarm = isAlarm(sim, f);
+    ctx.strokeStyle = alarm ? '#ff2a2a' : f.char.color;
+    ctx.lineWidth = alarm ? 6 : 3;
+    ctx.strokeRect(-2, -4, PORTRAIT, PORTRAIT);
+    ctx.restore();
+
+    const nameScale = Math.min(1, NAME_MAX_WIDTH / arcadeTextWidth(ctx, f.char.name, 26));
+    arcadeText(ctx, f.char.name, at(104), TOP + 44, 26, { align, colors: WHITE, scale: nameScale });
+    const dark: Gradient = [DARK, DARK, DARK];
+    arcadeText(
+      ctx,
+      full ? 'SUPER PRÊT !' : 'SUPER',
+      at(MARGIN + METER_X + METER_W / 2),
+      TOP + METER_Y + 6.5,
+      full ? 13 : 12,
+      { colors: full ? dark : GREY, stroke: full ? 'rgba(255,255,255,.9)' : DARK },
+    );
+  }
+}
+
+/** Compteur de combo : gros texte, dessiné sur la couche à gros grain. */
 function drawSideTexts(ctx: Ctx, sim: FightSim, f: Fighter): void {
   const right = f.index === 1;
   const align = right ? 'right' : 'left';
   const at = (offset: number) => (right ? VIEW_W - offset : offset);
-  const full = f.meter >= 100;
-
-  const nameScale = Math.min(1, NAME_MAX_WIDTH / arcadeTextWidth(ctx, f.char.name, 26));
-  arcadeText(ctx, f.char.name, at(104), TOP + 44, 26, { align, colors: WHITE, scale: nameScale });
-  const dark: Gradient = [DARK, DARK, DARK];
-  arcadeText(
-    ctx,
-    full ? 'SUPER PRÊT !' : 'SUPER',
-    at(MARGIN + METER_X + METER_W / 2),
-    TOP + METER_Y + 6.5,
-    full ? 13 : 12,
-    {
-      colors: full ? dark : GREY,
-      stroke: full ? 'rgba(255,255,255,.9)' : DARK,
-    },
-  );
-
   const combo = sim.comboDisplay[f.index];
   // pendant le bandeau d'un super, le compteur de combo lui laisse la place
   if (!combo || sim.superFreeze > 0) return;
