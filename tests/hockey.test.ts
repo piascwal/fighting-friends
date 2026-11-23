@@ -77,4 +77,18 @@ describe('taille des personnages', () => {
     expect(b.y1 - b.y0).toBeCloseTo((a.y1 - a.y0) * 0.8);
     expect(b.x1 - b.x0).toBeLessThan(a.x1 - a.x0);
   });
+
+  it('« Jette les gants » : il charge sur la glace et attrape un adversaire à mi-distance', () => {
+    const { sim, pad } = createTraining({ style: 'hockey', distance: 250, meter: 100 });
+    const dummy = sim.fighters[1];
+    pad.commands.push('super');
+    let hits = 0;
+    for (let f = 0; f < 160; f++) {
+      pad.step();
+      const before = dummy.hp;
+      sim.update();
+      if (dummy.hp < before) hits++;
+    }
+    expect(hits).toBeGreaterThanOrEqual(6);
+  });
 });

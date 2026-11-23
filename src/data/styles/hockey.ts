@@ -61,23 +61,36 @@ const bodyCheck = (heavy: boolean) =>
     ],
   });
 
-/** Super : jette les gants, agrippe le maillot (imparable), cinq coups de poing, puis le dernier qui envoie au tapis. */
+/**
+ * Super : jette les gants, fonce sur la glace jusqu'à l'adversaire et l'agrippe par le maillot
+ * (imparable), cinq coups de poing, puis le dernier qui envoie au tapis.
+ */
 function dropTheGloves() {
   const hits: HitDef[] = [
-    hit(6, 5, [0, -190, 95, 170], 30, { grab: true, hs: 60, kb: 0, fx: 'punch', stop: 10 }),
+    // la prise reste active pendant toute la charge : elle attrape l'adversaire où qu'il soit sur la route
+    hit(6, 18, [0, -190, 100, 170], 30, { grab: true, hs: 70, kb: 0, fx: 'punch', stop: 10 }),
   ];
   const anim: AnimKey[] = [
     [0, 'charge', 0.8],
     [4, 'grab', 1],
   ];
   for (let i = 0; i < 5; i++) {
-    const t = 16 + i * 6;
+    const t = 28 + i * 6;
     hits.push(hit(t, 3, [-20, -200, 140, 180], 26, { hs: 60, kb: 0, fx: 'punch', stop: 4 }));
     anim.push([t - 3, 'brawl', 1], [t, i % 2 ? 'lp' : 'hp', 1]);
   }
-  hits.push(hit(50, 4, [-20, -210, 150, 200], 110, { launch: [8, -12], fx: 'heavy', stop: 18, sw: 'side' }));
-  anim.push([46, 'brawl', 1], [50, 'hp', 1], [62, 'idle', 0.3]);
-  return superMove({ name: 'JETTE LES GANTS', total: 72, sprite: 'sp_hockey_fight', anim, hits });
+  hits.push(hit(62, 4, [-20, -210, 150, 200], 110, { launch: [8, -12], fx: 'heavy', stop: 18, sw: 'side' }));
+  anim.push([58, 'brawl', 1], [62, 'hp', 1], [74, 'idle', 0.3]);
+  return superMove({
+    name: 'JETTE LES GANTS',
+    total: 84,
+    sprite: 'sp_hockey_fight',
+    trail: true,
+    // charge en patinant : il traverse la glace jusqu'à l'adversaire
+    vel: [[4, 22, 15]],
+    anim,
+    hits,
+  });
 }
 
 /** La crosse, présente sur toutes les images sauf la bagarre (gants jetés) et le portrait. */

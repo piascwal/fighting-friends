@@ -35,6 +35,52 @@ export function superPulse(fx: Fx, f: Fighter, tick: number): void {
     });
   }
   fx.aura(f.x, GROUND_Y + f.y, color);
+  const shakeAt = f.move?.shakeAt;
+  if (shakeAt !== undefined && f.t >= shakeAt && f.t < shakeAt + FISSURE_FRAMES)
+    fissure(fx, f, f.t - shakeAt);
+}
+
+/** Durée et vitesse (px/frame) de la fissure qui court au sol après un coup au sol de super. */
+const FISSURE_FRAMES = 22;
+const FISSURE_SPEED = 24;
+
+/** Le sol se fend devant l'attaquant : des rochers jaillissent un peu plus loin à chaque frame. */
+function fissure(fx: Fx, f: Fighter, age: number): void {
+  const x = f.x + f.facing * (60 + age * FISSURE_SPEED);
+  for (let i = 0; i < 3; i++) {
+    fx.add({
+      type: 'rock',
+      x: x + rand(-14, 14),
+      y: GROUND_Y - 4,
+      vx: rand(-3, 3),
+      vy: rand(-16, -7),
+      g: 0.7,
+      life: rand(22, 36),
+      size: rand(6, 13),
+      col: i ? '#7a5a3a' : '#c9a56a',
+      rot: rand(6),
+    });
+  }
+  fx.add({
+    type: 'smoke',
+    x,
+    y: GROUND_Y - 10,
+    vx: 0,
+    vy: rand(-3, -1),
+    life: 24,
+    size: rand(16, 26),
+    col: 'rgb(200,180,150)',
+  });
+  if (age % 4 === 0)
+    fx.add({
+      type: 'burst',
+      x,
+      y: GROUND_Y - 20,
+      life: 10,
+      size: 70,
+      pal: ['#fff', '#ffd23a', f.char.color],
+      rot: rand(6.3),
+    });
 }
 
 /** Impact d'un coup de super : étoile géante, doubles ondes, éclats et entailles de lumière. */

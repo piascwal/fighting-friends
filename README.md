@@ -26,6 +26,9 @@ conventions, et « où mettre quoi ».
 
 La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**.
 
+En **mode arcade**, une carte des étapes montre avant chaque combat les adversaires déjà battus, le
+prochain (avec sa phrase de rencontre) et ceux qui restent, puis l'animation VS se lance.
+
 ## Ajouter un personnage avec ses propres sprites
 
 1. Dans le jeu : **Options ▸ Personnages & sprites ▸ Nouveau personnage** (nom, style de combat et taille :
@@ -55,6 +58,11 @@ jour (avec `"changes": { "images": [...], "adjust": [...] }`) et **seulement** l
 Pour l'intégrer : copier le contenu du dossier dans `public/assets/characters/<id>/` (les images s'ajoutent
 ou remplacent, `character.json` est remplacé). Sa date `updated` étant plus récente que les retouches, les
 copies locales sont effacées et les marqueurs disparaissent au chargement suivant.
+
+**Export en masse** (en haut de l'écran des sprites) : tous les changements de tous les personnages
+(images, tailles/positions, style, couleur, taille, nouveaux personnages) dans une liste à cocher, avec
+**Tout sélectionner**. La sélection part dans un seul .zip, un dossier par personnage. Un changement non
+coché reste sur l'appareil : la date `updated` de l'export est placée juste avant lui.
 
 Chaque personnage peut aussi avoir son **décor** : carte « Décor » dans l'écran des sprites, avec un prompt à
 compléter par la description de la scène et une image guide qui fixe le sol et la taille des combattants.
