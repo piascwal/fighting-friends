@@ -42,13 +42,13 @@ prochain (avec sa phrase de rencontre) et ceux qui restent, puis l'animation VS 
    exacte) : **Copier l'image guide** ou **Partager / Enregistrer**.
 3. **Importer l'image** générée (fond magenta `#FF00FF`) : le fond est retiré automatiquement.
 4. Seule la pose `idle` est obligatoire ; les poses manquantes réutilisent la plus proche.
-5. **Exporter .zip**, déposer le dossier obtenu dans `collections/fighting-friends/` de la **banque de
+5. **Exporter .zip**, déposer le dossier obtenu dans `characters/` de la **banque de
    sprites** ([sprite-bank](https://github.com/piascwal/sprite-bank)) et ajouter son nom dans son
    `index.json` (ex. `["matheo"]`) pour que le personnage soit livré avec le jeu.
 
 **Les sprites viennent de la banque.** `public/assets/characters/` n'est pas versionné ici : `npm run sprites`
-le remplit avec la collection `fighting-friends` de sprite-bank, à la version fixée par `sprites.json`
-(`"v1"` = la plus récente des v1.x ; `"v1.4"` = cette version exacte, pour figer le jeu). La CI le fait avant
+le remplit avec le dossier `characters/` de sprite-bank, à la version fixée par `sprites.json`
+(`"v2"` = la plus récente des v2.x ; `"v2.4"` = cette version exacte, pour figer le jeu). La CI le fait avant
 chaque construction : après un changement dans la banque, relancer le déploiement (onglet **Actions**,
 **Vérifier et déployer**, **Run workflow**) suffit pour que le jeu le récupère. En local, lancer
 `npm run sprites` une fois avant `npm run dev`. La version récupérée est écrite dans

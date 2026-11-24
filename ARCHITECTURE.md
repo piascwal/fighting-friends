@@ -94,8 +94,8 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
 
 | Je veux…                                                                         | Je touche…                                                                                                                                   |
 | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ajouter un personnage                                                            | dépôt **sprite-bank** : un dossier `collections/fighting-friends/<id>/` (export du jeu) + son id dans `index.json` ; ici `npm run sprites`   |
-| Changer la version des sprites utilisée                                          | `sprites.json` (« v1 » = dernière v1.x, ou une version exacte) ; récupération : `scripts/sync-sprites.mjs`                                   |
+| Ajouter un personnage                                                            | dépôt **sprite-bank** : un dossier `characters/<id>/` (export du jeu) + son id dans `characters/index.json` ; ici `npm run sprites`          |
+| Changer la version des sprites utilisée                                          | `sprites.json` (« v2 » = dernière v2.x, ou une version exacte) ; récupération : `scripts/sync-sprites.mjs`                                   |
 | Régler un coup (dégâts, vitesse, zone)                                           | `data/normals.ts` ou `data/styles/<style>.ts`                                                                                                |
 | Créer un style de combat                                                         | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` + son pantin dans `data/styles/looks.ts`          |
 | Donner une suite à un coup (enchaînement, posture), un bonus, un soin, un renvoi | champs `followUps`, `buff`, `heal`, `reflect` du coup (`data/types.ts`), lus par `engine/`                                                   |
