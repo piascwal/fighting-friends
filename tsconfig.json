@@ -16,5 +16,5 @@
     "types": ["vite/client", "node"],
     "paths": { "@piascwal/lan-kit": ["./src/net/lan-kit.d.ts"] }
   },
-  "include": ["src", "tests", "vite.config.ts"]
+  "include": ["src", "tests", "scripts/**/*.ts", "vite.config.ts"]
 }
