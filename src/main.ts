@@ -1,16 +1,14 @@
 /* Démarrage : chargement des données, mise à l'échelle de l'écran, boucle principale. */
 import './style.css';
 import { setBackground } from './audio/audio';
-import { applyOverrides, loadCustomCharacters, renameLegacySprite } from './assets/character-files';
 import { loadRepoCharacters, preloadRoster } from './assets/repo-characters';
 import { addCharacter, roster } from './data/roster';
-import { loadLocalSprites } from './assets/sprite-store';
-import { FPS, VIEW_H, VIEW_W } from './core/constants';
+import { FPS, SPRITE_BANK_URL, VIEW_H, VIEW_W } from './core/constants';
 import { isPortrait, isTouchDevice } from './core/display';
 import { registerServiceWorker } from './core/pwa';
 import { gameState } from './game';
 import { input } from './input';
-import { checkForUpdate, currentScreen, initUi, openCharactersShortcut, tickUi } from './ui';
+import { checkForUpdate, currentScreen, initUi, tickUi } from './ui';
 
 const canvas = document.getElementById('cv') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -63,12 +61,14 @@ function frame(now: number): void {
 }
 
 async function boot(): Promise<void> {
-  loadCustomCharacters();
+  // raccourci de l'icône de l'application (appui long sur Android) : l'atelier des sprites est dans la banque
+  if (new URLSearchParams(location.search).get('ecran') === 'personnages') {
+    location.replace(SPRITE_BANK_URL);
+    return;
+  }
   // les sprites sont un plus : si leur chargement échoue, le jeu démarre avec les pantins
-  await loadLocalSprites(renameLegacySprite).catch(() => {});
   await loadRepoCharacters().catch(() => {});
-  applyOverrides();
-  // plus aucun personnage intégré : sans ceux du dépôt (hors ligne, premier lancement), on en crée un
+  // plus aucun personnage intégré : sans ceux de la banque (hors ligne, premier lancement), on en crée un
   if (!roster.length) {
     addCharacter({ id: 'recrue', name: 'RECRUE', style: 'balanced', color: '#ff6a2b', custom: true });
   }
@@ -80,8 +80,6 @@ async function boot(): Promise<void> {
   gameState.startAttract();
   // portraits et poses de repos de tout le monde se chargent en arrière-plan, après l'affichage du jeu
   void preloadRoster().catch(() => {});
-  // raccourci de l'icône de l'application (appui long sur Android) : ouvre directement les sprites
-  if (new URLSearchParams(location.search).get('ecran') === 'personnages') openCharactersShortcut();
 
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', () => setTimeout(resize, 200));

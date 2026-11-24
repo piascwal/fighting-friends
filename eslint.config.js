@@ -94,9 +94,10 @@ export default tseslint.config(
     },
   },
   {
-    // scripts de construction lancés par Node (récupération des sprites de la banque)
-    files: ['scripts/**/*.mjs'],
+    // scripts de construction lancés par Node (sprites de la banque, besoins publiés) : ils écrivent leur bilan
+    files: ['scripts/**/*.mjs', 'scripts/**/*.ts'],
     languageOptions: { globals: globals.node },
+    rules: { 'no-console': 'off' },
   },
   {
     // filet de sécurité chargé avant le jeu, hors du paquet (voir index.html)

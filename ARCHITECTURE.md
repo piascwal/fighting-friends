@@ -35,7 +35,7 @@ infraction fait échouer la CI, donc le déploiement. Les autres relèvent de la
 | Couche    | Rôle                                                                                               | Peut importer                                               |
 | --------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
 | `core/`   | Outils génériques : maths, couleurs, constantes, stockage, réglages, plateforme (plein écran, PWA) | rien                                                        |
-| `data/`   | Contenu du jeu : types, poses, coups, styles, personnages, prompts                                 | `core`                                                      |
+| `data/`   | Contenu du jeu : types, poses, coups, styles, personnages                                          | `core`                                                      |
 | `engine/` | Simulation du combat, IA, règles d'enchaînement                                                    | `core`, `data`                                              |
 | `assets/` | Sprites en mémoire, détourage, import/export de personnages                                        | `core`, `data`                                              |
 | `audio/`  | Synthèse sonore, effets, musique                                                                   | `core`                                                      |
@@ -92,33 +92,28 @@ jamais entre eux ; on ne sait pas où ranger une nouvelle fonction ; le nom du f
 
 ## 4. Où mettre quoi
 
-| Je veux…                                                                         | Je touche…                                                                                                                                   |
-| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ajouter un personnage                                                            | dépôt **sprite-bank** : un dossier `characters/<id>/` (export du jeu) + son id dans `characters/index.json` ; ici `npm run sprites`          |
-| Publier les besoins en sprites du jeu (après un style ou une pose ajoutés)       | `npm run needs -- ../sprite-bank/games/fighting-friends.json` (`scripts/export-needs.ts`), puis commit dans la banque                        |
-| Changer la version des sprites utilisée                                          | `sprites.json` (« v2 » = dernière v2.x, ou une version exacte) ; récupération : `scripts/sync-sprites.mjs`                                   |
-| Régler un coup (dégâts, vitesse, zone)                                           | `data/normals.ts` ou `data/styles/<style>.ts`                                                                                                |
-| Créer un style de combat                                                         | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` + son pantin dans `data/styles/looks.ts`          |
-| Donner une suite à un coup (enchaînement, posture), un bonus, un soin, un renvoi | champs `followUps`, `buff`, `heal`, `reflect` du coup (`data/types.ts`), lus par `engine/`                                                   |
-| Ajouter une image de coup spécial ou de projectile                               | `data/special-poses.ts` (nom, description pour le prompt, posture guide) ; le coup la cite dans `sprite` ou `proj.sprite`                    |
-| Changer la direction artistique des prompts                                      | `ART_DIRECTION` dans `data/prompts.ts`                                                                                                       |
-| Changer une règle d'enchaînement                                                 | `engine/move-select.ts` (+ un test dans `tests/combos.test.ts`)                                                                              |
-| Changer une manipulation (↓↘→…)                                                  | `engine/input-buffer.ts`, constante `MOTIONS`                                                                                                |
-| Ajouter un effet visuel                                                          | `render/fx.ts` (création) et `render/fx-draw.ts` (dessin)                                                                                    |
-| Ajouter un son                                                                   | `core/sfx.ts` (son nom) puis `audio/sounds.ts` (sa recette)                                                                                  |
-| Ajouter un décor dessiné par le jeu                                              | `render/stage-painters.ts` (un décor par personnage, lui, est une image importée)                                                            |
-| Changer l'icône, le nom ou l'orientation de l'application                        | `public/manifest.webmanifest` et `public/icons/`                                                                                             |
-| Changer ce qui marche hors ligne                                                 | `scripts/sw-template.js` (modèle du service worker)                                                                                          |
-| Changer la compression des images                                                | `assets/image-codec.ts`                                                                                                                      |
-| Changer la reprise d'un personnage local par sa version du dépôt                 | `assets/repo-characters.ts`                                                                                                                  |
-| Changements locaux d'un perso du jeu (« à envoyer », export du delta)            | `assets/local-changes.ts` (couches jeu / appareil des images : `assets/sprite-store.ts`)                                                     |
-| Chargement des images d'un perso du jeu (quand, quel groupe)                     | `assets/repo-characters.ts` (`ensureSprites` : portrait / idle / preview / all). Jamais au démarrage : chaque écran demande ce qu'il affiche |
-| Motion design (intro VS, bandeau de super, K.O., victoire)                       | briques dans `render/motion.ts` ; séquences dans `scenes/versus.ts`, `scenes/victory.ts`, `render/super-cutin.ts`                            |
-| Export en masse des changements (cases à cocher, un seul .zip)                   | `ui/bulk-export.ts` (sélection : `ChangeSelection` dans `assets/local-changes.ts`)                                                           |
-| Carte des étapes du mode arcade, phrases de rencontre                            | `scenes/progress.ts` ; phrases dans `data/taunts.ts`                                                                                         |
-| Combat à deux sur le même Wi-Fi                                                  | `net/` (lockstep, protocole, mise en relation avec lan-kit) ; déroulé dans `lan-game.ts` ; écran `ui/lan.ts`                                 |
-| Ajouter un écran de menu                                                         | un fichier dans `ui/`, branché dans `ui/index.ts`                                                                                            |
-| Changer l'enchaînement des écrans                                                | `game.ts`                                                                                                                                    |
+| Je veux…                                                                         | Je touche…                                                                                                                                                                          |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ajouter un personnage                                                            | dépôt **sprite-bank** : un dossier `characters/<id>/` (export du jeu) + son id dans `characters/index.json` ; ici `npm run sprites`                                                 |
+| Publier les besoins en sprites du jeu (après un style ou une pose ajoutés)       | `npm run needs -- ../sprite-bank/games/fighting-friends.json` (`scripts/export-needs.ts`), puis commit dans la banque                                                               |
+| Changer la version des sprites utilisée                                          | `sprites.json` (« v2 » = dernière v2.x, ou une version exacte) ; récupération : `scripts/sync-sprites.mjs`                                                                          |
+| Régler un coup (dégâts, vitesse, zone)                                           | `data/normals.ts` ou `data/styles/<style>.ts`                                                                                                                                       |
+| Créer un style de combat                                                         | `data/styles/<nouveau>.ts` + une ligne dans `data/styles/index.ts` + son id dans `StyleId` + son pantin dans `data/styles/looks.ts`                                                 |
+| Donner une suite à un coup (enchaînement, posture), un bonus, un soin, un renvoi | champs `followUps`, `buff`, `heal`, `reflect` du coup (`data/types.ts`), lus par `engine/`                                                                                          |
+| Ajouter une image de coup spécial ou de projectile                               | `data/special-poses.ts` (nom, repli, cadrage) ; le coup la cite dans `sprite` ou `proj.sprite` ; sa description et son prompt dans la banque (`src/catalog/`), puis `npm run needs` |
+| Changer une règle d'enchaînement                                                 | `engine/move-select.ts` (+ un test dans `tests/combos.test.ts`)                                                                                                                     |
+| Changer une manipulation (↓↘→…)                                                  | `engine/input-buffer.ts`, constante `MOTIONS`                                                                                                                                       |
+| Ajouter un effet visuel                                                          | `render/fx.ts` (création) et `render/fx-draw.ts` (dessin)                                                                                                                           |
+| Ajouter un son                                                                   | `core/sfx.ts` (son nom) puis `audio/sounds.ts` (sa recette)                                                                                                                         |
+| Ajouter un décor dessiné par le jeu                                              | `render/stage-painters.ts` (un décor par personnage, lui, est une image importée)                                                                                                   |
+| Changer l'icône, le nom ou l'orientation de l'application                        | `public/manifest.webmanifest` et `public/icons/`                                                                                                                                    |
+| Changer ce qui marche hors ligne                                                 | `scripts/sw-template.js` (modèle du service worker)                                                                                                                                 |
+| Chargement des images d'un perso du jeu (quand, quel groupe)                     | `assets/repo-characters.ts` (`ensureSprites` : portrait / idle / preview / all). Jamais au démarrage : chaque écran demande ce qu'il affiche                                        |
+| Motion design (intro VS, bandeau de super, K.O., victoire)                       | briques dans `render/motion.ts` ; séquences dans `scenes/versus.ts`, `scenes/victory.ts`, `render/super-cutin.ts`                                                                   |
+| Carte des étapes du mode arcade, phrases de rencontre                            | `scenes/progress.ts` ; phrases dans `data/taunts.ts`                                                                                                                                |
+| Combat à deux sur le même Wi-Fi                                                  | `net/` (lockstep, protocole, mise en relation avec lan-kit) ; déroulé dans `lan-game.ts` ; écran `ui/lan.ts`                                                                        |
+| Ajouter un écran de menu                                                         | un fichier dans `ui/`, branché dans `ui/index.ts`                                                                                                                                   |
+| Changer l'enchaînement des écrans                                                | `game.ts`                                                                                                                                                                           |
 
 ## 5. Application installable (PWA)
 
@@ -141,9 +136,8 @@ Le jeu est une application web installable, qui se lance en plein écran à l'ho
 - `core/display.ts` gère plein écran et verrouillage de l'orientation ; `core/pwa.ts` l'enregistrement du
   service worker et la proposition d'installation.
 - Le jeu ne se joue qu'à l'horizontale : à la verticale sur téléphone, un message recouvre tout et le
-  combat se met en pause. Seule exception : l'écran « Personnages & sprites », utilisable dans les deux sens
-  pour passer facilement du jeu au générateur d'images. On y accède depuis ce message, ou par le raccourci de
-  l'icône (`?ecran=personnages`) ; ce qui se jouait derrière reste figé pendant ce temps (`game.ts`).
+  combat se met en pause. Les sprites se travaillent dans l'atelier de la banque de sprites (page à part) :
+  **Options ▸ Personnages & sprites** l'ouvre, et le raccourci de l'icône (`?ecran=personnages`) y renvoie.
 
 ## 6. Images des personnages
 
@@ -152,11 +146,9 @@ Le jeu est une application web installable, qui se lance en plein écran à l'ho
   partagée par les styles qui font le même geste. La liste demandée pour un style se déduit de ses coups
   (`styleSprites`) : rien à tenir à jour à la main.
 - **Rien ne se perd en changeant de style** : les images sont rangées par nom, pas par « spécial 1/2 ».
-  Celles qui ne servent plus apparaissent dans « Images conservées des autres styles ».
-- **Compression** : WebP 95 % (`assets/image-codec.ts`), visuellement identique au PNG et 5 fois plus léger.
-  Un fichier compressé est gardé tel quel (enregistrement, export) : il n'est jamais recompressé.
-- **Personnage du dépôt déjà présent sur l'appareil** : la version du dépôt remplace la version locale
-  (copies locales effacées) sauf pour les images importées après son export (`updated` du character.json).
+- **Les images viennent de la banque de sprites** (dépôt sprite-bank) : copiées à la construction
+  (`npm run sprites`, version dans `sprites.json`), chargées à la demande (`assets/repo-characters.ts`).
+  Création, prompts, import, réglages et export se font dans l'atelier de la banque, pas dans le jeu.
 
 ## 7. Conventions de code
 

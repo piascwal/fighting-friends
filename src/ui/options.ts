@@ -1,4 +1,5 @@
 /* Écran des options. */
+import { SPRITE_BANK_URL } from '../core/constants';
 import { playSfx, refreshMusic } from '../audio/audio';
 import { toggleFullscreen } from '../core/display';
 import { saveSettings, settings, type Settings } from '../core/settings';
@@ -15,7 +16,7 @@ export const OPTIONS_HTML = `
       <button class="nav opt" data-opt="rounds"></button>
       <button class="nav opt" data-opt="hitboxes"></button>
       <button class="nav opt" id="optFullscreen">PLEIN ÉCRAN</button>
-      <button class="nav opt hl" id="optChars">PERSONNAGES &amp; SPRITES ▶<small>Ajouter un personnage, voir les images manquantes, copier les prompts</small></button>
+      <button class="nav opt hl" id="optChars">PERSONNAGES &amp; SPRITES ↗<small>Ouvre l'atelier de la banque de sprites : créer, importer, régler</small></button>
       <button class="nav opt hl" id="optMoves">COMMANDES &amp; LISTE DES COUPS ▶</button>
     </div></div>
   </div>`;
@@ -61,7 +62,6 @@ export function openOptions(): void {
 }
 
 export interface OptionsHandlers {
-  openCharacters(): void;
   openMoves(): void;
 }
 
@@ -77,9 +77,10 @@ export function initOptions(handlers: OptionsHandlers): void {
     if (!(await toggleFullscreen()))
       toast("Plein écran indisponible ici : installe le jeu sur ton écran d'accueil");
   });
+  // l'atelier des sprites vit dans la banque (dépôt sprite-bank), partagée par tous les jeux
   on('#optChars', () => {
     playSfx('ok');
-    handlers.openCharacters();
+    window.open(SPRITE_BANK_URL, '_blank', 'noopener');
   });
   on('#optMoves', () => {
     playSfx('ok');

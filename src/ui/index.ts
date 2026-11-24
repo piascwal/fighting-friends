@@ -2,13 +2,11 @@
 import { playSfx, unlockAudio } from '../audio/audio';
 import { input } from '../input';
 import { game, setActions, type UiActions } from './actions';
-import { CHARACTERS_HTML, initCharacters, openCharacters } from './characters';
 import { $, $$ } from './dom';
 import { MENUS_HTML, initMenus } from './menus';
 import { MOVES_HTML, backFromMoves, initMoves, openMoves } from './moves';
 import { OPTIONS_HTML, initOptions, openOptions } from './options';
-import { closePoseModal, isPoseModalOpen, tickPoseModal } from './pose-modal';
-import { currentScreen, hideScreens, mountScreens, showScreen } from './screens';
+import { currentScreen, mountScreens, showScreen } from './screens';
 import { LAN_HTML, backFromLan, initLan, openLan } from './lan';
 import { SELECT_HTML, backFromSelect, initSelect, openSelect, tickSelect } from './select';
 import { resetTitle, tickTitle } from './title-fx';
@@ -34,11 +32,9 @@ const CONFIRM_KEYS = ['KeyU', 'KeyJ'];
 
 /** Touche « retour » : ferme la fenêtre ouverte, sinon revient à l'écran précédent. */
 function goBack(screen: string): void {
-  if (screen === 'chars' && isPoseModalOpen()) closePoseModal();
-  else if (screen === 'select') backFromSelect();
+  if (screen === 'select') backFromSelect();
   else if (screen === 'moves') backFromMoves();
   else if (screen === 'lan') backFromLan();
-  else if (screen === 'chars') $('#chBack').click();
   else if (screen === 'options') $('#optBack').click();
 }
 
@@ -54,7 +50,7 @@ function onKey(event: KeyboardEvent): void {
     }
     return;
   }
-  const scope = screen === 'chars' && isPoseModalOpen() ? $('#chModal') : $(`#s-${screen}`);
+  const scope = $(`#s-${screen}`);
   const items = $$<HTMLButtonElement>('.nav', scope).filter((b) => b.offsetParent !== null && !b.disabled);
   const index = items.indexOf(document.activeElement as HTMLButtonElement);
   const step = MOVE_KEYS[event.code];
@@ -71,7 +67,7 @@ function onKey(event: KeyboardEvent): void {
 
 export function initUi(actions: UiActions): void {
   setActions(actions);
-  mountScreens(MENUS_HTML + SELECT_HTML + OPTIONS_HTML + CHARACTERS_HTML + MOVES_HTML + LAN_HTML);
+  mountScreens(MENUS_HTML + SELECT_HTML + OPTIONS_HTML + MOVES_HTML + LAN_HTML);
   initMenus({
     openSelect,
     openLan,
@@ -79,23 +75,12 @@ export function initUi(actions: UiActions): void {
     openMovesFromPause: () => openMoves('pause', game().currentPlayer()),
   });
   initSelect();
-  initOptions({ openCharacters: () => openCharacters(), openMoves: () => openMoves('options') });
-  initCharacters(openOptions);
+  initOptions({ openMoves: () => openMoves('options') });
   initMoves();
   initLan();
   input.onKey = onKey;
   document.addEventListener('pointerdown', unlockAudio, { once: true });
   showScreen('title');
-}
-
-/**
- * Accès direct à l'écran des sprites (depuis le message « tourne ton téléphone » ou le raccourci de l'icône).
- * Le bouton Retour ramène exactement là où l'on était.
- */
-export function openCharactersShortcut(): void {
-  const from = currentScreen();
-  playSfx('ok');
-  openCharacters(() => (from ? showScreen(from) : hideScreens()));
 }
 
 export { wipe } from './transition';
@@ -106,5 +91,4 @@ export function tickUi(): void {
   if (screen !== 'title') resetTitle();
   if (screen === 'title') tickTitle();
   else if (screen === 'select') tickSelect();
-  else if (screen === 'chars') tickPoseModal();
 }

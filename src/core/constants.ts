@@ -12,3 +12,6 @@ export const FPS = 60;
 
 export const ARCADE_FONT =
   '"Impact","Haettenschweiler","Arial Narrow Bold","Roboto Condensed","Arial Black",sans-serif';
+
+/** Atelier de la banque de sprites : on y crée et règle les images des personnages (dépôt sprite-bank). */
+export const SPRITE_BANK_URL = 'https://piascwal.github.io/sprite-bank/';

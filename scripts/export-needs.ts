@@ -4,7 +4,7 @@
    connaître les coups du jeu. À relancer quand un style ou une pose change :
      npm run needs -- ../sprite-bank/games/fighting-friends.json */
 import { writeFileSync } from 'node:fs';
-import { styleSprites } from '../src/data/prompts';
+import { styleSprites } from '../src/data/style-sprites';
 import { SPRITE_POSES } from '../src/data/sprite-poses';
 import { STYLE_LIST } from '../src/data/styles';
 

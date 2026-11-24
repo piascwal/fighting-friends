@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { styleSprites } from '../src/data/prompts';
+import { styleSprites } from '../src/data/style-sprites';
 import { SPECIAL_POSES } from '../src/data/special-poses';
 import { SPRITE_BY_KEY } from '../src/data/sprite-poses';
 import { STYLE_LIST } from '../src/data/styles';

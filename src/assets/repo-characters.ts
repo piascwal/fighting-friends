@@ -1,29 +1,29 @@
-/* Personnages livrés avec le jeu dans public/assets/characters/ (liste dans index.json).
+/* Personnages du jeu : ceux de la banque de sprites, copiés dans public/assets/characters/ par
+   npm run sprites (liste dans index.json).
 
-   Un personnage du dépôt peut déjà exister sur l'appareil (créé et importé localement, puis exporté et
-   ajouté au dépôt). Dans ce cas la version du dépôt le remplace, sans rien perdre :
-   - ses images locales importées AVANT l'export sont remplacées par celles du dépôt (copies locales effacées) ;
-   - une image importée APRÈS l'export reste prioritaire (date `updated` du character.json) ;
-   - son style et sa couleur locaux, s'ils diffèrent, deviennent des réglages du joueur ;
-   - les réglages de taille/position modifiés après l'export sont réappliqués (local-changes.ts).
-
-   Les images des personnages du jeu ne sont PAS chargées au démarrage (il y en a des centaines) : au
-   démarrage on ne lit que les fiches, puis chaque écran demande ce dont il a besoin (ensureSprites). */
+   Les images ne sont PAS chargées au démarrage (il y en a des centaines) : on ne lit que les fiches, puis
+   chaque écran demande ce dont il a besoin (ensureSprites). */
 import { addCharacter, characterById } from '../data/roster';
 import { SPRITE_BY_KEY, SPRITE_POSES, isSpriteKey, type SpriteKey } from '../data/sprite-poses';
-import type { CharacterDef } from '../data/types';
-import { saveCustomCharacters, setOverride, type CharacterFile } from './character-files';
-import { loadImage, prepareStage } from './chroma-key';
-import { toCanvas } from './image-codec';
-import { applyStoredAdjust, registerRepoManifest } from './local-changes';
-import {
-  localEntry,
-  putSprite,
-  removeSprite,
-  spriteEntries,
-  spriteEntry,
-  type SpriteAdjust,
-} from './sprite-store';
+import type { StyleId } from '../data/types';
+import { loadImage, prepareStage, toCanvas } from './image-load';
+import { putSprite, type SpriteAdjust } from './sprite-store';
+
+/** Contenu d'un fichier character.json de la banque (champs lus par le jeu). */
+interface CharacterFile {
+  name?: string;
+  style?: StyleId;
+  /** Ancien nom du champ `style`. */
+  template?: StyleId;
+  color?: string;
+  size?: number;
+  title?: string;
+  quote?: string;
+  /** Fichier de chaque image (`{ "idle": "idle.webp" }`). Ancien format : liste de poses en .png. */
+  files?: Partial<Record<SpriteKey, string>>;
+  sprites?: SpriteKey[];
+  adjust?: Partial<Record<SpriteKey, SpriteAdjust>>;
+}
 
 const REPO_DIR = 'assets/characters/';
 
@@ -89,17 +89,6 @@ export const isLoaded = (id: string, group: SpriteGroup = 'all'): boolean =>
 export const spritesPending = (id: string): boolean =>
   !!manifests.get(id)?.files.has('idle') && !settled.has(`${id}:idle`);
 
-/** Cette image existe-t-elle pour ce personnage, même si elle n'est pas encore chargée ? */
-export const knowsSprite = (id: string, key: SpriteKey): boolean =>
-  !!manifests.get(id)?.files.has(key) || !!spriteEntry(id, key);
-
-/** Nombre d'images du personnage (livrées avec le jeu ou importées), chargées ou non. */
-export function spriteTotal(id: string): number {
-  const keys = new Set<SpriteKey>(manifests.get(id)?.files.keys());
-  for (const [key] of spriteEntries(id)) keys.add(key);
-  return keys.size;
-}
-
 function loadOne(id: string, m: Manifest, key: SpriteKey): Promise<void> {
   const tag = `${id}:${key}`;
   if (settled.has(tag)) return Promise.resolve();
@@ -108,12 +97,9 @@ function loadOne(id: string, m: Manifest, key: SpriteKey): Promise<void> {
     pending = (async () => {
       const name = m.files.get(key)!;
       try {
-        const { canvas, blob } = await loadRepoImage(m.dir + name, key);
-        const adj: Partial<SpriteAdjust> | undefined = m.file.adjust?.[key];
-        putSprite(id, key, canvas, 'repo', { adj, blob, file: name });
-        applyStoredAdjust(id, key);
+        putSprite(id, key, await loadRepoImage(m.dir + name, key), m.file.adjust?.[key]);
       } catch {
-        // image absente du dossier : on garde l'éventuelle image locale, sinon une pose de repli
+        // image absente du dossier : le personnage utilisera une pose de repli
       } finally {
         settled.add(tag);
         inflight.delete(tag);
@@ -124,7 +110,7 @@ function loadOne(id: string, m: Manifest, key: SpriteKey): Promise<void> {
   return pending;
 }
 
-/** Charge (une seule fois) les images d'un personnage du jeu ; sans effet pour un personnage local. */
+/** Charge (une seule fois) les images d'un personnage. */
 export async function ensureSprites(id: string, group: SpriteGroup = 'all'): Promise<void> {
   const m = manifests.get(id);
   if (!m) return;
@@ -141,8 +127,11 @@ export async function loadRepoCharacters(): Promise<void> {
     ids.map(async (id) => (await fetchJson<CharacterFile>(`${REPO_DIR}${id}/character.json`)) ?? {}),
   );
   // déclarés dans l'ordre de index.json (ordre de la sélection)
-  ids.forEach((id, i) => registerCharacter(id, files[i]!));
-  await Promise.all(ids.map((id, i) => declareImages(id, files[i]!)));
+  ids.forEach((id, i) => {
+    const file = files[i]!;
+    registerCharacter(id, file);
+    manifests.set(id, { dir: `${REPO_DIR}${id}/`, file, files: new Map(imageFiles(file)) });
+  });
 }
 
 /** Charge en arrière-plan les images que les menus affichent : portraits d'abord, puis poses de repos. */
@@ -152,10 +141,9 @@ export async function preloadRoster(): Promise<void> {
   await Promise.all(ids.map((id) => ensureSprites(id, 'idle')));
 }
 
-/** Déclare le personnage du dépôt, en remplaçant une éventuelle version créée sur l'appareil. */
+/** Déclare le personnage, dans l'ordre de index.json (ordre de la sélection). */
 function registerCharacter(id: string, file: CharacterFile): void {
-  const local = characterById(id);
-  const def: CharacterDef = {
+  addCharacter({
     id,
     name: file.name ?? id.toUpperCase(),
     style: file.style ?? file.template ?? 'balanced',
@@ -163,16 +151,8 @@ function registerCharacter(id: string, file: CharacterFile): void {
     size: file.size,
     title: file.title,
     quote: file.quote,
-    custom: true,
     repo: true,
-  };
-  addCharacter(def);
-  if (local?.custom && !local.repo) {
-    if (local.styleId !== def.style || local.color !== def.color || local.size !== (def.size ?? 1)) {
-      setOverride(id, { style: local.styleId, color: local.color, size: local.size });
-    }
-    saveCustomCharacters(); // il n'est plus dans la liste des personnages créés sur l'appareil
-  }
+  });
 }
 
 /** Fichiers d'images du personnage : `files`, ou l'ancien format (liste de poses en .png). */
@@ -183,31 +163,11 @@ function imageFiles(file: CharacterFile): [SpriteKey, string][] {
   return keys.filter(isSpriteKey).map((key) => [key, `${key}.png`]);
 }
 
-async function loadRepoImage(
-  url: string,
-  key: SpriteKey,
-): Promise<{ canvas: HTMLCanvasElement; blob?: Blob }> {
-  if (SPRITE_BY_KEY[key].stage) return { canvas: prepareStage(await loadImage(url)) };
+async function loadRepoImage(url: string, key: SpriteKey): Promise<HTMLCanvasElement> {
+  if (SPRITE_BY_KEY[key].stage) return prepareStage(await loadImage(url));
   const response = await fetch(url);
   if (!response.ok) throw new Error(`image absente : ${url}`);
-  const blob = await response.blob();
-  // Les images du dépôt viennent de l'export du jeu : déjà détourées, recadrées au pixel près et
-  // plafonnées à 640 px. Les repasser dans le détourage (lecture de tous les pixels) ne change rien et
-  // monopolise le processeur : on se contente de les décoder.
-  return { canvas: toCanvas(await createImageBitmap(blob)), blob };
-}
-
-/**
- * Déclare les images d'un personnage du jeu : retient où elles sont, et efface les copies locales
- * importées avant cet export (déjà dans le dépôt). Une image importée APRÈS reste prioritaire.
- */
-async function declareImages(id: string, file: CharacterFile): Promise<void> {
-  const files = new Map(imageFiles(file));
-  manifests.set(id, { dir: `${REPO_DIR}${id}/`, file, files });
-  registerRepoManifest(id, file);
-  const exportedAt = file.updated ?? 0;
-  for (const key of files.keys()) {
-    const local = localEntry(id, key);
-    if (local && !(local.at && local.at > exportedAt)) await removeSprite(id, key);
-  }
+  // Les images de la banque viennent de l'export de l'atelier : déjà détourées, recadrées au pixel près
+  // et plafonnées à 640 px. On se contente de les décoder.
+  return toCanvas(await createImageBitmap(await response.blob()));
 }

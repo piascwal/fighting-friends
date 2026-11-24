@@ -174,8 +174,8 @@ body.infight #pauseBtn {
   color: var(--y);
   text-shadow: 0 3px 0 #000;
 }
-/* l'écran des sprites reste utilisable à la verticale */
-body.portrait.touch:not([data-screen='chars']) #rotate {
+/* à la verticale sur téléphone, le message recouvre le jeu */
+body.portrait.touch #rotate {
   display: flex;
 }
 #rotate p {
@@ -623,7 +623,6 @@ textarea {
 }
 select,
 input[type='text'],
-#newName,
 #lanName {
   background: #1e153a;
   border: 2px solid var(--ln);
@@ -651,109 +650,16 @@ label {
   align-items: center;
   gap: 6px;
 }
-#chInfo {
-  background: var(--pn);
-  border-left: 4px solid var(--y);
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  line-height: 1.45;
-}
-.help {
-  background: var(--pn);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 8px 0;
-}
-.help summary {
-  font-weight: 800;
-  cursor: pointer;
-  color: var(--y);
-}
 code {
   background: #000;
   padding: 1px 5px;
   border-radius: 4px;
   color: #ff7bff;
 }
-#chGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 9px;
-  margin-top: 10px;
-}
-.card {
-  transform: none;
-  background: var(--pn);
-  color: #fff;
-  border: 2px solid var(--ln);
-  box-shadow: 0 3px 0 #000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5px 4px 6px;
-  font-family: system-ui, sans-serif;
-  font-style: normal;
-  letter-spacing: 0;
-  gap: 3px;
-}
-.card:active {
-  transform: translateY(2px);
-}
-.card canvas {
-  width: 100%;
-  max-width: 110px;
-  aspect-ratio: 1;
-  background: repeating-conic-gradient(#241c3a 0 25%, #1c1530 0 50%) 0 0/16px 16px;
-  border-radius: 6px;
-}
-.cl {
-  font-size: 11.5px;
-  font-weight: 700;
-  line-height: 1.15;
-  min-height: 2.3em;
-  display: flex;
-  align-items: center;
-  text-align: center;
-}
-.badge {
-  font-size: 9.5px;
-  font-weight: 900;
-  padding: 2px 7px;
-  border-radius: 20px;
-  letter-spacing: 0.05em;
-}
-.card.ok {
-  border-color: #2f9a55;
-}
-.card.ok .badge {
-  background: #1f7a41;
-}
-.card.miss .badge {
-  background: #8a5a12;
-}
-.card.req {
-  border-color: #ff3d3d;
-}
-.card.req .badge {
-  background: #c8001e;
-}
 .done {
   grid-column: 1/-1;
   text-align: center;
   opacity: 0.8;
-}
-.modal {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.78);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  z-index: 4;
 }
 .box {
   background: #150d2a;
@@ -764,93 +670,6 @@ code {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-.mhead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 2px solid var(--ln);
-}
-.mhead h3 {
-  margin: 0;
-}
-.mbody {
-  display: flex;
-  gap: 12px;
-  padding: 12px;
-  overflow-y: auto;
-  touch-action: pan-y;
-  flex-wrap: wrap;
-}
-.mleft {
-  flex: 0 1 300px;
-  min-width: 200px;
-  margin: 0 auto;
-}
-.mleft canvas {
-  width: 100%;
-  border-radius: 8px;
-  display: block;
-}
-.mright {
-  flex: 1 1 300px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-#mStatus {
-  font-size: 12.5px;
-  margin: 6px 0;
-  font-weight: 700;
-}
-.okc {
-  color: #6dff9a;
-}
-.warn {
-  color: #ffb84a;
-}
-#mAdj label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  margin: 3px 0;
-}
-#mAdj input {
-  flex: 1;
-  min-width: 0;
-}
-.lbl {
-  font-size: 12px;
-  opacity: 0.8;
-}
-#mPrompt {
-  width: 100%;
-  min-height: 150px;
-  flex: 1;
-  background: #0b0618;
-  border: 2px solid var(--ln);
-  border-radius: 8px;
-  padding: 9px;
-  font-size: 12.5px;
-  line-height: 1.4;
-  resize: none;
-  -webkit-user-select: text;
-  user-select: text;
-}
-.filebtn {
-  position: relative;
-  overflow: hidden;
-  display: inline-block;
-}
-.filebtn input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  font-size: 0;
 }
 table {
   width: 100%;
@@ -952,58 +771,6 @@ i.b {
   transform: translate(-50%, 0);
 }
 
-@media (max-height: 480px) {
-  #mPrompt {
-    min-height: 76px;
-    max-height: 104px;
-  }
-  .mleft {
-    flex-basis: 210px;
-  }
-  .mleft canvas {
-    max-height: 44vh;
-    width: auto;
-    margin: 0 auto;
-  }
-  .mbody {
-    padding: 8px;
-  }
-  .help {
-    font-size: 12px;
-  }
-}
-
-/* sections de la grille des images (poses communes, coups du style, autres styles) */
-.gridTitle {
-  grid-column: 1 / -1;
-  margin: 12px 0 2px;
-  font:
-    800 13px system-ui,
-    sans-serif;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--y);
-}
-.card.other {
-  border-color: #6a5a9a;
-  opacity: 0.75;
-}
-.card.other .badge {
-  background: #4a3d7a;
-}
-#mStageDesc {
-  width: 100%;
-  background: #0b0618;
-  border: 2px solid var(--y);
-  border-radius: 8px;
-  padding: 9px;
-  font-size: 13px;
-  line-height: 1.4;
-  resize: vertical;
-  -webkit-user-select: text;
-  user-select: text;
-}
-
 /* numéro de version, discret, sur l'écran titre */
 .version {
   position: absolute;
@@ -1063,48 +830,6 @@ i.b {
     sans-serif;
   letter-spacing: 0;
   color: #e9e2ff;
-}
-.styleInfo {
-  background: var(--pn);
-  border-left: 4px solid #8a7cff;
-  border-radius: 6px;
-  padding: 6px 10px;
-  margin: 4px 0 8px;
-  font-size: 12.5px;
-  line-height: 1.5;
-}
-.styleInfo .moves {
-  opacity: 0.8;
-}
-.styleInfo .warn {
-  color: #ffb84a;
-  font-weight: 700;
-}
-
-/* changements faits sur l'appareil à un personnage livré avec le jeu */
-.card.changed {
-  border-color: #2ee6c8;
-  opacity: 1;
-}
-.card.changed .badge {
-  background: #2ee6c8;
-  color: #0b0618;
-}
-.send {
-  color: #2ee6c8;
-  font-weight: bold;
-}
-.changes {
-  margin-top: 6px;
-  color: #2ee6c8;
-  font-size: 0.9em;
-}
-.changes ul {
-  margin: 4px 0 0 18px;
-  padding: 0;
-}
-#mAdjReset {
-  margin-top: 6px;
 }
 
 /* direction artistique : angles droits partout dans les menus (les commandes tactiles restent rondes) */
@@ -1199,45 +924,6 @@ i.b {
   100% {
     transform: scale(1);
   }
-}
-
-/* écran des sprites, mode création : seul le formulaire du nouveau personnage reste visible */
-#s-chars.bulk .scroll > :not(#chBulk) {
-  display: none;
-}
-.bulkGroup {
-  background: var(--pn);
-  border-left: 4px solid var(--y);
-  padding: 8px 12px;
-  margin: 8px 0;
-}
-.bulkItems {
-  margin: 4px 0 0 22px;
-  display: grid;
-  gap: 4px;
-}
-.bulkAll {
-  margin: 8px 0;
-}
-#s-chars.creating .scroll > :not(#chNew) {
-  display: none;
-}
-#chNew {
-  border-left: 4px solid var(--y);
-  background: #140a24;
-  padding: 8px 12px;
-  margin: 4px 0 10px;
-}
-#chNew h3 {
-  margin-top: 0.2em;
-}
-#crBox textarea {
-  width: 100%;
-  margin-top: 4px;
-  background: #0b0618;
-  border: 2px solid var(--ln);
-  color: #fff;
-  padding: 6px;
 }
 
 /* démarrage : tant que le jeu charge (personnages, images), le canvas encore vide est masqué et un

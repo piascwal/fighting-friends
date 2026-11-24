@@ -30,52 +30,24 @@ La liste complète est dans le jeu : **Options ▸ Commandes & liste des coups**
 En **mode arcade**, une carte des étapes montre avant chaque combat les adversaires déjà battus, le
 prochain (avec sa phrase de rencontre) et ceux qui restent, puis l'animation VS se lance.
 
-## Ajouter un personnage avec ses propres sprites
+## Personnages et sprites : la banque
 
-1. Dans le jeu : **Options ▸ Personnages & sprites ▸ Nouveau personnage** (nom, style de combat et taille :
-   petit, normal ou grand ; un petit est plus dur à toucher mais a moins d'allonge).
-   Pour créer son apparence à partir d'une photo : panneau **Créer son apparence à partir d'une photo**
-   (ouvert d'office tant que le personnage n'a pas d'image de garde). Il donne un prompt à copier et l'image
-   de garde d'un personnage existant sur fond magenta, qui sert de modèle de direction artistique.
-2. Toucher une pose ▸ **Copier le prompt**, le coller dans une IA d'images avec l'image de référence du personnage.
-   Si l'IA ne trouve pas la posture, lui joindre aussi l'**image guide** (mannequin gris dans la posture
-   exacte) : **Copier l'image guide** ou **Partager / Enregistrer**.
-3. **Importer l'image** générée (fond magenta `#FF00FF`) : le fond est retiré automatiquement.
-4. Seule la pose `idle` est obligatoire ; les poses manquantes réutilisent la plus proche.
-5. **Exporter .zip**, déposer le dossier obtenu dans `characters/` de la **banque de
-   sprites** ([sprite-bank](https://github.com/piascwal/sprite-bank)) et ajouter son nom dans son
-   `index.json` (ex. `["matheo"]`) pour que le personnage soit livré avec le jeu.
+Les images des personnages ne se fabriquent plus dans le jeu : elles vivent dans la **banque de sprites**
+([sprite-bank](https://github.com/piascwal/sprite-bank)), partagée avec les autres jeux, et son **atelier**
+(https://piascwal.github.io/sprite-bank/) sert à les créer : nouveau personnage, prompts à copier, image
+guide, import, réglages, décor, export. Dans le jeu, **Options ▸ Personnages & sprites** ouvre l'atelier.
 
-**Les sprites viennent de la banque.** `public/assets/characters/` n'est pas versionné ici : `npm run sprites`
-le remplit avec le dossier `characters/` de sprite-bank, à la version fixée par `sprites.json`
-(`"v2"` = la plus récente des v2.x ; `"v2.4"` = cette version exacte, pour figer le jeu). La CI le fait avant
-chaque construction : après un changement dans la banque, relancer le déploiement (onglet **Actions**,
-**Vérifier et déployer**, **Run workflow**) suffit pour que le jeu le récupère. En local, lancer
+**Le jeu copie les sprites de la banque à sa construction.** `public/assets/characters/` n'est pas versionné
+ici : `npm run sprites` le remplit avec le dossier `characters/` de sprite-bank, à la version fixée par
+`sprites.json` (`"v2"` = la plus récente des v2.x ; `"v2.4"` = cette version exacte, pour figer le jeu). La CI
+le fait avant chaque construction : après un changement dans la banque, relancer le déploiement (onglet
+**Actions**, **Vérifier et déployer**, **Run workflow**) suffit pour que le jeu le récupère. En local, lancer
 `npm run sprites` une fois avant `npm run dev`. La version récupérée est écrite dans
 `public/assets/characters/VERSION`.
 
-Un dossier `public/assets/characters/<id>/` contient `character.json` (style, couleur, réglages et liste des
-fichiers) et une image par pose, en WebP (`idle.webp`, `punch_light.webp`… — liste dans
-`src/data/sprite-poses.ts` et `src/data/special-poses.ts`). Les images importées sont compressées
-automatiquement : 5 fois plus légères qu'en PNG, sans différence visible.
-
-### Envoyer les retouches d'un personnage déjà livré
-
-Sur un personnage livré avec le jeu, tout ce qui est changé sur l'appareil (image importée qui remplace ou
-complète celles du jeu, taille/position retouchée) est marqué **✎ À ENVOYER** sur sa carte et listé sous le
-personnage. **Exporter les changements** télécharge `<id>-changements.zip` : le `character.json` complet à
-jour (avec `"changes": { "images": [...], "adjust": [...] }`) et **seulement** les images modifiées.
-Pour l'intégrer : copier le contenu du dossier dans `public/assets/characters/<id>/` (les images s'ajoutent
-ou remplacent, `character.json` est remplacé). Sa date `updated` étant plus récente que les retouches, les
-copies locales sont effacées et les marqueurs disparaissent au chargement suivant.
-
-**Export en masse** (en haut de l'écran des sprites) : tous les changements de tous les personnages
-(images, tailles/positions, style, couleur, taille, nouveaux personnages) dans une liste à cocher, avec
-**Tout sélectionner**. La sélection part dans un seul .zip, un dossier par personnage. Un changement non
-coché reste sur l'appareil : la date `updated` de l'export est placée juste avant lui.
-
-Chaque personnage peut aussi avoir son **décor** : carte « Décor » dans l'écran des sprites, avec un prompt à
-compléter par la description de la scène et une image guide qui fixe le sol et la taille des combattants.
+**Le jeu publie ses besoins dans la banque** : les poses communes et, pour chaque style de combat, ses images
+propres et son accessoire (`npm run needs -- ../sprite-bank/games/fighting-friends.json`). À refaire quand un
+style ou une pose change : l'atelier affiche alors ce qui manque à chaque personnage pour ce jeu.
 
 **26 styles de combat**, chacun avec sa famille et ses capacités (affichées à la sélection) :
 Équilibré, Rapide, Lourd, Technique, Lutteur (prises imparables), Maître du contre, Givre, Voltigeur, Boxeur,
@@ -108,10 +80,6 @@ Le jeu est une application web installable (PWA) : une fois installé, il se lan
 - **Android** : ouvrir le jeu dans Chrome, puis le bouton **Installer le jeu** de l'écran titre (ou menu ⋮ ▸
   _Installer l'application_).
 - **iPhone** : ouvrir le jeu dans Safari, bouton **Partager** ▸ **Sur l'écran d'accueil**.
-
-Pour travailler les sprites en alternant avec un générateur d'images : **Options ▸ Personnages & sprites** passe
-le jeu à la verticale (quand le téléphone le permet) et le remet à l'horizontale en quittant cet écran. Sur
-Android, un appui long sur l'icône du jeu propose aussi ce raccourci.
 
 Sans installation, le jeu passe quand même en plein écran au premier appui (sauf sur iPhone, où Safari ne le
 permet pas).

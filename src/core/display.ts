@@ -22,7 +22,7 @@ export const isIos = (): boolean =>
   /iPhone|iPad|iPod/.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-async function lockOrientation(orientation: 'landscape' | 'portrait' | 'any'): Promise<void> {
+async function lockOrientation(orientation: 'landscape' | 'any'): Promise<void> {
   const screenOrientation = screen.orientation as unknown as LockableOrientation | undefined;
   // refusé hors plein écran ou sur iOS : le message « tourne ton téléphone » prend le relais
   await screenOrientation?.lock?.(orientation).catch(() => {});
@@ -30,9 +30,6 @@ async function lockOrientation(orientation: 'landscape' | 'portrait' | 'any'): P
 
 /** Verrouille à l'horizontale (quand le navigateur le permet). */
 export const lockLandscape = (): Promise<void> => lockOrientation('landscape');
-
-/** Passe à la verticale (écran des sprites : pratique à côté d'un générateur d'images). */
-export const lockPortrait = (): Promise<void> => lockOrientation('portrait');
 
 /**
  * Passe en plein écran à l'horizontale sur téléphone.

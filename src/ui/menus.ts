@@ -27,7 +27,7 @@ export const MENUS_HTML = `
       <button class="nav big" data-mode="versus">VERSUS<small>Un combat contre la console</small></button>
       <button class="nav big" data-mode="duo">2 JOUEURS<small>Sur cet appareil ou sur le même Wi-Fi</small></button>
       <button class="nav big" data-mode="training">ENTRAÎNEMENT<small>Répète tes combos</small></button>
-      <button class="nav big alt" id="menuOptions">OPTIONS<small>Personnages, sprites, commandes</small></button>
+      <button class="nav big alt" id="menuOptions">OPTIONS<small>Réglages, sprites, commandes</small></button>
     </div>
   </div>
 
