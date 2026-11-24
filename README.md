@@ -7,6 +7,7 @@ TypeScript strict, Vite, Vitest, ESLint + Prettier. Aucune bibliothèque de jeu 
 
 ```bash
 npm install
+npm run sprites    # copie les sprites des personnages depuis la banque (sprite-bank)
 npm run dev        # jeu sur http://localhost:5173, rechargé à chaque modification
 npm run check      # types + règles d'architecture + tests
 npm run build      # version de production dans dist/
@@ -41,8 +42,17 @@ prochain (avec sa phrase de rencontre) et ceux qui restent, puis l'animation VS 
    exacte) : **Copier l'image guide** ou **Partager / Enregistrer**.
 3. **Importer l'image** générée (fond magenta `#FF00FF`) : le fond est retiré automatiquement.
 4. Seule la pose `idle` est obligatoire ; les poses manquantes réutilisent la plus proche.
-5. **Exporter .zip**, déposer le dossier obtenu dans `public/assets/characters/` et ajouter son nom dans
-   `public/assets/characters/index.json` (ex. `["matheo"]`) pour que le personnage soit livré avec le jeu.
+5. **Exporter .zip**, déposer le dossier obtenu dans `collections/fighting-friends/` de la **banque de
+   sprites** ([sprite-bank](https://github.com/piascwal/sprite-bank)) et ajouter son nom dans son
+   `index.json` (ex. `["matheo"]`) pour que le personnage soit livré avec le jeu.
+
+**Les sprites viennent de la banque.** `public/assets/characters/` n'est pas versionné ici : `npm run sprites`
+le remplit avec la collection `fighting-friends` de sprite-bank, à la version fixée par `sprites.json`
+(`"v1"` = la plus récente des v1.x ; `"v1.4"` = cette version exacte, pour figer le jeu). La CI le fait avant
+chaque construction : après un changement dans la banque, relancer le déploiement (onglet **Actions**,
+**Vérifier et déployer**, **Run workflow**) suffit pour que le jeu le récupère. En local, lancer
+`npm run sprites` une fois avant `npm run dev`. La version récupérée est écrite dans
+`public/assets/characters/VERSION`.
 
 Un dossier `public/assets/characters/<id>/` contient `character.json` (style, couleur, réglages et liste des
 fichiers) et une image par pose, en WebP (`idle.webp`, `punch_light.webp`… — liste dans

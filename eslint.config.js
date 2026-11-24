@@ -94,6 +94,11 @@ export default tseslint.config(
     },
   },
   {
+    // scripts de construction lancés par Node (récupération des sprites de la banque)
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
+  {
     // filet de sécurité chargé avant le jeu, hors du paquet (voir index.html)
     files: ['public/rescue.js'],
     languageOptions: { globals: globals.browser },

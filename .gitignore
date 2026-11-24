@@ -1,2 +1,4 @@
 node_modules
 dist
+# sprites copiés depuis la banque (npm run sprites) : la source est le dépôt sprite-bank
+public/assets/characters/

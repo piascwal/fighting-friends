@@ -21,6 +21,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # sprites des personnages : copiés depuis la banque (dépôt sprite-bank), version fixée par sprites.json
+      - run: npm run sprites
       # types + règles d'architecture + tests : rien n'est déployé si une étape échoue
       - run: npm run check
       - run: npm run format:check
