@@ -46,6 +46,9 @@ describe('prompts de génération des sprites', () => {
     ]) {
       expect(prompt).toContain(part);
     }
+    // le format 21:9 est exigé d'entrée, sans porte de sortie vers le 16:9
+    expect(prompt.startsWith('FORMAT OBLIGATOIRE')).toBe(true);
+    expect(prompt).not.toContain("n'est pas proposé");
   });
 
   it('les prompts de pose interdisent de recopier le personnage de référence à côté', () => {

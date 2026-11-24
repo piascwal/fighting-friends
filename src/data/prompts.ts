@@ -87,9 +87,11 @@ function framing(spec: SpritePoseSpec): string {
 /** Prompt du décor d'un personnage ; `description` est le texte libre du joueur, ajouté à la fin. */
 export function buildStagePrompt(char: Character, description: string): string {
   return (
+    `FORMAT OBLIGATOIRE : image panoramique très large, au format 21:9 (environ 2,3 fois plus large que haute, par exemple 2016×864). ` +
+    `PAS d'image carrée, PAS de 16:9, PAS de 3:2 : le décor défile derrière les combattants pendant le combat, et une image moins large ne leur laisse pas de place pour se déplacer. ` +
+    `L'image guide grise jointe a exactement ce format : reprends ses proportions, même si l'image de référence de style est carrée. ` +
     `Génère UNE SEULE image de décor pour un jeu de combat 2D en vue de côté : la scène où combat « ${char.name} ». ` +
     `Style : ${ART_DIRECTION}. ` +
-    `Format panoramique 21:9 (par exemple 2016×864) ; si ce format n'est pas proposé, 16:9. ` +
     `Cadrage : vue strictement latérale, caméra à hauteur d'homme. Le sol, plat et horizontal, occupe le bas de l'image à partir de ${STAGE_FLOOR_TOP} % de sa hauteur, vu légèrement en perspective ; ` +
     `les combattants y posent les pieds à ${STAGE_FLOOR} % de la hauteur. Un combattant debout mesurerait environ ${STAGE_FIGHTER} % de la hauteur de l'image : ` +
     `l'échelle des objets du décor doit correspondre. ` +

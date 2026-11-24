@@ -35,6 +35,7 @@ export const POSE_MODAL_HTML = `
         <div class="hidden" id="mStageBox">
           <div class="lbl">Décris ta scène : ce texte complète la fin du prompt (enregistré pour ce personnage).</div>
           <textarea id="mStageDesc" rows="3" placeholder="ex. un toit de Tokyo la nuit sous la pluie, néons roses et bleus, château d'eau au loin"></textarea>
+          <div class="changes"><b>⚠ FORMAT 21:9</b> : dans ton IA, règle le format sur <b>21:9</b> (ou le plus large proposé) avant de générer, le texte du prompt seul ne suffit pas toujours. Joins l'image guide en premier : elle a le bon format.</div>
         </div>
         <div class="lbl" id="mPromptLbl">1. Prompt à coller dans ton IA d'images, avec l'image de référence du personnage :</div>
         <textarea id="mPrompt" readonly></textarea>
@@ -130,6 +131,16 @@ export function drawPoseThumbnail(ctx: Ctx, size: number, char: Character, spec:
   }
 }
 
+/** En dessous de ce rapport largeur / hauteur, un décor ne défile pas (arène d'un seul écran). */
+const SCROLLING_STAGE_RATIO = 2.1;
+
+/** Décor pas assez large : il marche, mais l'arène tient sur un seul écran. */
+function stageFormatNote(image: HTMLCanvasElement): string {
+  const ratio = image.width / image.height;
+  if (ratio >= SCROLLING_STAGE_RATIO) return '';
+  return `<br><span class="warn">Ce décor est au format ${Math.round(ratio * 9)}:9 : l'arène tient sur un seul écran, sans défilement. Pour plus d'espace, régénère-le en 21:9.</span>`;
+}
+
 function statusHtml(char: Character, spec: SpritePoseSpec): string {
   const entry = spriteEntry(char.id, spec.key);
   if (entry) {
@@ -141,7 +152,7 @@ function statusHtml(char: Character, spec: SpritePoseSpec): string {
     if (change?.kind === 'adjust')
       return '<span class="okc">✓ Image fournie avec le jeu</span><br><span class="send">✎ Réglage modifié — À ENVOYER</span>';
     const origin = entry.src === 'repo' ? 'fournie avec le jeu' : 'importée sur cet appareil';
-    return `<span class="okc">✓ Image ${origin}</span>`;
+    return `<span class="okc">✓ Image ${origin}</span>${spec.stage ? stageFormatNote(entry.img) : ''}`;
   }
   if (spec.stage)
     return '<span class="warn">Pas encore de décor : le jeu utilise un de ses décors dessinés</span>';
@@ -166,7 +177,7 @@ function refresh(): void {
     : "1. Prompt à coller dans ton IA d'images, avec l'image de référence du personnage :";
   updatePrompt();
   $('#mGuideLbl').textContent = stage
-    ? "2. Joins aussi l'image guide : elle montre le sol et la taille des combattants à respecter."
+    ? "2. Joins l'image guide EN PREMIER : elle a le bon format (21:9) et montre le sol et la taille des combattants."
     : "2. Si l'IA ne trouve pas la posture, joins-lui aussi l'image guide (mannequin gris) :";
   $('#mStatus').innerHTML = statusHtml(char, spec);
   // les réglages n'ont de sens que pour une pose de combat déjà fournie
