@@ -38,8 +38,8 @@ Les images des personnages ne se fabriquent plus dans le jeu : elles vivent dans
 guide, import, réglages, décor, export. Dans le jeu, **Options ▸ Personnages & sprites** ouvre l'atelier.
 
 **Le jeu copie les sprites de la banque à sa construction.** `public/assets/characters/` n'est pas versionné
-ici : `npm run sprites` le remplit avec le dossier `characters/` de sprite-bank, à la version fixée par
-`sprites.json` (`"v2"` = la plus récente des v2.x ; `"v2.4"` = cette version exacte, pour figer le jeu). La CI
+ici : `npm run sprites` le remplit avec les images de sprite-bank **dont le jeu a besoin** (d'après ses
+besoins publiés, voir plus bas), à la version fixée par `sprites.json` (`"v2"` = la plus récente des v2.x ; `"v2.4"` = cette version exacte, pour figer le jeu). La CI
 le fait avant chaque construction : après un changement dans la banque, relancer le déploiement (onglet
 **Actions**, **Vérifier et déployer**, **Run workflow**) suffit pour que le jeu le récupère. En local, lancer
 `npm run sprites` une fois avant `npm run dev`. La version récupérée est écrite dans
