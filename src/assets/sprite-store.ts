@@ -1,6 +1,9 @@
-/* Les sprites des personnages, en mémoire : les images de la banque de sprites (copiées dans
-   public/assets/characters par npm run sprites), chargées à la demande par repo-characters.ts.
-   On les crée, les importe et les règle dans l'atelier de la banque, plus dans le jeu. */
+/* Les sprites des personnages, en mémoire, en deux couches :
+   - les images de la banque de sprites (copiées dans public/assets/characters par npm run sprites),
+     chargées à la demande par repo-characters.ts ;
+   - l'aperçu de l'atelier : images importées et réglages faits dans l'atelier de la banque et pas encore
+     envoyés (workshop-preview.ts). Ils passent devant, pour les essayer en combat avant l'export.
+   On crée, importe et règle les images dans l'atelier, jamais dans le jeu. */
 import { SPRITE_BY_KEY, type SpriteKey } from '../data/sprite-poses';
 import type { Character } from '../data/types';
 
@@ -21,26 +24,60 @@ export interface SpriteEntry {
 }
 
 const sprites = new Map<string, Map<SpriteKey, SpriteEntry>>();
+/** Aperçu de l'atelier : images importées, prioritaires sur celles de la banque. */
+const preview = new Map<string, Map<SpriteKey, SpriteEntry>>();
+/** Aperçu de l'atelier : réglages modifiés sur des images de la banque. */
+const adjustOverrides = new Map<string, Map<SpriteKey, SpriteAdjust>>();
 const portraits = new Map<string, HTMLCanvasElement>();
 const PORTRAIT_SIZE = 160;
 
 export const spriteEntry = (charId: string, key: SpriteKey): SpriteEntry | undefined =>
-  sprites.get(charId)?.get(key);
+  preview.get(charId)?.get(key) ?? sprites.get(charId)?.get(key);
 export const hasSprite = (charId: string, key: SpriteKey = 'idle'): boolean => !!spriteEntry(charId, key);
 
 /** Un personnage s'affiche avec ses images dès que sa pose de repos existe ; sinon, avec le pantin. */
 export const usesSprites = (char: Character): boolean => hasSprite(char.id, 'idle');
 
+function store(
+  layer: Map<string, Map<SpriteKey, SpriteEntry>>,
+  charId: string,
+  key: SpriteKey,
+  img: HTMLCanvasElement,
+  adj: Partial<SpriteAdjust>,
+): void {
+  let set = layer.get(charId);
+  if (!set) layer.set(charId, (set = new Map()));
+  set.set(key, { img, w: img.width, h: img.height, adj: { s: 1, dx: 0, dy: 0, ...adj } });
+  portraits.delete(charId);
+}
+
+/** Image de la banque (avec le réglage de l'atelier, s'il en a un plus récent). */
 export function putSprite(
   charId: string,
   key: SpriteKey,
   img: HTMLCanvasElement,
   adj: Partial<SpriteAdjust> = {},
 ): void {
-  let set = sprites.get(charId);
-  if (!set) sprites.set(charId, (set = new Map()));
-  set.set(key, { img, w: img.width, h: img.height, adj: { s: 1, dx: 0, dy: 0, ...adj } });
-  portraits.delete(charId);
+  store(sprites, charId, key, img, adjustOverrides.get(charId)?.get(key) ?? adj);
+}
+
+/** Image importée dans l'atelier et pas encore envoyée : elle passe devant celle de la banque. */
+export function putPreviewSprite(
+  charId: string,
+  key: SpriteKey,
+  img: HTMLCanvasElement,
+  adj: SpriteAdjust,
+): void {
+  store(preview, charId, key, img, adj);
+}
+
+/** Réglage d'une image de la banque modifié dans l'atelier (à poser avant le chargement de l'image). */
+export function setAdjustOverride(charId: string, key: SpriteKey, adj: SpriteAdjust): void {
+  let set = adjustOverrides.get(charId);
+  if (!set) adjustOverrides.set(charId, (set = new Map()));
+  set.set(key, adj);
+  const loaded = sprites.get(charId)?.get(key);
+  if (loaded) loaded.adj = { ...adj };
 }
 
 /** Le sprite à afficher pour une pose : l'image demandée, sinon le premier repli disponible. */

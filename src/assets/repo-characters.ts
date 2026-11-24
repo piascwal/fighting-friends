@@ -23,6 +23,8 @@ interface CharacterFile {
   files?: Partial<Record<SpriteKey, string>>;
   sprites?: SpriteKey[];
   adjust?: Partial<Record<SpriteKey, SpriteAdjust>>;
+  /** Date de l'export intégré à la banque (ms) : les changements de l'atelier plus anciens y sont déjà. */
+  updated?: number;
 }
 
 const REPO_DIR = 'assets/characters/';
@@ -43,6 +45,9 @@ interface Manifest {
   files: Map<SpriteKey, string>;
 }
 const manifests = new Map<string, Manifest>();
+/** Date de la version de la banque d'un personnage (0 s'il n'y est pas). */
+export const repoUpdated = (id: string): number => manifests.get(id)?.file.updated ?? 0;
+
 /** Images dont le chargement est terminé (réussi ou non : une image absente n'est pas redemandée). */
 const settled = new Set<string>();
 const inflight = new Map<string, Promise<void>>();

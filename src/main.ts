@@ -2,13 +2,14 @@
 import './style.css';
 import { setBackground } from './audio/audio';
 import { loadRepoCharacters, preloadRoster } from './assets/repo-characters';
+import { loadWorkshopPreview, workshopSignature } from './assets/workshop-preview';
 import { addCharacter, roster } from './data/roster';
 import { FPS, SPRITE_BANK_URL, VIEW_H, VIEW_W } from './core/constants';
 import { isPortrait, isTouchDevice } from './core/display';
 import { registerServiceWorker } from './core/pwa';
 import { gameState } from './game';
 import { input } from './input';
-import { checkForUpdate, currentScreen, initUi, tickUi } from './ui';
+import { checkForUpdate, currentScreen, initUi, tickUi, toast } from './ui';
 
 const canvas = document.getElementById('cv') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -68,6 +69,8 @@ async function boot(): Promise<void> {
   }
   // les sprites sont un plus : si leur chargement échoue, le jeu démarre avec les pantins
   await loadRepoCharacters().catch(() => {});
+  // images et réglages de l'atelier pas encore envoyés : on les essaie en jeu avant l'export
+  const previewed = await loadWorkshopPreview().catch(() => 0);
   // plus aucun personnage intégré : sans ceux de la banque (hors ligne, premier lancement), on en crée un
   if (!roster.length) {
     addCharacter({ id: 'recrue', name: 'RECRUE', style: 'balanced', color: '#ff6a2b', custom: true });
@@ -102,6 +105,32 @@ async function boot(): Promise<void> {
   document.documentElement.dataset.started = '1';
   // une version plus récente a-t-elle été publiée ? (à l'ouverture, puis à chaque retour dans l'application)
   checkForUpdate();
+  if (previewed)
+    toast(
+      `Aperçu de l'atelier : ${previewed} changement${previewed > 1 ? 's' : ''} pas encore envoyé${previewed > 1 ? 's' : ''}`,
+    );
+  void watchWorkshop();
+}
+
+/** Écrans où l'on peut recharger le jeu sans rien interrompre. */
+const RELOADABLE_SCREENS = new Set(['title', 'menu', 'options', 'select']);
+
+/**
+ * Retour depuis l'atelier (autre onglet) : s'il a enregistré de nouvelles images ou de nouveaux réglages,
+ * le jeu se recharge pour les montrer — tout de suite depuis les menus, sinon on prévient sans couper.
+ */
+async function watchWorkshop(): Promise<void> {
+  let known = await workshopSignature();
+  document.addEventListener('visibilitychange', async () => {
+    if (document.hidden) return;
+    const now = await workshopSignature();
+    if (now === known) return;
+    if (RELOADABLE_SCREENS.has(currentScreen() ?? '')) location.reload();
+    else {
+      known = now;
+      toast("Nouvelles images de l'atelier : reviens au menu et relance le jeu pour les voir");
+    }
+  });
 }
 
 registerServiceWorker();

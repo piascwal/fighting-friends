@@ -37,6 +37,12 @@ Les images des personnages ne se fabriquent plus dans le jeu : elles vivent dans
 (https://piascwal.github.io/sprite-bank/) sert à les créer : nouveau personnage, prompts à copier, image
 guide, import, réglages, décor, export. Dans le jeu, **Options ▸ Personnages & sprites** ouvre l'atelier.
 
+**Essayer ses images avant de les envoyer.** L'atelier et le jeu sont sur le même site : le jeu montre
+aussi ce qui a été importé ou réglé dans l'atelier et pas encore envoyé (images, tailles et positions,
+nouveaux personnages, style, couleur, taille), annoncé au lancement par « Aperçu de l'atelier ». On peut
+donc régler ses sprites en combat avant d'exporter. En revenant de l'atelier, le jeu se recharge tout seul
+s'il est sur un menu. Une fois les changements intégrés à la banque, l'aperçu s'efface de lui-même.
+
 **Le jeu copie les sprites de la banque à sa construction.** `public/assets/characters/` n'est pas versionné
 ici : `npm run sprites` le remplit avec les images de sprite-bank **dont le jeu a besoin** (d'après ses
 besoins publiés, voir plus bas), à la version fixée par `sprites.json` (`"v2"` = la plus récente des v2.x ; `"v2.4"` = cette version exacte, pour figer le jeu). La CI
