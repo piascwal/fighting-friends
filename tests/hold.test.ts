@@ -1,6 +1,8 @@
 /* Coup maintenu : tant que le bouton reste enfoncé, un coup normal garde sa pose tendue. */
 import { describe, expect, it } from 'vitest';
 import type { Button } from '../src/data/types';
+import { NORMALS } from '../src/data/normals';
+import { NEUTRAL_POSES } from '../src/data/poses';
 import { HOLD_MAX } from '../src/engine/fighter-attack';
 import { createTraining } from './harness';
 
@@ -47,5 +49,15 @@ describe('coup maintenu', () => {
       return frames;
     };
     expect(specialLength(true)).toBe(specialLength(false));
+  });
+
+  it('chaque coup normal maintenu se fige sur sa pose de frappe, pas sur son retour en garde', () => {
+    for (const [id, move] of Object.entries(NORMALS)) {
+      if (!move.hits?.length) continue;
+      // la frame où le coup se fige quand on maintient le bouton (voir holdsPose)
+      const peak = Math.max(...move.hits.map((h) => h.t + h.d));
+      const pose = [...move.anim].reverse().find(([t]) => t <= peak)![1];
+      expect(NEUTRAL_POSES.has(pose), `${id} : pose « ${pose} » à la frame ${peak}`).toBe(false);
+    }
   });
 });

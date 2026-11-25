@@ -67,7 +67,8 @@ export const NORMALS: Record<NormalId, MoveSpec> = {
     sprite: 'crouch_punch',
     anim: [
       [0, 'cLp', 1],
-      [6, 'crouch', 0.45],
+      // retour en garde APRÈS la fin de la frappe (image 6) : c'est la pose figée quand on maintient le bouton
+      [7, 'crouch', 0.45],
     ],
     vel: [[0, 3, 2]],
     hits: [hit(3, 3, [15, -108, 78, 34], 22, { hs: 14, bs: 9, kb: 2.5 })],
@@ -149,7 +150,8 @@ export const NORMALS: Record<NormalId, MoveSpec> = {
     anim: [
       [0, 'jump', 1],
       [2, 'jP', 1],
-      [11, 'jump', 0.6],
+      // le membre reste tendu jusqu'à la fin de la frappe : c'est la pose figée quand on maintient le bouton
+      [14, 'jump', 0.6],
     ],
     hits: [hit(3, 10, [5, -120, 78, 72], 36, { hs: 17, bs: 11, kb: 3, lvl: 'high' })],
   },
@@ -179,7 +181,8 @@ export const NORMALS: Record<NormalId, MoveSpec> = {
     anim: [
       [0, 'jump', 1],
       [2, 'jK', 1],
-      [12, 'jump', 0.6],
+      // le membre reste tendu jusqu'à la fin de la frappe : c'est la pose figée quand on maintient le bouton
+      [16, 'jump', 0.6],
     ],
     hits: [hit(4, 11, [5, -80, 92, 66], 40, { hs: 18, bs: 11, kb: 3, lvl: 'high', fx: 'kick' })],
   },
