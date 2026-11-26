@@ -18,6 +18,9 @@ const fireball = (heavy: boolean) =>
       vx: heavy ? 14 : 9.5,
       look: 'fire',
       sprite: 'pj_fireball',
+      // un peu plus grande et plus translucide à l'affichage ; la zone de frappe ne change pas
+      drawScale: 1.3,
+      opacity: 0.7,
       y: -128,
       w: 46,
       h: 40,
@@ -82,6 +85,7 @@ export const balanced: StyleDef = {
         vx: 16,
         look: 'fire',
         sprite: 'pj_fireball',
+        opacity: 0.7,
         y: -130,
         w: 120,
         h: 110,

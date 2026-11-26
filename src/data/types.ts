@@ -94,6 +94,10 @@ export interface ProjectileDef {
   ground?: boolean;
   /** Reste affiché jusqu'au bout de sa durée de vie même après avoir touché (rayon), sans retoucher. */
   persist?: boolean;
+  /** Affichage seulement : agrandit l'image (1 = taille de la zone de frappe), sans changer la zone de frappe. */
+  drawScale?: number;
+  /** Affichage seulement : opacité de l'image (0..1), à la place de celle de son genre (voir projectile-view.ts). */
+  opacity?: number;
   /**
    * Projectile qui apparaît à distance fixe (pic, éclair) : lancé en combo (enchaîné sur un coup qui
    * touche), il apparaît plutôt sous l'adversaire, sinon il raterait un adversaire collé à soi.

@@ -56,7 +56,8 @@ export function drawProjectile(ctx: Ctx, p: Projectile): void {
     // l'image couvre la zone de frappe : en hauteur pour les projectiles hauts (éclair, pic), en largeur sinon
     const k =
       (def.h > def.w * 2 ? h / sprite.h : (Math.max(w, h) * 1.6) / Math.max(sprite.w, sprite.h)) *
-      sprite.adj.s;
+      sprite.adj.s *
+      (def.drawScale ?? 1);
     const lift = def.ground && def.h <= def.w * 2 ? -h * 0.3 : 0;
     drawGlowing(
       ctx,
@@ -66,6 +67,7 @@ export function drawProjectile(ctx: Ctx, p: Projectile): void {
       (-sprite.h * k) / 2 + lift,
       sprite.w * k,
       sprite.h * k,
+      def.opacity,
     );
   } else {
     drawProjectileShape(ctx, def.look, w, h, p.age);
@@ -108,14 +110,16 @@ function drawGlowing(
   y: number,
   w: number,
   h: number,
+  /** Opacité propre au projectile (ProjectileDef.opacity), à la place de celle de son genre. */
+  opacity?: number,
 ): void {
-  const glow = GLOW[look];
+  const glow = GLOW[look] ?? (opacity !== undefined ? ([opacity, 0] as const) : undefined);
   if (!glow) {
     ctx.drawImage(img, x, y, w, h);
     return;
   }
   const alpha = ctx.globalAlpha;
-  ctx.globalAlpha = alpha * glow[0];
+  ctx.globalAlpha = alpha * (opacity ?? glow[0]);
   ctx.drawImage(img, x, y, w, h);
   ctx.globalCompositeOperation = 'lighter';
   ctx.globalAlpha = alpha * glow[1];
